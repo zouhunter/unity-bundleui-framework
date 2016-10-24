@@ -8,5 +8,5 @@ using System.Collections.Generic;
 
 public interface IRunTimeButton
 {
-    Button btn {  set; }
+    Button Btn {  set; }
 }

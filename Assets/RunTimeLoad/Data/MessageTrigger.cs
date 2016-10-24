@@ -5,7 +5,8 @@ using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 
-
-public interface IRunTimeEvent {
-    event UnityAction OnDelete;
+[System.Serializable]
+public class MessageTrigger:RunTimeTrigger {
+    public string messageKey;
+    public object data;
 }

@@ -5,7 +5,7 @@ using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 
-
-public interface IRunTimeEvent {
-    event UnityAction OnDelete;
+[System.Serializable]
+public class ButtonTrigger : RunTimeTrigger {
+    public Button button;
 }
