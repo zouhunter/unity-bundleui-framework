@@ -39,6 +39,13 @@ namespace AssetBundle
         //{
         //    //MD5TableParse.GetMD5CSV(AppFixed.NetWork.LocalPath_, AppFixed.CSVTable.MD5CSVINSIDE);
         //}
+        [MenuItem("Assets/AssetBundle/BundleName")]
+        static void OpenAssetBundleNameConfigWidow()
+        {
+            BundleNameWindow window = EditorWindow.GetWindow<BundleNameWindow>("assetBundle配制", true);
+            window.position = new Rect(400, 300, 700, 500);
+            window.Show();
+        }
         [MenuItem("Assets/AssetBundle/Clear Cache")]
         static void ClearGameCache()
         {

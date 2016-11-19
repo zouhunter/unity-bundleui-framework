@@ -12,7 +12,7 @@ public class BundleNameWindow : EditorWindow
     Object waitAdd = null;
     AssetImporter waitDelete;
     Vector2 scrollPos;
-
+    string newBundleName = "";
     void LoadAllAssetBundle()
     {
         string[] assets;
@@ -23,7 +23,6 @@ public class BundleNameWindow : EditorWindow
             for (int j = 0; j < assets.Length; j++)
             {
                 AssetImporter importer = AssetImporter.GetAtPath(assets[j]);
-                Debug.Log(assets[j]);
                 Object obj = AssetDatabase.LoadAssetAtPath<Object>(assets[j]);
                 importer.name = obj.name;
                 objectList.Add(importer, obj);
@@ -79,6 +78,8 @@ public class BundleNameWindow : EditorWindow
 
     void ShowObjectItemInfo(AssetImporter impoter)
     {
+        if (!objectList.ContainsKey(impoter)) return;
+
         objectList[impoter] = EditorGUILayout.ObjectField(objectList[impoter], typeof(Object), false);
 
         impoter.name = EditorGUILayout.TextField(impoter.name);
@@ -95,19 +96,22 @@ public class BundleNameWindow : EditorWindow
     void ShowControllButtons()
     {
         waitAdd = EditorGUILayout.ObjectField(waitAdd, typeof(Object), false);
-
-        string name = EditorGUILayout.TextField("assetName");
-
-        string assetBundleName = EditorGUILayout.TextField("assetBundleName");
+        string name ="";
+        if (waitAdd != null){
+            name = EditorGUILayout.TextField(waitAdd.name);
+        }
+        newBundleName = EditorGUILayout.TextField(newBundleName);
 
         if (GUILayout.Button("+") && waitAdd != null)
         {
-            string path = AssetDatabase.GetAssetPath(waitAdd);
-            AssetImporter impoter = AssetImporter.GetAtPath(path);
-            impoter.assetBundleName = assetBundleName;
-            impoter.name = name;
-            if (!importerList.Find((x)=> x.name == name && x.assetBundleName == assetBundleName))
+            if (!importerList.Find((x)=> x.name == name && x.assetBundleName == newBundleName))
             {
+                string path = AssetDatabase.GetAssetPath(waitAdd);
+
+                AssetImporter impoter = AssetImporter.GetAtPath(path);
+                impoter.assetBundleName = newBundleName;
+                impoter.name = name;
+
                 importerList.Add(impoter);
                 objectList.Add(impoter, waitAdd);
             }
@@ -115,7 +119,7 @@ public class BundleNameWindow : EditorWindow
         if (GUILayout.Button("ReloadFolder"))
         {
             string folder = EditorUtility.OpenFolderPanel("选择文件夹", Application.dataPath, "");
-            if (folder != null)
+            if (string.IsNullOrEmpty(folder))
             {
                 importerList.Clear();
                 objectList.Clear();

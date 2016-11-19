@@ -7,7 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using AssetBundles;
 
-public class AssetBundleManager : SingleManager<AssetBundleManager>
+public class AssetBundleManager : ManagerTemp<AssetBundleManager>
 {
 #if UNITY_EDITOR
     //private static int m_SimulateAssetBundleInEditor;
@@ -28,12 +28,24 @@ public class AssetBundleManager : SingleManager<AssetBundleManager>
 
 
 #endif
-
-    private ILocalAssetLoader localLoader = new LocalAssetLoader();
-    public AssetBundleManager SetActiveManu(string menu)
+    protected override bool DestroyOnLoad
     {
-        bundleLoadCtrlDic.TryGetValue(menu, out activeLoader);
-        return this;
+        get
+        {
+            return false;
+        }
+    }
+    private ILocalAssetLoader localLoader = new LocalAssetLoader();
+    public AssetBundleManager this[string menu]
+    {
+        get
+        {
+            if (bundleLoadCtrlDic.TryGetValue(menu, out activeLoader))
+            {
+                return instance;
+            }
+            return null;
+        }
     }
     private IUrlAssetBundleLoadCtrl activeLoader;
     private Dictionary<string, IUrlAssetBundleLoadCtrl> bundleLoadCtrlDic = new Dictionary<string, IUrlAssetBundleLoadCtrl>();
@@ -201,7 +213,7 @@ public class AssetBundleManager : SingleManager<AssetBundleManager>
         if (System.IO.File.Exists(filePath))
         {
             AsyncOperation opera = localLoader.LoadLevelAsync(filePath, levelName, loadMode);
-            StartCoroutine(WaitLoadLevel(opera,onProgressChanged));
+            StartCoroutine(WaitLoadLevel(opera, onProgressChanged));
         }
         else
         {
@@ -290,7 +302,7 @@ public class AssetBundleManager : SingleManager<AssetBundleManager>
         while (!operation.isDone)
         {
             operation.allowSceneActivation = false;
-            if(onProgressChanged!=null) onProgressChanged(operation.progress);
+            if (onProgressChanged != null) onProgressChanged(operation.progress);
             if (operation.progress >= 0.9f)
             {
                 operation.allowSceneActivation = true;

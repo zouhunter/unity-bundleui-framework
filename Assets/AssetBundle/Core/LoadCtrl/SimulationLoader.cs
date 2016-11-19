@@ -46,7 +46,7 @@ namespace AssetBundles
                 m_Operation = UnityEditor.EditorApplication.LoadLevelAdditiveAsyncInPlayMode(levelPaths[0]);
             else
                 m_Operation = UnityEditor.EditorApplication.LoadLevelAsyncInPlayMode(levelPaths[0]);
-            AssetBundleManager.Instance.StartCoroutine(SimulationWaitLoadLevel(m_Operation, onProgressChanged));
+            AssetBundleManager.GetInstance().StartCoroutine(SimulationWaitLoadLevel(m_Operation, onProgressChanged));
         }
         IEnumerator SimulationWaitLoadLevel(AsyncOperation operation, UnityAction<float> onProgressChanged)
         {
