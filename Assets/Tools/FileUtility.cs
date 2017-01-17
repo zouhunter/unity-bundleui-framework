@@ -112,7 +112,7 @@ public static class FileUtility {
     /// <summary>
     /// 遍历目录及其子目录
     /// </summary>
-    public static void Recursive(string path,string ignoreFileExt = ".meta", string ignorFolderEnd = "_files",Action<string> action = null)
+    public static void RecursiveSub(string path,string ignoreFileExt = ".meta", string ignorFolderEnd = "_files",Action<string> action = null)
     {
         string[] names = Directory.GetFiles(path);
         string[] dirs = Directory.GetDirectories(path);
@@ -125,8 +125,30 @@ public static class FileUtility {
         foreach (string dir in dirs)
         {
             if (dir.EndsWith(ignorFolderEnd)) continue;
-            Recursive(dir, ignoreFileExt, ignorFolderEnd, action);
+            RecursiveSub(dir, ignoreFileExt, ignorFolderEnd, action);
         }
+    }
+    /// <summary>
+    /// 遍历目录及其子目录
+    /// </summary>
+    public static void Recursive(string path,string fileExt, bool deep = true, Action<string> action = null)
+    {
+        string[] names = Directory.GetFiles(path);
+        foreach (string filename in names)
+        {
+            string ext = Path.GetExtension(filename);
+            if (ext.ToLower().Contains(fileExt.ToLower()))
+            action(filename.Replace('\\', '/'));
+        }
+        if (deep)
+        {
+            string[] dirs = Directory.GetDirectories(path);
+            foreach (string dir in dirs)
+            {
+                Recursive(dir, fileExt, deep, action);
+            }
+        }
+     
     }
 
     /// <summary>
@@ -141,5 +163,38 @@ public static class FileUtility {
             return true;
         }
         return false;
-    } 
+    }
+
+    public static string ConvertWindowsPath(string path)
+    {
+        return path.Replace("/", "\\");
+    }
+
+    public static string GetDemandDir(string fullPath)
+    {
+        string demandPath;
+        if (!(fullPath.EndsWith(Path.DirectorySeparatorChar.ToString())
+            || fullPath.EndsWith(Path.AltDirectorySeparatorChar.ToString())))
+        {
+            demandPath = fullPath + Path.DirectorySeparatorChar;
+        }
+        else
+        {
+            demandPath = fullPath;
+        }
+
+        return demandPath;
+    }
+
+    public static bool IsDirectorySeparator(char c)
+    {
+        return (c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar);
+    }
+
+    public static void CopyFile(string resourcePath,string targetPath)
+    {
+        if (string.Equals(resourcePath, targetPath)) return;
+        Directory.CreateDirectory(Path.GetDirectoryName(targetPath));
+        File.Copy(resourcePath, targetPath,true);//如果没有写要覆盖程序会卡死不会继续运行
+    }
 }
