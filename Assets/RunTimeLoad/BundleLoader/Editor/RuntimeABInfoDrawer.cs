@@ -7,7 +7,7 @@ using System.Collections.Generic;
 [CustomPropertyDrawer(typeof(RunTimeBundleInfo))]
 public class RuntimeABInfoDrawer : PropertyDrawer
 {
-    const float widthBt = 35;
+    const float widthBt = 20;
     const int ht = 7;
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
@@ -32,7 +32,8 @@ public class RuntimeABInfoDrawer : PropertyDrawer
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
-        var assetName = property.FindPropertyRelative("assetName"); 
+        var prefab = property.FindPropertyRelative("prefab"); 
+        var assetName = property.FindPropertyRelative("assetName");
         var bundleName = property.FindPropertyRelative("bundleName");
         var typeProp = property.FindPropertyRelative("type");    ;
         var parentProp = property.FindPropertyRelative("parent");
@@ -44,8 +45,20 @@ public class RuntimeABInfoDrawer : PropertyDrawer
         float height = EditorGUIUtility.singleLineHeight;
 
         Rect rect = new Rect(position.xMin, position.yMin, position.width, height);
-        property.isExpanded = EditorGUI.ToggleLeft(rect, assetName.stringValue, property.isExpanded);
-   
+        addArrayTools(rect, property);
+
+        rect.width -= widthBt * 8;
+        rect.width  /= 1.5f;
+        if (GUI.Button(rect,assetName.stringValue))
+        {
+            property.isExpanded = !property.isExpanded;
+        }
+        rect.width =  widthBt * 4;
+        rect.x = position.xMax - widthBt * 8;
+
+        prefab.objectReferenceValue = EditorGUI.ObjectField(rect, new GUIContent(""),prefab.objectReferenceValue,typeof(GameObject),false);
+
+        rect = new Rect(position.xMin, position.yMin, position.width, height);
         if (!property.isExpanded)
         {
             return;
@@ -83,8 +96,7 @@ public class RuntimeABInfoDrawer : PropertyDrawer
             default:
                 break;
         }
-        rect = new Rect(position.xMin, position.yMin + 7 * height, position.width, height);
-        addArrayTools(rect, property);
+       
     }
 
     void addArrayTools(Rect position, SerializedProperty property)
@@ -109,12 +121,12 @@ public class RuntimeABInfoDrawer : PropertyDrawer
             int myIndex = int.Parse(indString);
             Rect rcButton = position;
             rcButton.height = EditorGUIUtility.singleLineHeight;
-            rcButton.x = position.xMax - widthBt * 3;
+            rcButton.x = position.xMax - widthBt * 4;
             rcButton.width = widthBt;
 
             if (GUI.Button(rcButton, "o"))
             {
-                //Debug.Log("haha");
+                var prefab = property.FindPropertyRelative("prefab");
                 var item =  arrayProp.GetArrayElementAtIndex(myIndex);
                 var asset = item.FindPropertyRelative("assetName");
                 var bundle = item.FindPropertyRelative("bundleName");
@@ -123,11 +135,12 @@ public class RuntimeABInfoDrawer : PropertyDrawer
 
                 string[] paths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(bundle.stringValue,asset.stringValue);
                 GameObject gopfb = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
+                prefab.objectReferenceValue = gopfb;
                 GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
                 go.transform.SetParent((Transform)parent.objectReferenceValue, isworld.boolValue);
             }
 
-            rcButton.x += widthBt;
+            rcButton.x += 2 * widthBt;
             if (GUI.Button(rcButton, "-"))
             {
                 arrayProp.DeleteArrayElementAtIndex(myIndex);

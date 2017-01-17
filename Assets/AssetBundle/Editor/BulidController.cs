@@ -46,7 +46,7 @@ namespace AssetBundle
             {
                 System.IO.Directory.CreateDirectory(path);
             }
-            BuildPipeline.BuildAssetBundles(path, option, target);
+            /*AssetBundleManifest manifest = */BuildPipeline.BuildAssetBundles(path, option, target);
         }
 
         //void GetTextFile(string buildpath)

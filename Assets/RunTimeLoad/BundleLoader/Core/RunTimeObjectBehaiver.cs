@@ -8,45 +8,58 @@ using System.Collections.Generic;
 public partial class RunTimeObjectBehaiver
 {
 #if UNITY_EDITOR
-    public GameObject prefab;
-    [InspectorButton("QuickLoadObject")]
-    public int QuickLoad;
-    void QuickLoadObject()
+    [InspectorButton("RemoveDouble")]
+    public int 删除重复;
+    [InspectorButton("QuickUpdate"), Space(5)]
+    public int 批量更新;
+    void QuickUpdate()
     {
-        string name = prefab.name;
-        string assetPath = UnityEditor.AssetDatabase.GetAssetPath(prefab);// UnityEditor.AssetDatabase.GetTextMetaFilePathFromAssetPath(.asset(prefab)[0];
-        UnityEditor.AssetImporter importer = UnityEditor.AssetImporter.GetAtPath(assetPath);
-        string assetBundle = importer.assetBundleName;
-
-        if (string.IsNullOrEmpty(assetBundle))
+        foreach (var item in bundles)
         {
-            UnityEditor.EditorUtility.DisplayDialog("提示", "预制体没有assetBundle标记", "确认");
-            return;
-        }
-        if (bundles.Find((x) => x.assetName == name) != null)
-        {
-            UnityEditor.EditorUtility.DisplayDialog("提示", "信息已经加载到集合中", "确认");
-            return;
-        }
+            if (item.prefab == null)
+            {
+                UnityEditor.EditorUtility.DisplayDialog("空对象", item.assetName + "预制体为空", "确认");
+                continue;
+            }
 
-        RunTimeBundleInfo info = new RunTimeBundleInfo();
-        info.assetName = name;
-        info.bundleName = assetBundle;
-        info.isWorld = !prefab.GetComponent<RectTransform>();
-        info.parent = transform;
-        bundles.Add(info);
+            string assetPath = UnityEditor.AssetDatabase.GetAssetPath(item.prefab);
+
+            UnityEditor.AssetImporter importer = UnityEditor.AssetImporter.GetAtPath(assetPath);
+
+            item.assetName = item.prefab.name;
+            item.bundleName = importer.assetBundleName;
+
+            if (string.IsNullOrEmpty(item.bundleName))
+            {
+                UnityEditor.EditorUtility.DisplayDialog("提示", "预制体没有assetBundle标记", "确认");
+                return;
+            }
+        }
         UnityEditor.EditorUtility.SetDirty(this);
+
+    }
+    void RemoveDouble()
+    {
+        List<RunTimeBundleInfo> tempList = new List<RunTimeBundleInfo>();
+        for (int i = 0; i < bundles.Count; i++)
+        {
+            if (tempList.Find(x => x.assetName == bundles[i].assetName) == null)
+            {
+                tempList.Add(bundles[i]);
+            }
+        }
+        bundles = new List<RunTimeBundleInfo>(tempList);
     }
 #endif
 }
 public partial class RunTimeObjectBehaiver : MonoBehaviour
 {
     [Space(20)]
-    public string assetBundleFile;
+    public string assetBundleFile = "AssetBundle";
 
     [Header("动态面版")]
     public List<RunTimeBundleInfo> bundles = new List<RunTimeBundleInfo>();
-    private event UnityAction onSceneSwitch;
+    private event UnityAction onDestroy;
     public IRunTimeLoadCtrl Controller;
     void Start()
     {
@@ -100,7 +113,7 @@ public partial class RunTimeObjectBehaiver : MonoBehaviour
         };
 
         Facade.Instance.RegisterEvent(trigger.message, action);
-        onSceneSwitch += () => { Facade.Instance.RemoveEvent(trigger.message, action); };
+        onDestroy += () => { Facade.Instance.RemoveEvent(trigger.message, action); };
     }
 
     private void RegisterMessageEvents(RunTimeBundleInfo trigger)
@@ -126,7 +139,7 @@ public partial class RunTimeObjectBehaiver : MonoBehaviour
         };
 
         Facade.Instance.RegisterEvent<object>(trigger.message, action);
-        onSceneSwitch += () => { Facade.Instance.RemoveEvent<object>(trigger.message, action); };
+        onDestroy += () => { Facade.Instance.RemoveEvent<object>(trigger.message, action); };
     }
 
     private void RegisterToggleEvents(RunTimeBundleInfo trigger)
@@ -146,7 +159,7 @@ public partial class RunTimeObjectBehaiver : MonoBehaviour
             }
         };
         trigger.toggle.onValueChanged.AddListener(CreateByToggle);
-        onSceneSwitch += () =>
+        onDestroy += () =>
         {
             trigger.toggle.onValueChanged.RemoveAllListeners();
         };
@@ -176,7 +189,7 @@ public partial class RunTimeObjectBehaiver : MonoBehaviour
             Controller.GetGameObjectFromBundle(trigger);
         };
         trigger.button.onClick.AddListener(CreateByButton);
-        onSceneSwitch += () => { trigger.button.onClick.RemoveAllListeners(); };
+        onDestroy += () => { trigger.button.onClick.RemoveAllListeners(); };
         trigger.OnCreate = (x) =>
         {
             IRunTimeButton ib = x.GetComponent<IRunTimeButton>();
@@ -195,76 +208,6 @@ public partial class RunTimeObjectBehaiver : MonoBehaviour
 
     void OnDestroy()
     {
-        if (onSceneSwitch != null) onSceneSwitch();
+        if (onDestroy != null) onDestroy();
     }
-
-    //private void RegisterButtonEvents()
-    //{
-    //    for (int i = 0; i < btnTriggers.Count; i++)
-    //    {
-    //        ButtonTrigger btnTrigger = btnTriggers[i];
-    //        UnityAction CreateByButton = () =>
-    //        {
-    //            Controller.GetGameObjectFromBundle(btnTrigger);
-    //        };
-    //        btnTrigger.button.onClick.AddListener(CreateByButton);
-    //        onSceneSwitch += () => { btnTrigger.button.onClick.RemoveAllListeners(); };
-    //        btnTrigger.OnCreate = (x) =>
-    //        {
-    //            x.GetComponent<IRunTimeButton>().Btn = btnTrigger.button;
-    //            btnTrigger.button.onClick.RemoveListener(CreateByButton);
-    //        };
-    //    }
-    //}
-
-    //private void RegisterMessageEvents()
-    //{
-    //    for (int i = 0; i < msgTriggers.Count; i++)
-    //    {
-    //        MessageTrigger trigger = msgTriggers[i];
-    //        UnityAction<object> action = (x) =>
-    //        {
-    //            trigger.data = x;
-    //            Controller.GetGameObjectFromBundle(trigger);
-    //        };
-    //        trigger.OnCreate = (x) =>
-    //        {
-    //            IRunTimeMessage irm = x.GetComponent<IRunTimeMessage>();
-    //            irm.HandleMessage(trigger.data);
-    //            Facade.Instance.RemoveEvent<object>(trigger.messageKey, action);
-    //            irm.OnDelete += () =>
-    //            {
-    //                Facade.Instance.RegisterEvent<object>(trigger.messageKey, action);
-    //            };
-    //        };
-
-    //        Facade.Instance.RegisterEvent<object>(trigger.messageKey, action);
-    //        onSceneSwitch += () => { Facade.Instance.RemoveEvent<object>(trigger.messageKey, action); };
-    //    }
-    //}
-
-    //private void RegisterEventEvents()
-    //{
-    //    for (int i = 0; i < evtTriggers.Count; i++)
-    //    {
-    //        ActionTrigger trigger = evtTriggers[i];
-    //        UnityAction action = () =>
-    //        {
-    //            Controller.GetGameObjectFromBundle(trigger);
-    //        };
-    //        trigger.OnCreate = (x) =>
-    //        {
-    //            IRunTimeEvent irm = x.GetComponent<IRunTimeEvent>();
-    //            Facade.Instance.RemoveEvent(trigger.messageKey, action);
-    //            irm.OnDelete += () =>
-    //            {
-    //                Facade.Instance.RegisterEvent(trigger.messageKey, action);
-    //            };
-    //        };
-
-    //        Facade.Instance.RegisterEvent(trigger.messageKey, action);
-    //        onSceneSwitch += () => { Facade.Instance.RemoveEvent(trigger.messageKey, action); };
-    //    }
-    //}
-
 }

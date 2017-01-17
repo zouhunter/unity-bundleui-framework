@@ -14,6 +14,7 @@ namespace AssetBundles
         string[] ActiveVariants { get; set; }
         AssetBundleLoadManifestOperation Initialize();
         AssetBundleLoadAssetOperation LoadAssetAsync(string assetBundleName, string assetName, System.Type type);
+        AssetBundleLoadAssetsOperation LoadAssetsAsync(string assetBundleName, System.Type type);
         AssetBundleLoadLevelOperation LoadLevelAsync(string assetBundleName, string levelName, bool isAdditive);
         LoadedAssetBundle GetLoadedAssetBundle(string assetBundleName, out string error);
         void UnloadAssetBundle(string assetBundleName);
@@ -359,7 +360,23 @@ namespace AssetBundles
 
             return operation;
         }
+        // Load assets from the given assetbundle
+        public AssetBundleLoadAssetsOperation LoadAssetsAsync(string assetBundleName, Type type)
+        {
+            Log(LogType.Info, "Loading " + type.ToString() + " from " + assetBundleName + " bundle");
 
+            AssetBundleLoadAssetsOperation operation = null;
+
+            {
+                assetBundleName = RemapVariantName(assetBundleName);
+                LoadAssetBundle(assetBundleName);
+                operation = new AssetBundleLoadAssetsOperationFull(assetBundleName, type);
+
+                m_InProgressOperations.Add(operation);
+            }
+
+            return operation;
+        }
         // Load level from the given assetBundle.
         public AssetBundleLoadLevelOperation LoadLevelAsync(string assetBundleName, string levelName, bool isAdditive)
         {
@@ -377,6 +394,8 @@ namespace AssetBundles
 
             return operation;
         }
+
+       
     } // End of AssetBundleManager.
 
 }

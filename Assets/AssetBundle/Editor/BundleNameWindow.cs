@@ -13,6 +13,15 @@ public class BundleNameWindow : EditorWindow
     AssetImporter waitDelete;
     Vector2 scrollPos;
     string newBundleName = "";
+
+    void OnEnable()
+    {
+        if (Selection.activeObject != null)
+        {
+            waitAdd = Selection.activeObject;
+        }
+    }
+
     void LoadAllAssetBundle()
     {
         string[] assets;
@@ -34,7 +43,7 @@ public class BundleNameWindow : EditorWindow
     void LoadFolderAssetBundle(string path)
     {
         List<string> bundleObjs = new List<string>();
-        FileUtility.Recursive(path, action: (x) => { bundleObjs.Add(x); });
+        FileUtility.RecursiveSub(path, action: (x) => { bundleObjs.Add(x); });
         for (int i = 0; i < bundleObjs.Count; i++)
         {
             AssetImporter importer = AssetImporter.GetAtPath(FileUtil.GetProjectRelativePath(bundleObjs[i]));
@@ -74,6 +83,8 @@ public class BundleNameWindow : EditorWindow
         EditorGUILayout.EndHorizontal();
 
         EditorGUILayout.EndScrollView();
+
+        AssetDatabase.RemoveUnusedAssetBundleNames();
     }
 
     void ShowObjectItemInfo(AssetImporter impoter)
@@ -111,15 +122,20 @@ public class BundleNameWindow : EditorWindow
                 AssetImporter impoter = AssetImporter.GetAtPath(path);
                 impoter.assetBundleName = newBundleName;
                 impoter.name = name;
-
                 importerList.Add(impoter);
                 objectList.Add(impoter, waitAdd);
             }
         }
         if (GUILayout.Button("ReloadFolder"))
         {
-            string folder = EditorUtility.OpenFolderPanel("选择文件夹", Application.dataPath, "");
-            if (string.IsNullOrEmpty(folder))
+            string path = Application.dataPath;
+            if (Selection.activeObject != null)
+            {
+                path = AssetDatabase.GetAssetPath(Selection.activeObject);
+                path = System.IO.Path.GetDirectoryName(path);
+            }
+            string folder = EditorUtility.OpenFolderPanel("选择文件夹", path, "");
+            if (!string.IsNullOrEmpty(folder))
             {
                 importerList.Clear();
                 objectList.Clear();

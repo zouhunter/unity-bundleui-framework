@@ -59,7 +59,10 @@ public class AssetBundleManager : ManagerTemp<AssetBundleManager>
         if (!bundleLoadCtrlDic.ContainsKey(menu))
         {
             UrlAssetBundleLoadCtrl loadCtrl = new UrlAssetBundleLoadCtrl(url, menu);
+
             bundleLoadCtrlDic.Add(menu, loadCtrl);
+
+            activeLoader = loadCtrl;
         }
     }
 
@@ -104,6 +107,36 @@ public class AssetBundleManager : ManagerTemp<AssetBundleManager>
                 onAssetLoad += (x) => { activeLoader.UnloadAssetBundle(assetBundleName); };
                 AssetBundleLoadAssetOperation operation = activeLoader.LoadAssetAsync(assetBundleName, assetName, typeof(T));
                 StartCoroutine(WaitLoadObject(operation, onAssetLoad));
+            });
+        }
+        else
+        {
+            Debug.Log("Please Set Menu");
+        }
+    }
+    /// <summary>
+    /// 异步加载一组资源
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="assetBundleName"></param>
+    /// <param name="onAssetsLoad"></param>
+    public void LoadAssetsFromUrlAsync<T>(string assetBundleName,UnityAction<T[]> onAssetsLoad) where T : UnityEngine.Object
+    {
+#if UNITY_EDITOR
+        if (SimulateAssetBundleInEditor)
+        {
+            T[] asset = simuationLoader.LoadAssets<T>(assetBundleName);
+            onAssetsLoad(asset);
+            return;
+        }
+#endif
+        if (activeLoader != null)
+        {
+            LoadMenu(() =>
+            {
+                onAssetsLoad += (x) => { activeLoader.UnloadAssetBundle(assetBundleName); };
+                AssetBundleLoadAssetsOperation operation = activeLoader.LoadAssetsAsync(assetBundleName, typeof(T));
+                StartCoroutine(WaitLoadObjects(operation, onAssetsLoad));
             });
         }
         else
@@ -278,6 +311,15 @@ public class AssetBundleManager : ManagerTemp<AssetBundleManager>
         if (onLoad != null)
         {
             T asset = operation.GetAsset<T>();
+            onLoad.Invoke(asset);
+        }
+    }
+    IEnumerator WaitLoadObjects<T>(AssetBundleLoadAssetsOperation operation, UnityAction<T[]> onLoad) where T : UnityEngine.Object
+    {
+        yield return operation;
+        if (onLoad != null)
+        {
+            T[] asset = operation.GetAssets<T>();
             onLoad.Invoke(asset);
         }
     }

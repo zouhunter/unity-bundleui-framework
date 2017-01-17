@@ -7,6 +7,9 @@ using System.Collections.Generic;
 
 [System.Serializable]
 public class RunTimeBundleInfo {
+#if UNITY_EDITOR
+    public GameObject prefab;
+#endif
     public string assetName;
     public string bundleName;
     public bool isWorld;
