@@ -41,119 +41,76 @@ public class RuntimeABInfoDrawer : PropertyDrawer
         var buttonProp = property.FindPropertyRelative("button");
         var toggleProp = property.FindPropertyRelative("toggle");
         var messageProp = property.FindPropertyRelative("message");
-
+        var instenceProp = property.FindPropertyRelative("instence");
         float height = EditorGUIUtility.singleLineHeight;
 
         Rect rect = new Rect(position.xMin, position.yMin, position.width, height);
-        addArrayTools(rect, property);
 
-        rect.width -= widthBt * 8;
-        rect.width  /= 1.5f;
-        if (GUI.Button(rect,assetName.stringValue))
-        {
-            property.isExpanded = !property.isExpanded;
-        }
-        rect.width =  widthBt * 4;
-        rect.x = position.xMax - widthBt * 8;
-
-        prefab.objectReferenceValue = EditorGUI.ObjectField(rect, new GUIContent(""),prefab.objectReferenceValue,typeof(GameObject),false);
-
-        rect = new Rect(position.xMin, position.yMin, position.width, height);
-        if (!property.isExpanded)
-        {
-            return;
-        }
-
-        rect = new Rect(position.xMin, position.yMin + height, position.width, height);
-        EditorGUI.PropertyField(rect, assetName, new GUIContent("name"));
-
-        rect = new Rect(position.xMin, position.yMin + 2 * height, position.width, height);
-        EditorGUI.PropertyField(rect, bundleName, new GUIContent("bundle"));
-
-        rect = new Rect(position.xMin, position.yMin + 3 * height, position.width, height);
-        EditorGUI.PropertyField(rect, typeProp, new GUIContent("type"));
-
-
-        rect = new Rect(position.xMin, position.yMin + 4 * height, position.width, height);
-        EditorGUI.PropertyField(rect, parentProp, new GUIContent("parent"));
-
-        rect = new Rect(position.xMin, position.yMin + 5 * height, position.width, height);
-        EditorGUI.PropertyField(rect, boolProp, new GUIContent("isWorld"));
-
-        rect = new Rect(position.xMin, position.yMin + 6 * height, position.width, height);
-        switch (typeProp.enumValueIndex)
-        {
-            case 0:
-                EditorGUI.PropertyField(rect, buttonProp, new GUIContent("Button"));
-                break;
-            case 1:
-                EditorGUI.PropertyField(rect, toggleProp, new GUIContent("Toggle"));
-                break;
-            case 2:
-            case 3:
-                EditorGUI.PropertyField(rect, messageProp, new GUIContent("Key"));
-                break;
-            default:
-                break;
-        }
-       
-    }
-
-    void addArrayTools(Rect position, SerializedProperty property)
-    {
-        string path = property.propertyPath;
-
-        int arrayInd = path.LastIndexOf(".Array");
-        bool bIsArray = arrayInd >= 0;
-
-        if (bIsArray)
-        {
-            SerializedObject so = property.serializedObject;
-            string arrayPath = path.Substring(0, arrayInd);
-            SerializedProperty arrayProp = so.FindProperty(arrayPath);
-
-            //Next we need to grab the index from the path string
-            int indStart = path.IndexOf("[") + 1;
-            int indEnd = path.IndexOf("]");
-
-            string indString = path.Substring(indStart, indEnd - indStart);
-
-            int myIndex = int.Parse(indString);
-            Rect rcButton = position;
-            rcButton.height = EditorGUIUtility.singleLineHeight;
-            rcButton.x = position.xMax - widthBt * 4;
-            rcButton.width = widthBt;
-
-            if (GUI.Button(rcButton, "o"))
+            rect.width -= widthBt * 8;
+            rect.width /= 1.5f;
+            if (GUI.Button(rect, assetName.stringValue))
             {
-                var prefab = property.FindPropertyRelative("prefab");
-                var item =  arrayProp.GetArrayElementAtIndex(myIndex);
-                var asset = item.FindPropertyRelative("assetName");
-                var bundle = item.FindPropertyRelative("bundleName");
-                var parent = item.FindPropertyRelative("parent");
-                var isworld = item.FindPropertyRelative("isWorld");
-
-                string[] paths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(bundle.stringValue,asset.stringValue);
-                GameObject gopfb = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
-                prefab.objectReferenceValue = gopfb;
-                GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
-                go.transform.SetParent((Transform)parent.objectReferenceValue, isworld.boolValue);
+                property.isExpanded = !property.isExpanded;
+                if (instenceProp.objectReferenceValue != null)
+                {
+                    Object.DestroyImmediate(instenceProp.objectReferenceValue);
+                }
+                if (property.isExpanded)
+                {
+                    string[] paths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(bundleName.stringValue, assetName.stringValue);
+                    if (paths != null && paths.Length > 0)
+                    {
+                        GameObject gopfb = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
+                        prefab.objectReferenceValue = gopfb;
+                        GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
+                        go.transform.SetParent((Transform)parentProp.objectReferenceValue, boolProp.boolValue);
+                        instenceProp.objectReferenceValue = go;
+                    }
+                }
             }
+            rect.width = widthBt * 7;
+            rect.x = position.xMax - widthBt * 8;
 
-            rcButton.x += 2 * widthBt;
-            if (GUI.Button(rcButton, "-"))
+            prefab.objectReferenceValue = EditorGUI.ObjectField(rect, new GUIContent(""), prefab.objectReferenceValue, typeof(GameObject), false);
+
+            rect = new Rect(position.xMin, position.yMin, position.width, height);
+            if (!property.isExpanded)
             {
-                arrayProp.DeleteArrayElementAtIndex(myIndex);
-                so.ApplyModifiedProperties();
+                return;
             }
+            EditorGUI.BeginDisabledGroup(true);
+            rect = new Rect(position.xMin, position.yMin + height, position.width, height);
+            EditorGUI.PropertyField(rect, assetName, new GUIContent("name"));
 
-            rcButton.x += widthBt;
-            if (GUI.Button(rcButton, "+"))
+            rect = new Rect(position.xMin, position.yMin + 2 * height, position.width, height);
+            EditorGUI.PropertyField(rect, bundleName, new GUIContent("bundle"));
+            EditorGUI.EndDisabledGroup();
+
+            rect = new Rect(position.xMin, position.yMin + 3 * height, position.width, height);
+            EditorGUI.PropertyField(rect, typeProp, new GUIContent("type"));
+
+
+            rect = new Rect(position.xMin, position.yMin + 4 * height, position.width, height);
+            EditorGUI.PropertyField(rect, parentProp, new GUIContent("parent"));
+
+            rect = new Rect(position.xMin, position.yMin + 5 * height, position.width, height);
+            EditorGUI.PropertyField(rect, boolProp, new GUIContent("isWorld"));
+
+            rect = new Rect(position.xMin, position.yMin + 6 * height, position.width, height);
+            switch (typeProp.enumValueIndex)
             {
-                arrayProp.InsertArrayElementAtIndex(myIndex);
-                so.ApplyModifiedProperties();
+                case 0:
+                    EditorGUI.PropertyField(rect, buttonProp, new GUIContent("Button"));
+                    break;
+                case 1:
+                    EditorGUI.PropertyField(rect, toggleProp, new GUIContent("Toggle"));
+                    break;
+                case 2:
+                case 3:
+                    EditorGUI.PropertyField(rect, messageProp, new GUIContent("Key"));
+                    break;
+                default:
+                    break;
             }
         }
-    }
-
 }

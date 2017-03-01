@@ -8,8 +8,8 @@ using System.Collections.Generic;
 
 public class RunTimeLoadController : IRunTimeLoadCtrl
 {
-    private Dictionary<string, GameObject> loadedPrefabs = new Dictionary<string, GameObject>();
-    private AssetBundleManager assetLoader { get { return AssetBundleManager.GetInstance()[Menu]; } }
+    private AssetBundleManager assetLoader { get { return AssetBundleManager.GetInstance(); } }
+    private List<string> _loadingKeys = new List<string>();
     public string Menu
     {
         get;
@@ -29,25 +29,25 @@ public class RunTimeLoadController : IRunTimeLoadCtrl
     /// <param name="onCreate"></param>
     public void GetGameObjectFromBundle(RunTimeBundleInfo trigger)
     {
-        GameObject go;
-        if (loadedPrefabs.TryGetValue(trigger.IDName, out go) && go != null)
+        if (!_loadingKeys.Contains(trigger.IDName))
         {
-            CreateInstance(go, trigger);
-        }
-        else
-        {
+            _loadingKeys.Add(trigger.IDName);
             assetLoader.LoadAssetFromUrlAsync<GameObject>(trigger.bundleName, trigger.assetName, (x) =>
             {
                 if (x != null)
                 {
-                    loadedPrefabs[trigger.assetName] = x;
                     CreateInstance(x, trigger);
+                    _loadingKeys.Remove(trigger.IDName);
                 }
                 else
                 {
                     Debug.Log(x + "::空");
                 }
             });
+        }
+        else
+        {
+            Debug.Log("asset:" + trigger.IDName + "isLoading");
         }
     }
 
@@ -67,11 +67,8 @@ public class RunTimeLoadController : IRunTimeLoadCtrl
         if (trigger.OnCreate != null) trigger.OnCreate(go);
     }
 
-    /// <summary>
-    /// 清除缓存
-    /// </summary>
     public void ClearLoaded()
     {
-        loadedPrefabs.Clear();
+        //throw new NotImplementedException();
     }
 }

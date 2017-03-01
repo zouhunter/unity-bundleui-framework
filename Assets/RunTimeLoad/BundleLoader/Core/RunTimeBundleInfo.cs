@@ -9,6 +9,7 @@ using System.Collections.Generic;
 public class RunTimeBundleInfo {
 #if UNITY_EDITOR
     public GameObject prefab;
+    public GameObject instence;
 #endif
     public string assetName;
     public string bundleName;

@@ -5,53 +5,6 @@ using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 
-public partial class RunTimeObjectBehaiver
-{
-#if UNITY_EDITOR
-    [InspectorButton("RemoveDouble")]
-    public int 删除重复;
-    [InspectorButton("QuickUpdate"), Space(5)]
-    public int 批量更新;
-    void QuickUpdate()
-    {
-        foreach (var item in bundles)
-        {
-            if (item.prefab == null)
-            {
-                UnityEditor.EditorUtility.DisplayDialog("空对象", item.assetName + "预制体为空", "确认");
-                continue;
-            }
-
-            string assetPath = UnityEditor.AssetDatabase.GetAssetPath(item.prefab);
-
-            UnityEditor.AssetImporter importer = UnityEditor.AssetImporter.GetAtPath(assetPath);
-
-            item.assetName = item.prefab.name;
-            item.bundleName = importer.assetBundleName;
-
-            if (string.IsNullOrEmpty(item.bundleName))
-            {
-                UnityEditor.EditorUtility.DisplayDialog("提示", "预制体没有assetBundle标记", "确认");
-                return;
-            }
-        }
-        UnityEditor.EditorUtility.SetDirty(this);
-
-    }
-    void RemoveDouble()
-    {
-        List<RunTimeBundleInfo> tempList = new List<RunTimeBundleInfo>();
-        for (int i = 0; i < bundles.Count; i++)
-        {
-            if (tempList.Find(x => x.assetName == bundles[i].assetName) == null)
-            {
-                tempList.Add(bundles[i]);
-            }
-        }
-        bundles = new List<RunTimeBundleInfo>(tempList);
-    }
-#endif
-}
 public partial class RunTimeObjectBehaiver : MonoBehaviour
 {
     [Space(20)]
@@ -120,6 +73,7 @@ public partial class RunTimeObjectBehaiver : MonoBehaviour
     {
         UnityAction<object> action = (x) =>
         {
+            //防止重复加载
             trigger.Data = x;
             Controller.GetGameObjectFromBundle(trigger);
         };
@@ -139,7 +93,10 @@ public partial class RunTimeObjectBehaiver : MonoBehaviour
         };
 
         Facade.Instance.RegisterEvent<object>(trigger.message, action);
-        onDestroy += () => { Facade.Instance.RemoveEvent<object>(trigger.message, action); };
+        onDestroy += () =>
+        {
+            Facade.Instance.RemoveEvent<object>(trigger.message, action);
+        };
     }
 
     private void RegisterToggleEvents(RunTimeBundleInfo trigger)
