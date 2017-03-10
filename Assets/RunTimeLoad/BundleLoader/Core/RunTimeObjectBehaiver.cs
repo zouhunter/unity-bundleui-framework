@@ -105,14 +105,15 @@ public partial class RunTimeObjectBehaiver : MonoBehaviour
         {
             if (x)
             {
+                trigger.toggle.interactable = false;
                 Controller.GetGameObjectFromBundle(trigger);
             }
             else
             {
-                if (trigger.Data != null && trigger.Data is GameObject)
-                {
+                //if (trigger.Data != null && trigger.Data is GameObject)
+                //{
                     Destroy((GameObject)trigger.Data);
-                }
+                //}
             }
         };
         trigger.toggle.onValueChanged.AddListener(CreateByToggle);
@@ -123,6 +124,8 @@ public partial class RunTimeObjectBehaiver : MonoBehaviour
 
         trigger.OnCreate = (x) =>
         {
+            trigger.toggle.interactable = true;
+
             trigger.Data = x;
             IRunTimeToggle it = x.GetComponent<IRunTimeToggle>();
             if (it != null)
