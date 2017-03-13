@@ -13,8 +13,10 @@ public partial class RunTimeObjectBehaiver : MonoBehaviour
     [Header("动态面版")]
     public List<RunTimeBundleInfo> bundles = new List<RunTimeBundleInfo>();
     private event UnityAction onDestroy;
+    private event UnityAction onEnable;
+    private event UnityAction onDisable;
     public IRunTimeLoadCtrl Controller;
-    void Start()
+    void Awake()
     {
         Controller = new RunTimeLoadController(assetBundleFile);
         RegisterBundleEvents();
@@ -38,6 +40,9 @@ public partial class RunTimeObjectBehaiver : MonoBehaviour
                     break;
                 case RunTimeBundleInfo.Type.Action:
                     RegisterActionEvents(trigger);
+                    break;
+                case RunTimeBundleInfo.Type.Enable:
+                    RegisterEnableEvents(trigger);
                     break;
                 default:
                     break;
@@ -110,10 +115,7 @@ public partial class RunTimeObjectBehaiver : MonoBehaviour
             }
             else
             {
-                //if (trigger.Data != null && trigger.Data is GameObject)
-                //{
-                    Destroy((GameObject)trigger.Data);
-                //}
+                Destroy((GameObject)trigger.Data);
             }
         };
         trigger.toggle.onValueChanged.AddListener(CreateByToggle);
@@ -165,9 +167,61 @@ public partial class RunTimeObjectBehaiver : MonoBehaviour
             }
         };
     }
+    private void RegisterEnableEvents(RunTimeBundleInfo trigger)
+    {
+        UnityAction onEnableAction = () =>
+        {
+            Controller.GetGameObjectFromBundle(trigger);
+        };
+
+        trigger.OnCreate = (x) =>
+        {
+            trigger.Data = x;
+            IRunTimeEnable irm = x.GetComponent<IRunTimeEnable>();
+            if (irm != null)
+            {
+                onEnable -= onEnableAction;
+
+                irm.OnDelete += () =>
+                {
+                    onEnable += onEnableAction;
+                };
+            }
+            else
+            {
+                onDisable += () =>
+                {
+                    if (trigger.Data != null && trigger.Data is GameObject)
+                    {
+                        Destroy((GameObject)trigger.Data);
+                    }
+                };
+            }
+        };
+
+        onEnable += onEnableAction;
+    }
+
+    private void OnEnable()
+    {
+        if (onEnable != null)
+        {
+            onEnable.Invoke();
+        }
+    }
+    private void OnDisable()
+    {
+        if (onDisable != null)
+        {
+            onDisable.Invoke();
+        }
+    }
 
     void OnDestroy()
     {
-        if (onDestroy != null) onDestroy();
+        if (onDestroy != null)
+        {
+            onDestroy.Invoke();
+        }
     }
 }

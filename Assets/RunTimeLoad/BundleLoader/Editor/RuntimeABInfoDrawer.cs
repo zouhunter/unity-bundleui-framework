@@ -115,6 +115,8 @@ public class RuntimeABInfoDrawer : PropertyDrawer
             case 3:
                 EditorGUI.PropertyField(rect, messageProp, new GUIContent("Key"));
                 break;
+            case 4:
+                break;
             default:
                 break;
         }

@@ -29,6 +29,7 @@ public class RunTimeBundleInfo {
         Button,
         Toggle,
         Message,
-        Action
+        Action,
+        Enable
     }
 }
