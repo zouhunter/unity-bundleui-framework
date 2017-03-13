@@ -63,7 +63,12 @@ public class RunTimeLoadController : IRunTimeLoadCtrl
         GameObject go = GameObject.Instantiate(prefab);
 
         go.SetActive(true);
-        go.transform.SetParent(trigger.parent, trigger.isWorld);
+        bool isworld = trigger.parent == null ? true : !trigger.parent.GetComponent<RectTransform>();
+        go.transform.SetParent(trigger.parent, isworld);
+        if (trigger.reset){
+            go.transform.position = Vector3.zero;
+            go.transform.localRotation = Quaternion.identity;
+        }
         if (trigger.OnCreate != null) trigger.OnCreate(go);
     }
 

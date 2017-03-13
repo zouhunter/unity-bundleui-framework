@@ -13,7 +13,7 @@ public class RunTimeBundleInfo {
 #endif
     public string assetName;
     public string bundleName;
-    public bool isWorld;
+    public bool reset;
     public Transform parent;
     public Type type;
 
