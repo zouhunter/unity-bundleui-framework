@@ -9,8 +9,8 @@ using System.Collections.Generic;
 public class RTBundleInfo {
 #if UNITY_EDITOR
     public GameObject prefab;
-    public GameObject instence;
 #endif
+    public GameObject instence;
     public string assetName;
     public string bundleName;
     public bool reset;

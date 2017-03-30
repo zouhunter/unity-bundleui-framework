@@ -48,11 +48,17 @@ public partial class RTObjGroup : MonoBehaviour
     }
     private void RegisterMessageEvents(RTBundleInfo trigger)
     {
-        UnityAction<object> action = (x) =>
+        UnityAction<object> createAction = (x) =>
         {
-            //防止重复加载
             trigger.Data = x;
             Controller.GetGameObjectFromBundle(trigger);
+        };
+
+        UnityAction<object> handInfoAction = (data) =>
+        {
+            trigger.Data = data;
+            IRTName irm = trigger.instence.GetComponent<IRTName>();
+            irm.HandleData(trigger.Data);
         };
 
         trigger.OnCreate = (x) =>
@@ -60,19 +66,24 @@ public partial class RTObjGroup : MonoBehaviour
             IRTName irm = x.GetComponent<IRTName>();
             if (irm != null)
             {
+                trigger.instence = x;
                 irm.HandleData(trigger.Data);
-                RTObjUtility.Remove(trigger.assetName, action);
+                RTObjUtility.Remove(trigger.assetName, createAction);
+                RTObjUtility.Record(trigger.assetName, handInfoAction);
                 irm.OnDelete += () =>
                 {
-                    RTObjUtility.Record(trigger.assetName, action);
+                    trigger.instence = null;
+                    RTObjUtility.Remove(trigger.assetName, handInfoAction);
+                    RTObjUtility.Record(trigger.assetName, createAction);
                 };
             }
         };
 
-        RTObjUtility.Record(trigger.assetName, action);
+        RTObjUtility.Record(trigger.assetName, createAction);
+
         onDestroy += () =>
         {
-            RTObjUtility.Remove(trigger.assetName, action);
+            RTObjUtility.Remove(trigger.assetName, createAction);
         };
     }
 

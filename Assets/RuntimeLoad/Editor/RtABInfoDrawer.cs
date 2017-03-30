@@ -117,13 +117,13 @@ public class RtABInfoDrawer : PropertyDrawer
         EditorGUI.PropertyField(rect, typeProp, new GUIContent("type"));
 
 
-        rect = new Rect(position.xMin, position.yMin + 4 * height, position.width, height);
+        rect = new Rect(position.xMin, position.yMin + 5 * height, position.width, height);
         EditorGUI.PropertyField(rect, parentProp, new GUIContent("parent"));
 
-        rect = new Rect(position.xMin, position.yMin + 5 * height, position.width, height);
+        rect = new Rect(position.xMin, position.yMin + 6 * height, position.width, height);
         EditorGUI.PropertyField(rect, boolProp, new GUIContent("reset"));
 
-        rect = new Rect(position.xMin, position.yMin + 6 * height, position.width, height);
+        rect = new Rect(position.xMin, position.yMin + 4 * height, position.width, height);
         switch (typeProp.enumValueIndex)
         {
             case 0:
