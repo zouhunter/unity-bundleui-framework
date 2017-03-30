@@ -6,7 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public interface IRTMessage {
+public interface IRTName {
     event UnityAction OnDelete;
-    void HandleMessage(object message);
+    void HandleData(object data);
 }

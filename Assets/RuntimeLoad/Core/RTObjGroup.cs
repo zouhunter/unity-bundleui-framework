@@ -57,10 +57,10 @@ public partial class RTObjGroup : MonoBehaviour
 
         trigger.OnCreate = (x) =>
         {
-            IRTMessage irm = x.GetComponent<IRTMessage>();
+            IRTName irm = x.GetComponent<IRTName>();
             if (irm != null)
             {
-                irm.HandleMessage(trigger.Data);
+                irm.HandleData(trigger.Data);
                 RTObjUtility.Remove(trigger.assetName, action);
                 irm.OnDelete += () =>
                 {

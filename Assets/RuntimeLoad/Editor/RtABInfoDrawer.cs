@@ -8,7 +8,7 @@ using System.Collections.Generic;
 public class RtABInfoDrawer : PropertyDrawer
 {
     const float widthBt = 20;
-    const int ht = 7;
+    const int ht = 6;
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         if (!property.isExpanded) return EditorGUIUtility.singleLineHeight;
@@ -93,7 +93,7 @@ public class RtABInfoDrawer : PropertyDrawer
                     for (int i = 0; i < scripts.Length && !find; i++)
                     {
                         MonoBehaviour item = scripts[i];
-                        if (item is IRTButton || item is IRTEnable || item is IRTMessage || item is IRTToggle)
+                        if (item is IRTButton || item is IRTEnable || item is IRTName || item is IRTToggle)
                         {
                             find = true;
                             SerializedObject obj = new SerializedObject(scripts);

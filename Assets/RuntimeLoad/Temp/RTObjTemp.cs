@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
-public class RTObjTemp :MonoBehaviour,IRTButton,IRTMessage,IRTToggle {
+public class RTObjTemp :MonoBehaviour,IRTButton,IRTName,IRTToggle {
 
     [SerializeField]
     protected UnityEvent m_OnOpen;
@@ -33,7 +33,7 @@ public class RTObjTemp :MonoBehaviour,IRTButton,IRTMessage,IRTToggle {
         }
     }
 
-    public virtual void HandleMessage(object message)
+    public virtual void HandleData(object data)
     {
         Debug.Log("打开面板" + this.name);
     }
