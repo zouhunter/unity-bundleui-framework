@@ -5,9 +5,12 @@ using UnityEngine.EventSystems;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
-public interface IRTButton
+namespace BundleUISystem.Internal
 {
-    Button Btn {  set; }
-    event UnityAction OnDelete;
+    public interface IPanelName
+    {
+        event Action OnDelete;
+        void HandleData(object data);
+    }
+
 }

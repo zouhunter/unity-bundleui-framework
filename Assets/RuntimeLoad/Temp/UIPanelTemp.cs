@@ -5,8 +5,9 @@ using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
+using BundleUISystem.Internal;
 
-public class RTObjTemp :MonoBehaviour,IRTButton,IRTName,IRTToggle {
+public class UIPanelTemp :MonoBehaviour,IPanelButton,IPanelName,IPanelToggle {
 
     [SerializeField]
     protected UnityEvent m_OnOpen;
@@ -14,7 +15,7 @@ public class RTObjTemp :MonoBehaviour,IRTButton,IRTName,IRTToggle {
     [SerializeField]
     protected Toggle.ToggleEvent m_OpenClose;
     protected Toggle m_Tog;
-    public event UnityAction OnDelete;
+    public event Action OnDelete;
 
     public virtual Button Btn
     {
@@ -35,7 +36,7 @@ public class RTObjTemp :MonoBehaviour,IRTButton,IRTName,IRTToggle {
 
     public virtual void HandleData(object data)
     {
-        Debug.Log("打开面板" + this.name);
+
     }
 
     protected virtual void OnDestroy()

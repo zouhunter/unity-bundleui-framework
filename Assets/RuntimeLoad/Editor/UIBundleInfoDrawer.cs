@@ -3,8 +3,10 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using BundleUISystem.Internal;
+using BundleUISystem;
 
-[CustomPropertyDrawer(typeof(RTBundleInfo))]
+[CustomPropertyDrawer(typeof(UIBundleInfo))]
 public class RtABInfoDrawer : PropertyDrawer
 {
     const float widthBt = 20;
@@ -93,7 +95,7 @@ public class RtABInfoDrawer : PropertyDrawer
                     for (int i = 0; i < scripts.Length && !find; i++)
                     {
                         MonoBehaviour item = scripts[i];
-                        if (item is IRTButton || item is IRTEnable || item is IRTName || item is IRTToggle)
+                        if (item is IPanelButton || item is IPanelEnable || item is IPanelName || item is IPanelToggle)
                         {
                             find = true;
                             SerializedObject obj = new SerializedObject(scripts);
@@ -109,27 +111,21 @@ public class RtABInfoDrawer : PropertyDrawer
         rect = new Rect(position.xMin, position.yMin + height, position.width, height);
         EditorGUI.PropertyField(rect, assetName, new GUIContent("name"));
 
-        rect = new Rect(position.xMin, position.yMin + 2 * height, position.width, height);
+        rect.y += height;
         EditorGUI.PropertyField(rect, bundleName, new GUIContent("bundle"));
         EditorGUI.EndDisabledGroup();
 
-        rect = new Rect(position.xMin, position.yMin + 3 * height, position.width, height);
+        rect.y += height;
         EditorGUI.PropertyField(rect, typeProp, new GUIContent("type"));
 
-
-        rect = new Rect(position.xMin, position.yMin + 5 * height, position.width, height);
-        EditorGUI.PropertyField(rect, parentProp, new GUIContent("parent"));
-
-        rect = new Rect(position.xMin, position.yMin + 6 * height, position.width, height);
-        EditorGUI.PropertyField(rect, boolProp, new GUIContent("reset"));
-
-        rect = new Rect(position.xMin, position.yMin + 4 * height, position.width, height);
         switch (typeProp.enumValueIndex)
         {
             case 0:
+                rect.y += height;
                 EditorGUI.PropertyField(rect, buttonProp, new GUIContent("Button"));
                 break;
             case 1:
+                rect.y += height;
                 EditorGUI.PropertyField(rect, toggleProp, new GUIContent("Toggle"));
                 break;
             case 2:
@@ -138,5 +134,13 @@ public class RtABInfoDrawer : PropertyDrawer
             default:
                 break;
         }
+
+        rect.y += height;
+        EditorGUI.PropertyField(rect, parentProp, new GUIContent("parent"));
+
+        rect.y += height;
+        EditorGUI.PropertyField(rect, boolProp, new GUIContent("reset"));
+
+       
     }
 }

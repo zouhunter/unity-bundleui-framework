@@ -4,18 +4,20 @@ using UnityEngine;
 using UnityEditor;
 using System.Reflection;
 using Rotorz.ReorderableList;
-[CustomEditor(typeof(RTObjGroup))]
-public class RtObjGroupDrawer : Editor {
+using BundleUISystem;
+[CustomEditor(typeof(UIGroup))]
+public class UIGroupDrawer : Editor {
     SerializedProperty script;
     SerializedPropertyAdaptor adapt;
-    RTObjGroup targetObj;
+    UIGroup targetObj;
     bool swink;
+    List<GameObject> created;
     private void OnEnable()
     {
         script = serializedObject.FindProperty("m_Script");
         var ritems = serializedObject.FindProperty("bundles");
         adapt = new SerializedPropertyAdaptor(ritems);
-        targetObj = (RTObjGroup)target;
+        targetObj = (UIGroup)target;
     }
     public override void OnInspectorGUI()
     {
@@ -46,9 +48,13 @@ public class RtObjGroupDrawer : Editor {
             {
                 QuickUpdate();
             }
-            if (GUILayout.Button("添加对象"))
+            if (GUILayout.Button("批量编辑"))
             {
-                AddNewItem();
+                OpenAll();
+            }
+            if (GUILayout.Button("退出编辑"))
+            {
+                CloseAll();
             }
         }
        
@@ -77,7 +83,7 @@ public class RtObjGroupDrawer : Editor {
 
             if (string.IsNullOrEmpty(item.bundleName))
             {
-                UnityEditor.EditorUtility.DisplayDialog("提示", "预制体没有assetBundle标记", "确认");
+                UnityEditor.EditorUtility.DisplayDialog("提示", "预制体" + item.assetName +"没有assetBundle标记", "确认");
                 return;
             }
         }
@@ -86,7 +92,7 @@ public class RtObjGroupDrawer : Editor {
     }
     private void RemoveDouble()
     {
-        List<RTBundleInfo> tempList = new List<RTBundleInfo>();
+        List<UIBundleInfo> tempList = new List<UIBundleInfo>();
         for (int i = 0; i < targetObj.bundles.Count; i++)
         {
             if (tempList.Find(x => x.assetName == targetObj.bundles[i].assetName) == null)
@@ -94,20 +100,34 @@ public class RtObjGroupDrawer : Editor {
                 tempList.Add(targetObj.bundles[i]);
             }
         }
-        targetObj.bundles = new List<RTBundleInfo>(tempList);
+        targetObj.bundles = new List<UIBundleInfo>(tempList);
     }
-    private void AddNewItem()
+    private void OpenAll()
     {
-        RTBundleInfo item = new RTBundleInfo();
-        if (targetObj.bundles.Count > 0)
-        {
-            RTBundleInfo lastItem = targetObj.bundles[targetObj.bundles.Count - 1];
-            FieldInfo[] infos = typeof(RTBundleInfo).GetFields();
-            foreach (var info in infos)
-            {
-                info.SetValue(item, info.GetValue(lastItem));
-            }
+        UIBundleInfo item;
+        if (created != null){
+            return;
         }
-        targetObj.bundles.Add(item);
+        created = new List<GameObject>();
+        for (int i = 0; i < targetObj.bundles.Count; i++)
+        {
+            item = targetObj.bundles[i];
+            GameObject instence = PrefabUtility.InstantiatePrefab(item.prefab) as GameObject;
+            instence.transform.SetParent(item.parent, item.reset);
+            created.Add(instence);
+        }
+    }
+    private void CloseAll()
+    {
+        if (created == null)
+        {
+            return;
+        }
+        for (int i = 0; i < created.Count; i++)
+        {
+            if(created[i] != null) DestroyImmediate(created[i]);
+        }
+        created.Clear();
+        created = null;
     }
 }

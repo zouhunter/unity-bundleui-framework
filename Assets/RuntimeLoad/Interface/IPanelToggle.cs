@@ -5,8 +5,11 @@ using UnityEngine.EventSystems;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
-public interface IRTToggle {
-    Toggle toggle { set; }
-    event UnityAction OnDelete;
+namespace BundleUISystem.Internal
+{
+    public interface IPanelToggle
+    {
+        Toggle toggle { set; }
+        event Action OnDelete;
+    }
 }

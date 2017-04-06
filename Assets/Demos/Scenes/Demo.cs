@@ -7,7 +7,7 @@ public class Demo : MonoBehaviour {
     {
         if (GUILayout.Button("打开cube1"))
         {
-            RTObjUtility.Open<Cube1>();
+            // RTObjUtility.Open<Cube1>();
         }
     }
 }
