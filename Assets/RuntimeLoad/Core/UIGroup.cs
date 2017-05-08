@@ -78,12 +78,18 @@ namespace BundleUISystem
         }
         public static void Close(string assetName)
         {
+            foreach (var item in controllers)
+            {
+                if(item != null){
+                    item.CansaleLoadObject(assetName);
+                }
+            }
             InvokeEvent(addClose + assetName);
         }
         public static void Close<T>() where T : UIPanelTemp
         {
             string assetName = typeof(T).ToString();
-            InvokeEvent(addClose + assetName);
+            Close(assetName);
         }
 
         private static void InvokeEvent(string key)
@@ -133,10 +139,11 @@ namespace BundleUISystem
         private event UnityAction onDisable;
         private IUILoadCtrl Controller;
         private const string addClose = "close";
-
+        private static List<IUILoadCtrl> controllers = new List<IUILoadCtrl>();
         void Awake()
         {
             Controller = new UILoadCtrl(assetBundleFile);
+            controllers.Add(Controller);
             RegisterBundleEvents();
         }
 
@@ -338,6 +345,7 @@ namespace BundleUISystem
             {
                 onDestroy.Invoke();
             }
+            controllers.Remove(Controller);
         }
     }
 }

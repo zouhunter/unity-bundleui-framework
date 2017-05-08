@@ -11,5 +11,6 @@ namespace BundleUISystem.Internal
     {
         string Menu { get; }
         void GetGameObjectFromBundle(UIBundleInfo trigger);
+        void CansaleLoadObject(string assetName);
     }
 }

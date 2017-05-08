@@ -6,41 +6,48 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using BundleUISystem.Internal;
-
-public class UIPanelTemp :MonoBehaviour,IPanelButton,IPanelName,IPanelToggle {
-
-    [SerializeField]
-    protected UnityEvent m_OnOpen;
-    protected Button m_Btn;
-    [SerializeField]
-    protected Toggle.ToggleEvent m_OpenClose;
-    protected Toggle m_Tog;
-    public event Action OnDelete;
-
-    public virtual Button Btn
+namespace BundleUISystem
+{
+    public class UIPanelTemp : MonoBehaviour, IPanelButton, IPanelName, IPanelToggle
     {
-        set
-        {
-            m_Btn = value;
+        [SerializeField]
+        protected UnityEvent m_OnOpen;
+        protected Button m_Btn;
+        [SerializeField]
+        protected Toggle.ToggleEvent m_OpenClose;
+        protected Toggle m_Tog;
+        public event Action OnDelete;
+        protected virtual void OnEnable(){
+            m_OnOpen.Invoke();
+            m_OpenClose.Invoke(true);
         }
-    }
-
-    public virtual Toggle toggle
-    {
-        set
+        public virtual Button Btn
         {
-            m_Tog = value;
-            m_Tog.onValueChanged.AddListener((x) => { gameObject.SetActive(x); });
+            set
+            {
+                m_Btn = value;
+            }
         }
-    }
 
-    public virtual void HandleData(object data)
-    {
+        public virtual Toggle toggle
+        {
+            set
+            {
+                m_Tog = value;
+                m_Tog.onValueChanged.AddListener((x) => { gameObject.SetActive(x); });
+            }
+        }
 
-    }
+        public virtual void HandleData(object data)
+        {
 
-    protected virtual void OnDestroy()
-    {
-        if(OnDelete != null) OnDelete();
+        }
+
+        protected virtual void OnDestroy()
+        {
+            m_OpenClose.Invoke(false);
+            if (OnDelete != null) OnDelete();
+        }
     }
 }
+

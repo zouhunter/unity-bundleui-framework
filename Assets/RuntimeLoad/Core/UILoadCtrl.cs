@@ -11,6 +11,7 @@ namespace BundleUISystem
     {
         private AssetBundleManager assetLoader { get { return AssetBundleManager.GetInstance(); } }
         private List<string> _loadingKeys = new List<string>();
+        private List<string> _cansaleKeys = new List<string>();
         public string Menu
         {
             get;
@@ -51,12 +52,25 @@ namespace BundleUISystem
                 Debug.Log("asset:" + trigger.IDName + "isLoading");
             }
         }
-
+        /// <summary>
+        /// 取消创建对象
+        /// </summary>
+        /// <param name="assetName"></param>
+        public void CansaleLoadObject(string assetName)
+        {
+            _cansaleKeys.Add(assetName);
+        }
         /// <summary>
         /// 获取对象实例
         /// </summary>
         void CreateInstance(GameObject prefab, UIBundleInfo trigger)
         {
+            if (_cansaleKeys.Contains(trigger.assetName))
+            {
+                _cansaleKeys.Remove(trigger.assetName);
+                return;
+            }
+
             if (prefab == null || trigger == null)
             {
                 return;
@@ -74,5 +88,6 @@ namespace BundleUISystem
             }
             if (trigger.OnCreate != null) trigger.OnCreate(go);
         }
+
     }
 }
