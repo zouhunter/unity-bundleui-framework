@@ -31,6 +31,8 @@ namespace BundleUISystem
         /// <param name="onCreate"></param>
         public void GetGameObjectFromBundle(UIBundleInfo trigger)
         {
+            if (_cansaleKeys.Contains(trigger.assetName)) _cansaleKeys.RemoveAll(x => x == trigger.assetName);
+			
             if (!_loadingKeys.Contains(trigger.IDName))
             {
                 _loadingKeys.Add(trigger.IDName);
