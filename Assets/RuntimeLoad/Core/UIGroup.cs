@@ -14,7 +14,7 @@ namespace BundleUISystem
     public partial class UIGroup
     {
         public static System.Action<string> MessageNotHandled;
-        public static Dictionary<string, Delegate> m_needHandle = new Dictionary<string, Delegate>();
+        public static Dictionary<string, UnityAction<object>> m_needHandle = new Dictionary<string, UnityAction<object>>();
         public static void NoMessageHandle(string rMessage)
         {
             if (MessageNotHandled == null)
@@ -29,7 +29,7 @@ namespace BundleUISystem
 
         #region 注册注销事件
 
-        public static void Record(string key, Delegate handle)
+        public static void Record(string key, UnityAction<object> handle)
         {
             if (!m_needHandle.ContainsKey(key))
             {
@@ -37,14 +37,14 @@ namespace BundleUISystem
             }
             else
             {
-                m_needHandle[key] = Delegate.Combine(m_needHandle[key], handle);
+                m_needHandle[key] += handle;
             }
         }
-        public static bool Remove(string key, Delegate handle)
+        public static bool Remove(string key, UnityAction<object> handle)
         {
             if (m_needHandle.ContainsKey(key))
             {
-                m_needHandle[key] = Delegate.Remove(m_needHandle[key], handle);
+                m_needHandle[key] -= handle;
                 if (m_needHandle[key] == null)
                 {
                     m_needHandle.Remove(key);
@@ -319,7 +319,7 @@ namespace BundleUISystem
         {
             string key = addClose + assetName;
             RemoveEvents(key);
-            Record(key, new Action(()=> {
+            Record(key, new UnityAction<object>((y)=> {
                 if (x != null) Destroy(x);
             }));
         }

@@ -2,6 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Cube1 : RTObjTemp {
+public class Cube1 : BundleUISystem.UIPanelTemp {
     
 }
