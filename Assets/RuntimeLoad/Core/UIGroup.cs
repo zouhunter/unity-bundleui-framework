@@ -97,7 +97,7 @@ namespace BundleUISystem
             bool lReportMissingRecipient = true;
             if (m_needHandle.ContainsKey(key))
             {
-                m_needHandle[key].DynamicInvoke();
+                m_needHandle[key].Invoke(null);
                 lReportMissingRecipient = false;
             }
 
@@ -111,7 +111,7 @@ namespace BundleUISystem
             bool lReportMissingRecipient = true;
             if (m_needHandle.ContainsKey(key))
             {
-                m_needHandle[key].DynamicInvoke(body);
+                m_needHandle[key].Invoke(body);
                 lReportMissingRecipient = false;
             }
 
