@@ -84,8 +84,8 @@ public class RtABInfoDrawer : PropertyDrawer
             rect = new Rect(position.xMin, position.yMin, position.width, height);
             rect.width -= widthBt * 8;
             rect.x += rect.width / 1.2f;
-            rect.width = widthBt;
-            if (GUI.Button(rect, "s"))
+            rect.width = widthBt * 1.5f;
+            if (GUI.Button(rect, "[-]"))
             {
                 Object pfbItem = prefab.objectReferenceValue;
                 if (pfbItem != null)
@@ -98,9 +98,7 @@ public class RtABInfoDrawer : PropertyDrawer
                         if (item is IPanelButton || item is IPanelEnable || item is IPanelName || item is IPanelToggle)
                         {
                             find = true;
-                            SerializedObject obj = new SerializedObject(scripts);
-                            var sc = obj.FindProperty("m_Script");
-                            Selection.activeInstanceID = sc.objectReferenceValue.GetInstanceID();
+                            Selection.activeObject = MonoScript.FromMonoBehaviour(item);
                         }
                     }
                 }

@@ -8,73 +8,152 @@ using BundleUISystem.Internal;
 
 namespace BundleUISystem
 {
+    
     /// <summary>
     /// 静态
     /// </summary>
     public partial class UIGroup
     {
-        public static System.Action<string> MessageNotHandled;
-        public static Dictionary<string, UnityAction<object>> m_needHandle = new Dictionary<string, UnityAction<object>>();
-        public static void NoMessageHandle(string rMessage)
+        public class EventHold
         {
-            if (MessageNotHandled == null)
+            public UnityEngine.Events.UnityAction<string> MessageNotHandled;
+            public Dictionary<string, UnityAction<object>> m_needHandle = new Dictionary<string, UnityAction<object>>();
+            public Dictionary<string, UnityAction> m_needHandle0 = new Dictionary<string, UnityAction>();
+            private void NoMessageHandle(string rMessage)
             {
-                Debug.Log("action not registed!!!" + rMessage);
-            }
-            else
-            {
-                MessageNotHandled(rMessage);
-            }
-        }
-
-        #region 注册注销事件
-
-        public static void Record(string key, UnityAction<object> handle)
-        {
-            if (!m_needHandle.ContainsKey(key))
-            {
-                m_needHandle.Add(key, handle);
-            }
-            else
-            {
-                m_needHandle[key] += handle;
-            }
-        }
-        public static bool Remove(string key, UnityAction<object> handle)
-        {
-            if (m_needHandle.ContainsKey(key))
-            {
-                m_needHandle[key] -= handle;
-                if (m_needHandle[key] == null)
+                if (MessageNotHandled == null)
                 {
-                    m_needHandle.Remove(key);
-                    return false;
+                    Debug.LogWarning("MessageDispatcher: Unhandled Message of type " + rMessage);
+                }
+                else
+                {
+                    MessageNotHandled(rMessage);
                 }
             }
-            return true;
-        }
-        public static void RemoveEvents(string key)
-        {
-            if (m_needHandle.ContainsKey(key))
+
+            #region 注册注销事件
+            public void Record(string key, UnityAction<object> handle)
             {
-                m_needHandle.Remove(key);
+                // First check if we know about the message type
+                if (!m_needHandle.ContainsKey(key))
+                {
+                    m_needHandle.Add(key, handle);
+                }
+                else
+                {
+                    m_needHandle[key] += handle;
+                }
+            }
+            public void Record(string key, UnityAction handle)
+            {
+                // First check if we know about the message type
+                if (!m_needHandle0.ContainsKey(key))
+                {
+                    m_needHandle0.Add(key, handle);
+                }
+                else
+                {
+                    m_needHandle0[key] += handle;
+                }
+            }
+            public bool Remove(string key, UnityAction<object> handle)
+            {
+                if (m_needHandle.ContainsKey(key))
+                {
+                    m_needHandle[key] -= handle;
+                    if (m_needHandle[key] == null)
+                    {
+                        m_needHandle.Remove(key);
+                        return false;
+                    }
+                }
+                return true;
+            }
+            public bool Remove(string key, UnityAction handle)
+            {
+                if (m_needHandle0.ContainsKey(key))
+                {
+                    m_needHandle0[key] -= handle;
+                    if (m_needHandle0[key] == null)
+                    {
+                        m_needHandle0.Remove(key);
+                        return false;
+                    }
+                }
+                return true;
+            }
+            public void Remove(string key)
+            {
+                if (m_needHandle.ContainsKey(key))
+                {
+                    m_needHandle.Remove(key);
+                }
+                if (m_needHandle0.ContainsKey(key))
+                {
+                    m_needHandle0.Remove(key);
+                }
+            }
+            #endregion
+
+            #region 触发事件
+            public void NotifyObserver(string key)
+            {
+                bool lReportMissingRecipient = true;
+
+                if (m_needHandle.ContainsKey(key))
+                {
+                    m_needHandle[key].Invoke(null);
+
+                    lReportMissingRecipient = false;
+                }
+
+                // If we were unable to send the message, we may need to report it
+                if (lReportMissingRecipient)
+                {
+                    NoMessageHandle(key);
+                }
+            }
+            public void NotifyObserver(string key, object value)
+            {
+                bool lReportMissingRecipient = true;
+
+                if (m_needHandle.ContainsKey(key))
+                {
+                    m_needHandle[key].Invoke(value);
+
+                    lReportMissingRecipient = false;
+                }
+
+                // If we were unable to send the message, we may need to report it
+                if (lReportMissingRecipient)
+                {
+                    NoMessageHandle(key);
+                }
+            }
+            #endregion
+        }
+
+        private static void TraverseHold(UnityAction<EventHold> OnGet)
+        {
+            var list = new List<EventHold>(eventHolders);
+            foreach (var item in list)
+            {
+                OnGet(item);
             }
         }
-        public static bool HaveEvent(string key)
-        {
-            return m_needHandle.ContainsKey(key);
-        }
-        #endregion
 
         #region 触发事件
         public static void Open(string assetName, object data = null)
         {
-            InvokeEvent(assetName, data);
+            TraverseHold((eventHold) =>
+            {
+                eventHold.NotifyObserver(assetName, data);
+            });
         }
         public static void Open<T>(object data = null) where T : UIPanelTemp
         {
             string assetName = typeof(T).ToString();
-            InvokeEvent(assetName, data);
+            Open(assetName, data);
         }
         public static void Close(string assetName)
         {
@@ -84,42 +163,20 @@ namespace BundleUISystem
                     item.CansaleLoadObject(assetName);
                 }
             }
-            InvokeEvent(addClose + assetName);
+
+            var key =(addClose + assetName);
+
+            TraverseHold((eventHold) =>
+            {
+                eventHold.NotifyObserver(key);
+            });
         }
         public static void Close<T>() where T : UIPanelTemp
         {
             string assetName = typeof(T).ToString();
             Close(assetName);
         }
-
-        private static void InvokeEvent(string key)
-        {
-            bool lReportMissingRecipient = true;
-            if (m_needHandle.ContainsKey(key))
-            {
-                m_needHandle[key].Invoke(null);
-                lReportMissingRecipient = false;
-            }
-
-            if (lReportMissingRecipient)
-            {
-                NoMessageHandle(key);
-            }
-        }
-        private static void InvokeEvent(string key,object body)
-        {
-            bool lReportMissingRecipient = true;
-            if (m_needHandle.ContainsKey(key))
-            {
-                m_needHandle[key].Invoke(body);
-                lReportMissingRecipient = false;
-            }
-
-            if (lReportMissingRecipient)
-            {
-                NoMessageHandle(key);
-            }
-        }
+       
         #endregion
     }
     /// <summary>
@@ -132,7 +189,7 @@ namespace BundleUISystem
 
         [Header("动态面版")]
         public List<UIBundleInfo> bundles = new List<UIBundleInfo>();
-
+        private EventHold eventHold = new EventHold();
 
         private event UnityAction onDestroy;
         private event UnityAction onEnable;
@@ -140,10 +197,13 @@ namespace BundleUISystem
         private IUILoadCtrl Controller;
         private const string addClose = "close";
         private static List<IUILoadCtrl> controllers = new List<IUILoadCtrl>();
+        private static List<EventHold> eventHolders = new List<EventHold>();
+        private static List<EventHold> lastHolders = new List<EventHold>();
         void Awake()
         {
             Controller = new UILoadCtrl(assetBundleFile);
             controllers.Add(Controller);
+            eventHolders.Add(eventHold);
             RegisterBundleEvents();
         }
 
@@ -193,23 +253,23 @@ namespace BundleUISystem
                 {
                     trigger.instence = x;
                     irm.HandleData(trigger.Data);
-                    Remove(trigger.assetName, createAction);
-                    Record(trigger.assetName, handInfoAction);
+                    eventHold.Remove(trigger.assetName, createAction);
+                    eventHold.Record(trigger.assetName, handInfoAction);
                     irm.OnDelete += () =>
                     {
                         trigger.instence = null;
-                        Remove(trigger.assetName, handInfoAction);
-                        Record(trigger.assetName, createAction);
+                        eventHold.Remove(trigger.assetName, handInfoAction);
+                        eventHold.Record(trigger.assetName, createAction);
                     };
                 }
                 RegisterDestoryAction(trigger.assetName, x);
             };
 
-            Record(trigger.assetName, createAction);
+            eventHold.Record(trigger.assetName, createAction);
 
             onDestroy += () =>
             {
-                Remove(trigger.assetName, createAction);
+                eventHold.Remove(trigger.assetName, createAction);
             };
         }
 
@@ -279,6 +339,7 @@ namespace BundleUISystem
                 RegisterDestoryAction(trigger.assetName, x);
             };
         }
+
         private void RegisterEnableEvents(UIBundleInfo trigger)
         {
             UnityAction onEnableAction = () =>
@@ -318,8 +379,8 @@ namespace BundleUISystem
         private void RegisterDestoryAction(string assetName,GameObject x)
         {
             string key = addClose + assetName;
-            RemoveEvents(key);
-            Record(key, new UnityAction<object>((y)=> {
+            eventHold.Remove(key);
+            eventHold.Record(key, new UnityAction<object>((y)=> {
                 if (x != null) Destroy(x);
             }));
         }
@@ -341,11 +402,11 @@ namespace BundleUISystem
 
         void OnDestroy()
         {
-            if (onDestroy != null)
-            {
+            if (onDestroy != null){
                 onDestroy.Invoke();
             }
             controllers.Remove(Controller);
+            eventHolders.Remove(eventHold);
         }
     }
 }
