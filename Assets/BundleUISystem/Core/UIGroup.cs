@@ -21,13 +21,14 @@ namespace BundleUISystem
         private const string addClose = "close";
         private static List<IUILoadCtrl> controllers = new List<IUILoadCtrl>();
         private static List<EventHold> eventHolders = new List<EventHold>();
+        public static UnityEngine.Events.UnityAction<string> MessageNotHandled;
 
         void Awake()
         {
             Controller = new UILoadCtrl(transform);
             controllers.Add(Controller);
             eventHolders.Add(eventHold);
-            RegisterBundleEvents();
+            RegistUIEvents();
         }
         private void OnEnable()
         {
@@ -51,7 +52,15 @@ namespace BundleUISystem
             controllers.Remove(Controller);
             eventHolders.Remove(eventHold);
         }
-        private void RegisterBundleEvents()
+        private void RegistUIEvents()
+        {
+            RegisterBundleEvents(bundles);
+            foreach (var item in groupObjs)
+            {
+                RegisterBundleEvents(item.bundles);
+            }
+        }
+        private void RegisterBundleEvents(List<UIBundleInfo> bundles)
         {
             for (int i = 0; i < bundles.Count; i++)
             {
@@ -235,7 +244,7 @@ namespace BundleUISystem
             });
             if (!handled)
             {
-                EventHold.NoMessageHandle(assetName);
+                NoMessageHandle(assetName);
             }
         }
         public static void Open<T>(object data = null) where T : UIPanelTemp
@@ -271,6 +280,17 @@ namespace BundleUISystem
             foreach (var item in list)
             {
                 OnGet(item);
+            }
+        }
+        public static void NoMessageHandle(string rMessage)
+        {
+            if (MessageNotHandled == null)
+            {
+                Debug.LogWarning("MessageDispatcher: Unhandled Message of type " + rMessage);
+            }
+            else
+            {
+                MessageNotHandled(rMessage);
             }
         }
 

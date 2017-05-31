@@ -2,25 +2,14 @@
 using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections.Generic;
+using BundleUISystem.Internal;
+
 namespace BundleUISystem
 {
 
-    public class EventHold
+    public class EventHold: IEventHold
     {
-        public static UnityEngine.Events.UnityAction<string> MessageNotHandled;
-        public Dictionary<string, UnityAction<object>> m_needHandle = new Dictionary<string, UnityAction<object>>();
-        public static void NoMessageHandle(string rMessage)
-        {
-            if (MessageNotHandled == null)
-            {
-                Debug.LogWarning("MessageDispatcher: Unhandled Message of type " + rMessage);
-            }
-            else
-            {
-                MessageNotHandled(rMessage);
-            }
-        }
-
+        private Dictionary<string, UnityAction<object>> m_needHandle = new Dictionary<string, UnityAction<object>>();
         #region 注册注销事件
         public void Record(string key, UnityAction<object> handle)
         {

@@ -91,10 +91,30 @@ namespace BundleUISystem
             if (!_parents.TryGetValue(layer,out parent))
             {
                 parent = new GameObject(layer.ToString()).transform;
-                parent.SetParent(_root);
+                if (_root is RectTransform)
+                {
+                    var rectParent = parent.gameObject.AddComponent<RectTransform>();
+                    rectParent.anchorMin = Vector2.zero;
+                    rectParent.anchorMax = Vector2.one;
+                    rectParent.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, ((RectTransform)_root).rect.width);
+                    rectParent.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, ((RectTransform)_root).rect.height);
+                    parent = rectParent;
+                    parent.SetParent(_root, false);
+                }
+                else
+                {
+                    parent.SetParent(_root, true);
+                }
                 _parents.Add(layer,parent);
             }
-            child.SetParent(parent, reset);
+
+            child.SetParent(parent, !(_root is RectTransform));
+
+            if(reset)
+            {
+                child.transform.position = Vector3.zero;
+                child.transform.localRotation = Quaternion.identity;
+            }
         }
     }
 }

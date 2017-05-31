@@ -11,6 +11,7 @@ public class RtABInfoDrawer : PropertyDrawer
 {
     const float widthBt = 20;
     const int ht = 6;
+    List<GameObject> created = new List<GameObject>();
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         if (!property.isExpanded) return EditorGUIUtility.singleLineHeight;
@@ -40,7 +41,6 @@ public class RtABInfoDrawer : PropertyDrawer
         var boolProp = property.FindPropertyRelative("reset");
         var buttonProp = property.FindPropertyRelative("button");
         var toggleProp = property.FindPropertyRelative("toggle");
-        var instenceProp = property.FindPropertyRelative("instence");
         float height = EditorGUIUtility.singleLineHeight;
 
         Rect rect = new Rect(position.xMin, position.yMin, position.width, height);
@@ -50,9 +50,11 @@ public class RtABInfoDrawer : PropertyDrawer
         if (GUI.Button(rect, assetName.stringValue))
         {
             property.isExpanded = !property.isExpanded;
-            if (instenceProp.objectReferenceValue != null)
+            var instence = created.Find(x => x.name == assetName.stringValue);
+            if(instence != null)
             {
-                Object.DestroyImmediate(instenceProp.objectReferenceValue);
+                created.Remove(instence);
+                Object.DestroyImmediate(instence);
             }
             if (property.isExpanded)
             {
@@ -63,15 +65,14 @@ public class RtABInfoDrawer : PropertyDrawer
                     prefab.objectReferenceValue = gopfb;
                     GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
                     var uigroup = GameObject.FindObjectOfType<UIGroup>();
-                    go.transform.SetParent(uigroup.transform);
-                    //bool isworld = parentProp.objectReferenceValue == null ? true : !((Transform)parentProp.objectReferenceValue).GetComponent<RectTransform>();
-                    //go.transform.SetParent((Transform)parentProp.objectReferenceValue, isworld);
+                    bool isworld = !uigroup.transform.GetComponent<RectTransform>();
+                    go.transform.SetParent(uigroup.transform, isworld);
                     if (boolProp.boolValue)
                     {
                         go.transform.position = Vector3.zero;
                         go.transform.localRotation = Quaternion.identity;
                     }
-                    instenceProp.objectReferenceValue = go;
+                    created.Add(go);
                 }
             }
         }
