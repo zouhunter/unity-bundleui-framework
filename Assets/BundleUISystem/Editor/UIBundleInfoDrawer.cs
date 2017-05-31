@@ -64,16 +64,31 @@ public class RtABInfoDrawer : PropertyDrawer
                     GameObject gopfb = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
                     prefab.objectReferenceValue = gopfb;
                     GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
-                    if(go.GetComponent<Transform>() is RectTransform)
-                    {
-                        var canvas = GameObject.FindObjectOfType<Canvas>();
-                        go.transform.SetParent(canvas.transform, false);
-                    }
-                    else
-                    {
-                        go.transform.SetParent(null);
-                    }
+                    var obj = property.serializedObject.targetObject;
 
+                    if (obj is UIGroup)
+                    {
+                        if (go.GetComponent<Transform>() is RectTransform)
+                        {
+                            go.transform.SetParent((obj as UIGroup).transform, false);
+                        }
+                        else
+                        {
+                            go.transform.SetParent((obj as UIGroup).transform, true);
+                        }
+                    }
+                    else if(obj is UIGroupObj)
+                    {
+                        if (go.GetComponent<Transform>() is RectTransform)
+                        {
+                            var canvas = GameObject.FindObjectOfType<Canvas>();
+                            go.transform.SetParent(canvas.transform, false);
+                        }
+                        else
+                        {
+                            go.transform.SetParent(null);
+                        }
+                    }
 
                     if (boolProp.boolValue)
                     {
