@@ -96,8 +96,8 @@ namespace BundleUISystem
                     var rectParent = parent.gameObject.AddComponent<RectTransform>();
                     rectParent.anchorMin = Vector2.zero;
                     rectParent.anchorMax = Vector2.one;
-                    rectParent.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, ((RectTransform)_root).rect.width);
-                    rectParent.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, ((RectTransform)_root).rect.height);
+                    rectParent.offsetMin = Vector3.zero;
+                    rectParent.offsetMax = Vector3.zero;
                     parent = rectParent;
                     parent.SetParent(_root, false);
                 }

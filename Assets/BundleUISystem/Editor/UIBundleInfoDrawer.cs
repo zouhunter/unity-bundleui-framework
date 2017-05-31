@@ -64,9 +64,17 @@ public class RtABInfoDrawer : PropertyDrawer
                     GameObject gopfb = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
                     prefab.objectReferenceValue = gopfb;
                     GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
-                    var uigroup = GameObject.FindObjectOfType<UIGroup>();
-                    bool isworld = !uigroup.transform.GetComponent<RectTransform>();
-                    go.transform.SetParent(uigroup.transform, isworld);
+                    if(go.GetComponent<Transform>() is RectTransform)
+                    {
+                        var canvas = GameObject.FindObjectOfType<Canvas>();
+                        go.transform.SetParent(canvas.transform, false);
+                    }
+                    else
+                    {
+                        go.transform.SetParent(null);
+                    }
+
+
                     if (boolProp.boolValue)
                     {
                         go.transform.position = Vector3.zero;

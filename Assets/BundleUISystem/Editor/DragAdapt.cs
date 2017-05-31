@@ -65,7 +65,7 @@ namespace BundleUISystem
                     Rect totalItemPosition = ReorderableListGUI.CurrentItemTotalPosition;
                     var width = totalItemPosition.width - widthBt * 8;
                     width /= 1.5f;
-                    Rect draggableRect = new Rect(width + totalItemPosition.x, totalItemPosition.y, totalItemPosition.width - width - widthBt * 8, totalItemPosition.height);
+                    Rect draggableRect = new Rect(width + totalItemPosition.x, totalItemPosition.y, totalItemPosition.width - width - widthBt * 8,EditorGUIUtility.singleLineHeight);
                     if (draggableRect.Contains(Event.current.mousePosition))
                     {
                         // Select this list item.
