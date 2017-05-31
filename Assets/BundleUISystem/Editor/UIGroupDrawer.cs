@@ -8,15 +8,16 @@ using BundleUISystem;
 [CustomEditor(typeof(UIGroup))]
 public class UIGroupDrawer : Editor {
     SerializedProperty script;
-    SerializedPropertyAdaptor adapt;
+    SerializedProperty groupObjsProp;
+    SerializedProperty bundlesProp;
     UIGroup targetObj;
     bool swink;
     List<GameObject> created;
     private void OnEnable()
     {
         script = serializedObject.FindProperty("m_Script");
-        var ritems = serializedObject.FindProperty("bundles");
-        adapt = new SerializedPropertyAdaptor(ritems);
+        bundlesProp = serializedObject.FindProperty("bundles");
+        groupObjsProp = serializedObject.FindProperty("groupObjs");
         targetObj = (UIGroup)target;
     }
     public override void OnInspectorGUI()
@@ -25,7 +26,6 @@ public class UIGroupDrawer : Editor {
         DrawScript();
         DrawToolButtons();
         DrawRuntimeItems();
-        //base.OnInspectorGUI();
         serializedObject.ApplyModifiedProperties();
     }
 
@@ -62,7 +62,10 @@ public class UIGroupDrawer : Editor {
 
     private void DrawRuntimeItems()
     {
-        Rotorz.ReorderableList.ReorderableListGUI.ListField(adapt);
+        ReorderableListGUI.Title("静态面板");
+        ReorderableListGUI.ListField(groupObjsProp);
+        ReorderableListGUI.Title("动态面板");
+        Rotorz.ReorderableList.ReorderableListGUI.ListField(bundlesProp);
     }
     private void QuickUpdate()
     {
@@ -113,7 +116,7 @@ public class UIGroupDrawer : Editor {
         {
             item = targetObj.bundles[i];
             GameObject instence = PrefabUtility.InstantiatePrefab(item.prefab) as GameObject;
-            instence.transform.SetParent(item.parent, item.reset);
+            instence.transform.SetParent(targetObj.transform, item.reset);
             created.Add(instence);
         }
     }

@@ -9,20 +9,15 @@ namespace BundleUISystem
 {
     public class UILoadCtrl : IUILoadCtrl
     {
-        private AssetBundleLoader assetLoader { get { return AssetBundleLoader.GetInstance(); } }
+        private AssetBundleManager assetLoader { get { return AssetBundleManager.GetInstance(); } }
         private List<string> _loadingKeys = new List<string>();
         private List<string> _cansaleKeys = new List<string>();
-        public string Menu
+        private Dictionary<int, Transform> _parents = new Dictionary<int, Transform>();
+        private Transform _root;
+        public UILoadCtrl(Transform root)
         {
-            get;
-            private set;
+            _root = root;
         }
-
-        public UILoadCtrl(string menu)
-        {
-            this.Menu = menu;
-        }
-
         /// <summary>
         /// 创建对象
         /// </summary>
@@ -65,7 +60,7 @@ namespace BundleUISystem
         /// <summary>
         /// 获取对象实例
         /// </summary>
-        void CreateInstance(GameObject prefab, UIBundleInfo trigger)
+        private void CreateInstance(GameObject prefab, UIBundleInfo trigger)
         {
             if (_cansaleKeys.Contains(trigger.assetName))
             {
@@ -81,8 +76,7 @@ namespace BundleUISystem
             GameObject go = GameObject.Instantiate(prefab);
 
             go.SetActive(true);
-            bool isworld = trigger.parent == null ? true : !trigger.parent.GetComponent<RectTransform>();
-            go.transform.SetParent(trigger.parent, isworld);
+            SetParent(trigger.parentLayer, go.transform, trigger.reset);
             if (trigger.reset)
             {
                 go.transform.position = Vector3.zero;
@@ -91,5 +85,16 @@ namespace BundleUISystem
             if (trigger.OnCreate != null) trigger.OnCreate(go);
         }
 
+        private void SetParent(int layer,Transform child,bool reset)
+        {
+            Transform parent = null;
+            if (!_parents.TryGetValue(layer,out parent))
+            {
+                parent = new GameObject(layer.ToString()).transform;
+                parent.SetParent(_root);
+                _parents.Add(layer,parent);
+            }
+            child.SetParent(parent, reset);
+        }
     }
 }

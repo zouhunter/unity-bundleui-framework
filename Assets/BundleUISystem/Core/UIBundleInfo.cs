@@ -16,7 +16,7 @@ namespace BundleUISystem
         public string assetName;
         public string bundleName;
         public bool reset;
-        public Transform parent;
+        public int parentLayer;
         public Type type;
 
         public Button button;

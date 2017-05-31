@@ -36,7 +36,7 @@ public class RtABInfoDrawer : PropertyDrawer
         var assetName = property.FindPropertyRelative("assetName");
         var bundleName = property.FindPropertyRelative("bundleName");
         var typeProp = property.FindPropertyRelative("type"); ;
-        var parentProp = property.FindPropertyRelative("parent");
+        var parentLayerProp = property.FindPropertyRelative("parentLayer");
         var boolProp = property.FindPropertyRelative("reset");
         var buttonProp = property.FindPropertyRelative("button");
         var toggleProp = property.FindPropertyRelative("toggle");
@@ -62,8 +62,10 @@ public class RtABInfoDrawer : PropertyDrawer
                     GameObject gopfb = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
                     prefab.objectReferenceValue = gopfb;
                     GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
-                    bool isworld = parentProp.objectReferenceValue == null ? true : !((Transform)parentProp.objectReferenceValue).GetComponent<RectTransform>();
-                    go.transform.SetParent((Transform)parentProp.objectReferenceValue, isworld);
+                    var uigroup = GameObject.FindObjectOfType<UIGroup>();
+                    go.transform.SetParent(uigroup.transform);
+                    //bool isworld = parentProp.objectReferenceValue == null ? true : !((Transform)parentProp.objectReferenceValue).GetComponent<RectTransform>();
+                    //go.transform.SetParent((Transform)parentProp.objectReferenceValue, isworld);
                     if (boolProp.boolValue)
                     {
                         go.transform.position = Vector3.zero;
@@ -134,7 +136,7 @@ public class RtABInfoDrawer : PropertyDrawer
         }
 
         rect.y += height;
-        EditorGUI.PropertyField(rect, parentProp, new GUIContent("parent"));
+        EditorGUI.PropertyField(rect, parentLayerProp, new GUIContent("parentLayer"));
 
         rect.y += height;
         EditorGUI.PropertyField(rect, boolProp, new GUIContent("reset"));
