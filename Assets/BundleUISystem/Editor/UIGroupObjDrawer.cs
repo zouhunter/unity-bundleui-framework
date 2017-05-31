@@ -8,14 +8,14 @@ using BundleUISystem;
 [CustomEditor(typeof(UIGroupObj))]
 public class UIGroupObjDrawer : Editor {
     SerializedProperty script;
-    SerializedProperty bundlesProp;
+    DragAdapt bundlesAdapt;
     UIGroupObj targetObj;
     bool swink;
     List<GameObject> created;
     private void OnEnable()
     {
         script = serializedObject.FindProperty("m_Script");
-        bundlesProp = serializedObject.FindProperty("bundles");
+        bundlesAdapt = new DragAdapt(serializedObject.FindProperty("bundles"));
         targetObj = (UIGroupObj)target;
     }
     public override void OnInspectorGUI()
@@ -60,7 +60,7 @@ public class UIGroupObjDrawer : Editor {
 
     private void DrawRuntimeItems()
     {
-        Rotorz.ReorderableList.ReorderableListGUI.ListField(bundlesProp);
+        Rotorz.ReorderableList.ReorderableListGUI.ListField(bundlesAdapt);
     }
     private void QuickUpdate()
     {

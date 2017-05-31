@@ -141,15 +141,12 @@ namespace Rotorz.ReorderableList {
 
 		/// <inheritdoc/>
 		public virtual void DrawItem(Rect position, int index) {
-			EditorGUI.PropertyField(position, this[index], GUIContent.none, false);
+			EditorGUI.PropertyField(position, this[index], GUIContent.none, true);
 		}
 
 		/// <inheritdoc/>
 		public virtual float GetItemHeight(int index) {
-			return FixedItemHeight != 0f
-				? FixedItemHeight
-				: EditorGUI.GetPropertyHeight(this[index], GUIContent.none, false)
-				;
+			return FixedItemHeight != 0f ? FixedItemHeight : EditorGUI.GetPropertyHeight(this[index], GUIContent.none, true);
 		}
 
 		#endregion

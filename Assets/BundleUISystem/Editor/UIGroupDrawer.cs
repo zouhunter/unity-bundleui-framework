@@ -5,20 +5,21 @@ using UnityEditor;
 using System.Reflection;
 using Rotorz.ReorderableList;
 using BundleUISystem;
-[CustomEditor(typeof(UIGroup))]
+[CustomEditor(typeof(UIGroup)),CanEditMultipleObjects]
 public class UIGroupDrawer : Editor {
     SerializedProperty script;
     SerializedProperty groupObjsProp;
-    SerializedProperty bundlesProp;
+    DragAdapt bundlesAdapt;
     UIGroup targetObj;
     bool swink;
     List<GameObject> created;
     private void OnEnable()
     {
         script = serializedObject.FindProperty("m_Script");
-        bundlesProp = serializedObject.FindProperty("bundles");
-        groupObjsProp = serializedObject.FindProperty("groupObjs");
         targetObj = (UIGroup)target;
+        var bundlesProp = serializedObject.FindProperty("bundles");
+        bundlesAdapt = new DragAdapt(bundlesProp);
+        groupObjsProp = serializedObject.FindProperty("groupObjs");
     }
     public override void OnInspectorGUI()
     {
@@ -65,7 +66,7 @@ public class UIGroupDrawer : Editor {
         ReorderableListGUI.Title("静态面板");
         ReorderableListGUI.ListField(groupObjsProp);
         ReorderableListGUI.Title("动态面板");
-        Rotorz.ReorderableList.ReorderableListGUI.ListField(bundlesProp);
+        Rotorz.ReorderableList.ReorderableListGUI.ListField(bundlesAdapt);
     }
     private void QuickUpdate()
     {

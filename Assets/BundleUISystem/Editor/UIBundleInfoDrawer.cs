@@ -51,7 +51,7 @@ public class RtABInfoDrawer : PropertyDrawer
         {
             property.isExpanded = !property.isExpanded;
             var instence = created.Find(x => x.name == assetName.stringValue);
-            if(instence != null)
+            if (instence != null)
             {
                 created.Remove(instence);
                 Object.DestroyImmediate(instence);
@@ -81,33 +81,39 @@ public class RtABInfoDrawer : PropertyDrawer
 
         prefab.objectReferenceValue = EditorGUI.ObjectField(rect, new GUIContent(""), prefab.objectReferenceValue, typeof(GameObject), false);
 
-        rect = new Rect(position.xMin, position.yMin, position.width, height);
+        //rect = new Rect(position.xMin, position.yMin, position.width, height);
         if (!property.isExpanded)
         {
-            rect = new Rect(position.xMin, position.yMin, position.width, height);
-            rect.width -= widthBt * 8;
-            rect.x += rect.width / 1.2f;
-            rect.width = widthBt * 1.5f;
-            if (GUI.Button(rect, "[-]"))
-            {
-                Object pfbItem = prefab.objectReferenceValue;
-                if (pfbItem != null)
-                {
-                    bool find = false;
-                    MonoBehaviour[] scripts = ((GameObject)pfbItem).GetComponents<MonoBehaviour>();
-                    for (int i = 0; i < scripts.Length && !find; i++)
-                    {
-                        MonoBehaviour item = scripts[i];
-                        if (item is IPanelButton || item is IPanelEnable || item is IPanelName || item is IPanelToggle)
-                        {
-                            find = true;
-                            Selection.activeObject = MonoScript.FromMonoBehaviour(item);
-                        }
-                    }
-                }
-            }
+            var width = position.width - widthBt * 8;
+            width /= 1.5f;
+            Rect draggableRect = new Rect(width + position.x, position.y, position.width - width - widthBt * 8, position.height);
+            EditorGUI.Toggle(draggableRect, false, EditorStyles.toolbarButton);
+
+            //    rect = new Rect(position.xMin, position.yMin, position.width, height);
+            //    rect.width -= widthBt * 8;
+            //    rect.x += rect.width / 1.2f;
+            //    rect.width = widthBt * 1.5f;
+            //    if (GUI.Button(rect, "[-]"))
+            //    {
+            //        Object pfbItem = prefab.objectReferenceValue;
+            //        if (pfbItem != null)
+            //        {
+            //            bool find = false;
+            //            MonoBehaviour[] scripts = ((GameObject)pfbItem).GetComponents<MonoBehaviour>();
+            //            for (int i = 0; i < scripts.Length && !find; i++)
+            //            {
+            //                MonoBehaviour item = scripts[i];
+            //                if (item is IPanelButton || item is IPanelEnable || item is IPanelName || item is IPanelToggle)
+            //                {
+            //                    find = true;
+            //                    Selection.activeObject = MonoScript.FromMonoBehaviour(item);
+            //                }
+            //            }
+            //        }
+            //    }
             return;
         }
+
         EditorGUI.BeginDisabledGroup(true);
         rect = new Rect(position.xMin, position.yMin + height, position.width, height);
         EditorGUI.PropertyField(rect, assetName, new GUIContent("name"));
@@ -142,6 +148,6 @@ public class RtABInfoDrawer : PropertyDrawer
         rect.y += height;
         EditorGUI.PropertyField(rect, boolProp, new GUIContent("reset"));
 
-       
+
     }
 }
