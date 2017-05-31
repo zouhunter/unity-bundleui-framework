@@ -6,59 +6,14 @@ using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 using AssetBundles;
-using System.Tuples;
+using AssetBundleReference.Tuples;
 
-public class AssetBundleManager:MonoBehaviour
+public class AssetBundleLoader :MonoBehaviour
 {
-    #region 单例
-    protected static AssetBundleManager instance = default(AssetBundleManager);
-    private static object lockHelper = new object();
-    private static bool isQuit = false;
-
-    public static AssetBundleManager GetInstance()
-    {
-        if (instance == null)
-        {
-            lock (lockHelper)
-            {
-                if (instance == null && !isQuit)
-                {
-                    GameObject go = new GameObject(typeof(AssetBundleManager).ToString());
-                    instance = go.AddComponent<AssetBundleManager>();
-                }
-            }
-        }
-        return instance;
-    }
-
-    protected virtual void Awake()
-    {
-        if (instance == null)
-        {
-            instance = GetComponent<AssetBundleManager>();
-        }
-        //资源加载
-        UrlAssetBundleLoadCtrl.logMode = AssetBundles.UrlAssetBundleLoadCtrl.LogMode.JustErrors;
-        activeLoader = new UrlAssetBundleLoadCtrl("file:///" + Application.streamingAssetsPath, "AssetBundle");
-    }
-
-    void OnApplicationQuit()
-    {
-        isQuit = true;
-    }
-
-    protected virtual void OnDestroy()
-    {
-        if (instance == this)
-        {
-            instance = null;
-        }
-    }
-    #endregion
 #if UNITY_EDITOR
     //private static int m_SimulateAssetBundleInEditor;
     private static string kSimulateAssetBundles = "simulateinEditor";
-    private ISimulationLoader simuationLoader = new SimulationLoader();
+    private ISimulationLoader simuationLoader;
     // Flag to indicate if we want to simulate assetBundles in Editor without building them actually.
     public static bool SimulateAssetBundleInEditor
     {
@@ -72,12 +27,60 @@ public class AssetBundleManager:MonoBehaviour
         }
     }
 #endif
+    #region 单例
+    protected static AssetBundleLoader instance = default(AssetBundleLoader);
+    private static object lockHelper = new object();
+    private static bool isQuit = false;
+    public static AssetBundleLoader GetInstance()
+    {
+        if (instance == null)
+        {
+            lock (lockHelper)
+            {
+                if (instance == null && !isQuit)
+                {
+                    GameObject go = new GameObject(typeof(AssetBundleLoader).ToString());
+                    instance = go.AddComponent<AssetBundleLoader>();
+                }
+            }
+        }
+        return instance;
+    }
+    protected virtual void Awake()
+    {
+        if (instance == null){
+            instance = GetComponent<AssetBundleLoader>();
+        }
+        DontDestroyOnLoad(gameObject);
+        InitOnAwake();
+    }
+    void OnApplicationQuit()
+    {
+        isQuit = true;
+    }
+    protected virtual void OnDestroy()
+    {
+        if (instance == this)
+        {
+            instance = null;
+        }
+    }
+    #endregion 
+
     private IUrlAssetBundleLoadCtrl activeLoader;
     private bool isDownLanding;
     private bool menuLoaded;
     private Queue<Tuple<string, string, UnityAction<UnityEngine.Object>>> m_LoadObjectQueue =
       new Queue<Tuple<string, string, UnityAction<UnityEngine.Object>>>();
-
+    protected void InitOnAwake()
+    {
+        //资源加载
+        UrlAssetBundleLoadCtrl.logMode = AssetBundles.UrlAssetBundleLoadCtrl.LogMode.JustErrors;
+        activeLoader = new UrlAssetBundleLoadCtrl("file:///" + Application.streamingAssetsPath, "AssetBundle");
+#if UNITY_EDITOR
+        simuationLoader = new SimulationLoader(this);
+#endif
+    }
     void Update()
     {
         if (activeLoader != null)
@@ -126,8 +129,10 @@ public class AssetBundleManager:MonoBehaviour
 #if UNITY_EDITOR
         if (SimulateAssetBundleInEditor)
         {
-            T asset = simuationLoader.LoadAsset<T>(assetBundleName, assetName);
-            onAssetLoad(asset);
+            simuationLoader.LoadAssetAsync(assetBundleName, assetName, (x) =>
+            {
+                onAssetLoad((T)x);
+            });
             return;
         }
 #endif

@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using UnityEditor;
 using System;
 using System.IO;
+using System.Text;
+
 public class ArtBundles : EditorWindow
 {
     enum ArtType
@@ -30,6 +32,7 @@ public class ArtBundles : EditorWindow
         public BundleAbleAsset(string rootPath, string appendName)
         {
             this.fileName = System.IO.Path.GetFileNameWithoutExtension(rootPath);
+            if (fileName.Contains(".")) Debug.LogError("文件名不对:" + rootPath);
             this.rootPath = rootPath;
             this.bundleappend = appendName.Replace(System.IO.Path.GetFileName(rootPath), fileName);
             importer = AssetImporter.GetAtPath(rootPath);
@@ -234,17 +237,17 @@ public class ArtBundles : EditorWindow
         switch (artType)
         {
             case ArtType.Texture:
-                Recursive(artAssetsFolder, "jpg", deepSet, action: (x) => { allFiles.Add(x); });
-                Recursive(artAssetsFolder, "png", deepSet, action: (x) => { allFiles.Add(x); });
+                BundleBuildUtility.Recursive(artAssetsFolder, "jpg", deepSet, action: (x) => { allFiles.Add(x); });
+                BundleBuildUtility.Recursive(artAssetsFolder, "png", deepSet, action: (x) => { allFiles.Add(x); });
                 break;
             case ArtType.Model:
-                Recursive(artAssetsFolder, "fbx", deepSet, action: (x) => { allFiles.Add(x); });
+                BundleBuildUtility.Recursive(artAssetsFolder, "fbx", deepSet, action: (x) => { allFiles.Add(x); });
                 break;
             case ArtType.Prefab:
-                Recursive(artAssetsFolder, "prefab", deepSet, action: (x) => { allFiles.Add(x); });
+                BundleBuildUtility.Recursive(artAssetsFolder, "prefab", deepSet, action: (x) => { allFiles.Add(x); });
                 break;
             case ArtType.Material:
-                Recursive(artAssetsFolder, "mat", deepSet, action: (x) => { allFiles.Add(x); });
+                BundleBuildUtility.Recursive(artAssetsFolder, "mat", deepSet, action: (x) => { allFiles.Add(x); });
                 break;
             default:
                 break;
@@ -310,32 +313,12 @@ public class ArtBundles : EditorWindow
         }
         EditorUtility.ClearProgressBar();
     }
-    void BackGroundColor(Rect rect,Color color)
+    void BackGroundColor(Rect rect, Color color)
     {
         GUI.color = color;
         GUI.Box(rect, "");
         GUI.color = Color.white;
     }
-    /// <summary>
-    /// 遍历目录及其子目录
-    /// </summary>
-    public static void Recursive(string path, string fileExt, bool deep = true, Action<string> action = null)
-    {
-        string[] names = Directory.GetFiles(path);
-        foreach (string filename in names)
-        {
-            string ext = Path.GetExtension(filename);
-            if (ext.ToLower().Contains(fileExt.ToLower()))
-                action(filename.Replace('\\', '/'));
-        }
-        if (deep)
-        {
-            string[] dirs = Directory.GetDirectories(path);
-            foreach (string dir in dirs)
-            {
-                Recursive(dir, fileExt, deep, action);
-            }
-        }
+   
 
-    }
 }

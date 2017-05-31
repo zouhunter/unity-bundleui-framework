@@ -5,7 +5,7 @@
 
 using System.Collections;
 
-namespace System.Tuples
+namespace AssetBundleReference.Tuples
 {
     #region Conversions
 

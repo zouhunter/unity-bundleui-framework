@@ -9,7 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace System.Tuples
+namespace AssetBundleReference.Tuples
 {
     #region ZeroTuple
 

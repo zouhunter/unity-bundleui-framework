@@ -73,9 +73,9 @@ namespace AssetBundles
         private static void Log(LogType logType, string text)
         {
             if (logType == LogType.Error)
-                Debug.LogError("[AssetBundleManager] " + text);
+                Debug.LogError("[AssetBundleLoader] " + text);
             else if (m_LogMode == LogMode.All)
-                Debug.Log("[AssetBundleManager] " + text);
+                Debug.Log("[AssetBundleLoader] " + text);
         }
 
         #region public Functions
@@ -146,7 +146,7 @@ namespace AssetBundles
             {
                 if (m_AssetBundleManifest == null)
                 {
-                    Debug.LogError("Please initialize AssetBundleManifest by calling AssetBundleManager.Initialize()");
+                    Debug.LogError("Please initialize AssetBundleManifest by calling AssetBundleLoader.Initialize()");
                     return;
                 }
             }
@@ -240,7 +240,7 @@ namespace AssetBundles
         {
             if (m_AssetBundleManifest == null)
             {
-                Debug.LogError("Please initialize AssetBundleManifest by calling AssetBundleManager.Initialize()");
+                Debug.LogError("Please initialize AssetBundleManifest by calling AssetBundleLoader.Initialize()");
                 return;
             }
 
@@ -396,6 +396,6 @@ namespace AssetBundles
         }
 
        
-    } // End of AssetBundleManager.
+    } // End of AssetBundleLoader.
 
 }

@@ -9,19 +9,6 @@ namespace AssetBundle
 {
     public class AssetBundlesMenu : Editor
     {
-
-        [MenuItem("Assets/AssetBundle/Simulation")]
-        static void SetSimulation()
-        {
-            AssetBundleManager.SimulateAssetBundleInEditor = !AssetBundleManager.SimulateAssetBundleInEditor;
-        }
-        [MenuItem("Assets/AssetBundle/Simulation",true)]
-        static bool SetSimuLationEnable()
-        {
-            Menu.SetChecked("Assets/AssetBundle/Simulation", AssetBundleManager.SimulateAssetBundleInEditor);
-            return true;
-        }
-
         [MenuItem("Assets/AssetBundle/BuildSelect")]
         static void BuildSingleAssetBundle()
         {
@@ -37,7 +24,7 @@ namespace AssetBundle
         [MenuItem("Assets/AssetBundle/GenMd5 of Files")]
         static void GenStreamingAssetFile()
         {
-            MD5TableParse.GetMD5CSV(Application.streamingAssetsPath, "Md5.csv");
+            //MD5TableParse.GetMD5CSV(AppFixed.NetWorks.localDir, AppFixed.CSVTable.MD5CSVINSIDE);
         }
         [MenuItem("Assets/AssetBundle/BundleName")]
         static void OpenAssetBundleNameConfigWidow()

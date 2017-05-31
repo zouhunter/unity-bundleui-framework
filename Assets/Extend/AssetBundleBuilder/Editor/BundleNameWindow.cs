@@ -4,9 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System;
-using Object = UnityEngine.Object;
+
 public class BundleNameWindow : EditorWindow
 {
     List<AssetImporter> importerList = new List<AssetImporter>();
@@ -45,7 +43,7 @@ public class BundleNameWindow : EditorWindow
     void LoadFolderAssetBundle(string path)
     {
         List<string> bundleObjs = new List<string>();
-        RecursiveSub(path, action: (x) => { bundleObjs.Add(x); });
+        BundleBuildUtility.RecursiveSub(path, action: (x) => { bundleObjs.Add(x); });
         for (int i = 0; i < bundleObjs.Count; i++)
         {
             AssetImporter importer = AssetImporter.GetAtPath(FileUtil.GetProjectRelativePath(bundleObjs[i]));
@@ -161,25 +159,6 @@ public class BundleNameWindow : EditorWindow
             waitDelete.assetBundleName = "";
             waitDelete.name = "";
             waitDelete = null;
-        }
-    }
-    /// <summary>
-    /// 遍历目录及其子目录
-    /// </summary>
-    public static void RecursiveSub(string path, string ignoreFileExt = ".meta", string ignorFolderEnd = "_files", Action<string> action = null)
-    {
-        string[] names = Directory.GetFiles(path);
-        string[] dirs = Directory.GetDirectories(path);
-        foreach (string filename in names)
-        {
-            string ext = Path.GetExtension(filename);
-            if (ext.Equals(ignoreFileExt)) continue;
-            action(filename.Replace('\\', '/'));
-        }
-        foreach (string dir in dirs)
-        {
-            if (dir.EndsWith(ignorFolderEnd)) continue;
-            RecursiveSub(dir, ignoreFileExt, ignorFolderEnd, action);
         }
     }
 }

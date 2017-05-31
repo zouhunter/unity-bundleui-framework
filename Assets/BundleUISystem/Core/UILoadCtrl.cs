@@ -9,7 +9,7 @@ namespace BundleUISystem
 {
     public class UILoadCtrl : IUILoadCtrl
     {
-        private AssetBundleManager assetLoader { get { return AssetBundleManager.GetInstance(); } }
+        private AssetBundleLoader assetLoader { get { return AssetBundleLoader.GetInstance(); } }
         private List<string> _loadingKeys = new List<string>();
         private List<string> _cansaleKeys = new List<string>();
         private Dictionary<int, Transform> _parents = new Dictionary<int, Transform>();
