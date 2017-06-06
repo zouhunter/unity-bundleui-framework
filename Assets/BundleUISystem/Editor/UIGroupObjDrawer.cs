@@ -11,7 +11,6 @@ public class UIGroupObjDrawer : Editor {
     DragAdapt bundlesAdapt;
     UIGroupObj targetObj;
     bool swink;
-    List<GameObject> created;
     private void OnEnable()
     {
         script = serializedObject.FindProperty("m_Script");
@@ -46,13 +45,13 @@ public class UIGroupObjDrawer : Editor {
             {
                 QuickUpdate();
             }
-            if (GUILayout.Button("批量编辑"))
+            if (GUILayout.Button("排序"))
             {
-                OpenAll();
+                SortAll();
             }
-            if (GUILayout.Button("退出编辑"))
+            if (GUILayout.Button("批量保存"))
             {
-                CloseAll();
+                SaveAll();
             }
         }
        
@@ -100,33 +99,25 @@ public class UIGroupObjDrawer : Editor {
         }
         targetObj.bundles = new List<UIBundleInfo>(tempList);
     }
-    private void OpenAll()
+    private void SortAll()
     {
-        UIBundleInfo item;
-        if (created != null){
-            return;
-        }
-        created = new List<GameObject>();
-        var uigroup = GameObject.FindObjectOfType<UIGroup>();
-        for (int i = 0; i < targetObj.bundles.Count; i++)
-        {
-            item = targetObj.bundles[i];
-            GameObject instence = PrefabUtility.InstantiatePrefab(item.prefab) as GameObject;
-            instence.transform.SetParent(uigroup.transform,!(uigroup.transform is RectTransform));
-            created.Add(instence);
-        }
+        System.Comparison<UIBundleInfo> comp = (x, y) => { return string.Compare(x.assetName, y.assetName); };
+        targetObj.bundles.Sort(comp);
     }
-    private void CloseAll()
+    private void SaveAll()
     {
-        if (created == null)
+        var items = FindObjectsOfType<UIPanelTemp>();
+        foreach (var item in items)
         {
-            return;
+            var prefab = PrefabUtility.GetPrefabParent(item.gameObject);
+            if(prefab != null)
+            {
+                var root = PrefabUtility.FindPrefabRoot((GameObject)prefab);
+                if(root != null)
+                {
+                    PrefabUtility.ReplacePrefab(item.gameObject, root, ReplacePrefabOptions.ConnectToPrefab);
+                }
+            }
         }
-        for (int i = 0; i < created.Count; i++)
-        {
-            if(created[i] != null) DestroyImmediate(created[i]);
-        }
-        created.Clear();
-        created = null;
     }
 }

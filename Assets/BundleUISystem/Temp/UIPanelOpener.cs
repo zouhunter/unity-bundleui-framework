@@ -9,11 +9,6 @@ using UnityEditor;
 [CustomEditor(typeof(UIPanelOpener)),CanEditMultipleObjects]
 public class UIPanelOpenerDrawer:Editor
 {
-    GUISkin skin;
-    private void OnEnable()
-    {
-        skin = EditorGUIUtility.GetBuiltinSkin(EditorSkin.Inspector);
-    }
     public override void OnInspectorGUI()
     {
         var opener = (UIPanelOpener)target;
