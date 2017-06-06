@@ -6,4 +6,5 @@ using BundleUISystem;
 [CreateAssetMenu(menuName ="生成/UI组")]
 public class UIGroupObj : ScriptableObject {
     public List<UIBundleInfo> bundles = new List<UIBundleInfo>();
+    public List<UIGroupObj> groupObjs = new List<UIGroupObj>();
 }

@@ -6,18 +6,27 @@ using System.Reflection;
 using Rotorz.ReorderableList;
 using BundleUISystem;
 [CustomEditor(typeof(UIGroup)),CanEditMultipleObjects]
-public class UIGroupDrawer : Editor {
+public class UIGroupDrawer : UIDrawerTemp
+{
+
+}
+[CustomEditor(typeof(UIGroupObj))]
+public class UIGroupObjDrawer : UIDrawerTemp
+{
+
+}
+
+public class UIDrawerTemp : Editor {
     SerializedProperty script;
     SerializedProperty groupObjsProp;
+    SerializedProperty bundlesProp;
     DragAdapt bundlesAdapt;
-    UIGroup targetObj;
     bool swink;
     List<GameObject> created;
     private void OnEnable()
     {
         script = serializedObject.FindProperty("m_Script");
-        targetObj = (UIGroup)target;
-        var bundlesProp = serializedObject.FindProperty("bundles");
+        bundlesProp = serializedObject.FindProperty("bundles");
         bundlesAdapt = new DragAdapt(bundlesProp);
         groupObjsProp = serializedObject.FindProperty("groupObjs");
     }
@@ -49,13 +58,13 @@ public class UIGroupDrawer : Editor {
             {
                 QuickUpdate();
             }
-            if (GUILayout.Button("批量编辑"))
+            if (GUILayout.Button("排序"))
             {
-                OpenAll();
+                SortAll();
             }
-            if (GUILayout.Button("退出编辑"))
+            if (GUILayout.Button("批量保存"))
             {
-                CloseAll();
+                SaveAll();
             }
         }
        
@@ -70,24 +79,29 @@ public class UIGroupDrawer : Editor {
     }
     private void QuickUpdate()
     {
-        foreach (var item in targetObj.bundles)
+        for (int i = 0; i < bundlesProp.arraySize; i++)
         {
-            if (item.prefab == null)
+            var itemProp = bundlesProp.GetArrayElementAtIndex(i);
+            var prefabProp = itemProp.FindPropertyRelative("prefab");
+            var assetNameProp = itemProp.FindPropertyRelative("assetName");
+            var bundleNameProp = itemProp.FindPropertyRelative("bundleName");
+
+            if (prefabProp.objectReferenceValue == null)
             {
-                UnityEditor.EditorUtility.DisplayDialog("空对象", item.assetName + "预制体为空", "确认");
+                UnityEditor.EditorUtility.DisplayDialog("空对象", assetNameProp.stringValue + "预制体为空", "确认");
                 continue;
             }
 
-            string assetPath = UnityEditor.AssetDatabase.GetAssetPath(item.prefab);
+            string assetPath = UnityEditor.AssetDatabase.GetAssetPath(prefabProp.objectReferenceValue);
 
             UnityEditor.AssetImporter importer = UnityEditor.AssetImporter.GetAtPath(assetPath);
 
-            item.assetName = item.prefab.name;
-            item.bundleName = importer.assetBundleName;
+            assetNameProp.stringValue = prefabProp.objectReferenceValue.name;
+            bundleNameProp.stringValue = importer.assetBundleName;
 
-            if (string.IsNullOrEmpty(item.bundleName))
+            if (string.IsNullOrEmpty(bundleNameProp.stringValue))
             {
-                UnityEditor.EditorUtility.DisplayDialog("提示", "预制体" + item.assetName +"没有assetBundle标记", "确认");
+                UnityEditor.EditorUtility.DisplayDialog("提示", "预制体" + assetNameProp.stringValue + "没有assetBundle标记", "确认");
                 return;
             }
         }
@@ -96,28 +110,38 @@ public class UIGroupDrawer : Editor {
     }
     private void RemoveDouble()
     {
-        List<UIBundleInfo> tempList = new List<UIBundleInfo>();
-        for (int i = 0; i < targetObj.bundles.Count; i++)
+        compair: List<string> temp = new List<string>();
+
+        for (int i = 0; i < bundlesProp.arraySize; i++)
         {
-            if (tempList.Find(x => x.assetName == targetObj.bundles[i].assetName) == null)
+            var itemProp = bundlesProp.GetArrayElementAtIndex(i);
+            var assetNameProp = itemProp.FindPropertyRelative("assetName");
+            if(!temp.Contains(assetNameProp.stringValue)){
+                temp.Add(assetNameProp.stringValue);
+            }
+            else
             {
-                tempList.Add(targetObj.bundles[i]);
+                bundlesProp.DeleteArrayElementAtIndex(i);
+                goto compair;
             }
         }
-        targetObj.bundles = new List<UIBundleInfo>(tempList);
     }
     private void OpenAll()
     {
-        UIBundleInfo item;
         if (created != null){
             return;
         }
         created = new List<GameObject>();
-        for (int i = 0; i < targetObj.bundles.Count; i++)
+        for (int i = 0; i < bundlesProp.arraySize; i++)
         {
-            item = targetObj.bundles[i];
-            GameObject instence = PrefabUtility.InstantiatePrefab(item.prefab) as GameObject;
-            instence.transform.SetParent(targetObj.transform, item.reset);
+            var itemProp = bundlesProp.GetArrayElementAtIndex(i);
+            var prefabProp = itemProp.FindPropertyRelative("prefab");
+            var resetProp = itemProp.FindPropertyRelative("reset");
+            GameObject instence = PrefabUtility.InstantiatePrefab(prefabProp.objectReferenceValue) as GameObject;
+            if(target is UIGroup)
+            {
+                instence.transform.SetParent((target as UIGroup).transform, resetProp.boolValue);
+            }
             created.Add(instence);
         }
     }
@@ -133,5 +157,36 @@ public class UIGroupDrawer : Editor {
         }
         created.Clear();
         created = null;
+    }
+    private void SortAll()
+    {
+        for (int i = 0; i < bundlesProp.arraySize; i++)
+        {
+            for (int j = i; j < bundlesProp.arraySize - i - 1; j++)
+            {
+                var itemj = bundlesProp.GetArrayElementAtIndex(j).FindPropertyRelative("assetName");
+                var itemj1 = bundlesProp.GetArrayElementAtIndex(j + 1).FindPropertyRelative("assetName");
+                if (string.Compare(itemj.stringValue,itemj1.stringValue) > 0)
+                {
+                    bundlesProp.MoveArrayElement(j, j + 1);
+                }
+            }
+        }
+    }
+    private void SaveAll()
+    {
+        var items = FindObjectsOfType<UIPanelTemp>();
+        foreach (var item in items)
+        {
+            var prefab = PrefabUtility.GetPrefabParent(item.gameObject);
+            if (prefab != null)
+            {
+                var root = PrefabUtility.FindPrefabRoot((GameObject)prefab);
+                if (root != null)
+                {
+                    PrefabUtility.ReplacePrefab(item.gameObject, root, ReplacePrefabOptions.ConnectToPrefab);
+                }
+            }
+        }
     }
 }
