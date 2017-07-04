@@ -12,20 +12,24 @@ namespace BundleUISystem
     {
         public List<UIGroupObj> groupObjs = new List<UIGroupObj>();
         public List<UIBundleInfo> bundles = new List<UIBundleInfo>();
-
+        public bool defult;
+        public string assetUrl;
+        public string menu;
         private EventHold eventHold = new EventHold();
         private event UnityAction onDestroy;
         private event UnityAction onEnable;
         private event UnityAction onDisable;
         private IUILoadCtrl Controller;
         private const string addClose = "close";
+
         private static List<IUILoadCtrl> controllers = new List<IUILoadCtrl>();
         private static List<EventHold> eventHolders = new List<EventHold>();
         public static UnityEngine.Events.UnityAction<string> MessageNotHandled;
-
+        //private static List<UIGroupObj> usedUIGroupObj = new List<UIGroupObj>();//防止循环注册
         void Awake()
         {
-            Controller = new UILoadCtrl(transform);
+            if(defult) Controller = new UILoadCtrl(transform);
+            else Controller = new UILoadCtrl(assetUrl, menu,transform);
             controllers.Add(Controller);
             eventHolders.Add(eventHold);
             RegistUIEvents();

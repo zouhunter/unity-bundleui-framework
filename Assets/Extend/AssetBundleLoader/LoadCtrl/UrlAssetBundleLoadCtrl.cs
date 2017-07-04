@@ -27,7 +27,11 @@ namespace AssetBundles
         public string MenuName { get; set; }
         public UrlAssetBundleLoadCtrl(string urlPath, string menuName)
         {
-            BaseDownloadingURL = System.IO.Path.Combine(urlPath, menuName) + "/";
+            if (!urlPath.EndsWith("/"))
+            {
+                urlPath += "/";
+            }
+            BaseDownloadingURL = urlPath;
             this.MenuName = menuName;
         }
 
@@ -111,10 +115,11 @@ namespace AssetBundles
 
             return bundle;
         }
-        
+
         public AssetBundleLoadManifestOperation Initialize()
         {
-            if (m_AssetBundleManifest!=null){
+            if (m_AssetBundleManifest != null)
+            {
                 return null;
             }
 
@@ -258,7 +263,7 @@ namespace AssetBundles
                 LoadAssetBundleInternal(dependencies[i], false);
         }
 
-      
+
         protected void UnloadDependencies(string assetBundleName)
         {
             string[] dependencies = null;
@@ -395,7 +400,7 @@ namespace AssetBundles
             return operation;
         }
 
-       
+
     } // End of AssetBundleLoader.
 
 }

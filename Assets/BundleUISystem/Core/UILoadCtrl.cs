@@ -9,7 +9,7 @@ namespace BundleUISystem
 {
     public class UILoadCtrl : IUILoadCtrl
     {
-        private AssetBundleLoader assetLoader { get { return AssetBundleLoader.GetInstance(); } }
+        private AssetBundleLoader assetLoader;
         private List<string> _loadingKeys = new List<string>();
         private List<string> _cansaleKeys = new List<string>();
         private Dictionary<int, Transform> _parents = new Dictionary<int, Transform>();
@@ -17,6 +17,12 @@ namespace BundleUISystem
         public UILoadCtrl(Transform root)
         {
             _root = root;
+            assetLoader = AssetBundleLoader.Instence;
+        }
+        public UILoadCtrl(string url,string menu,Transform root)
+        {
+            _root = root;
+            assetLoader = AssetBundleLoader.GetInstance(url, menu);
         }
         /// <summary>
         /// 创建对象

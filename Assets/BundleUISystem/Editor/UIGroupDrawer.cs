@@ -20,8 +20,14 @@ public class UIDrawerTemp : Editor {
     SerializedProperty script;
     SerializedProperty groupObjsProp;
     SerializedProperty bundlesProp;
+    SerializedProperty defultProp;
+    SerializedProperty assetUrlProp;
+    SerializedProperty menuProp;
+
     DragAdapt bundlesAdapt;
     bool swink;
+    int id;
+    string[] option = new string[] {"默认","指定" };
     List<GameObject> created;
     private void OnEnable()
     {
@@ -29,11 +35,15 @@ public class UIDrawerTemp : Editor {
         bundlesProp = serializedObject.FindProperty("bundles");
         bundlesAdapt = new DragAdapt(bundlesProp);
         groupObjsProp = serializedObject.FindProperty("groupObjs");
+        defultProp = serializedObject.FindProperty("defult");
+        assetUrlProp = serializedObject.FindProperty("assetUrl");
+        menuProp = serializedObject.FindProperty("menu");
     }
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
         DrawScript();
+        DrawOption();
         DrawToolButtons();
         DrawRuntimeItems();
         serializedObject.ApplyModifiedProperties();
@@ -44,6 +54,16 @@ public class UIDrawerTemp : Editor {
         EditorGUI.BeginDisabledGroup(true);
         EditorGUILayout.PropertyField(script);
         EditorGUI.EndDisabledGroup();
+    }
+    private void DrawOption()
+    {
+        id = GUILayout.Toolbar(id, option);
+        defultProp.boolValue = id == 0;
+        if (!defultProp.boolValue)
+        {
+            EditorGUILayout.PropertyField(assetUrlProp);
+            EditorGUILayout.PropertyField(menuProp);
+        }
     }
 
     private void DrawToolButtons()
