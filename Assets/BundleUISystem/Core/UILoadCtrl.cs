@@ -106,10 +106,12 @@ namespace BundleUISystem
                     rectParent.offsetMax = Vector3.zero;
                     parent = rectParent;
                     parent.SetParent(_root, false);
+                    parent.SetSiblingIndex(layer);
                 }
                 else
                 {
                     parent.SetParent(_root, true);
+                    parent.SetSiblingIndex(layer);
                 }
                 _parents.Add(layer,parent);
             }
