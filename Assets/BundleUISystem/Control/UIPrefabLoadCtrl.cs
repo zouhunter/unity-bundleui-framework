@@ -7,48 +7,40 @@ using System.Collections.Generic;
 using BundleUISystem.Internal;
 namespace BundleUISystem
 {
-    public class UILoadCtrl : IUILoadCtrl
+    public class UIPrefabLoadCtrl : IUILoadCtrl
     {
-        private AssetBundleLoader assetLoader;
+        private Transform _root;
         private List<string> _loadingKeys = new List<string>();
         private List<string> _cansaleKeys = new List<string>();
-        private Dictionary<int, Transform> _parents = new Dictionary<int, Transform>();
-        private Transform _root;
-        public UILoadCtrl(Transform root)
+        private static Dictionary<Transform, Dictionary<int, Transform>> _parentsDic = new Dictionary<Transform, Dictionary<int, Transform>>();
+
+        public UIPrefabLoadCtrl(Transform root,bool isRoot = true)
         {
             _root = root;
-            assetLoader = AssetBundleLoader.Instence;
+            if (!_parentsDic.ContainsKey(_root))
+            {
+                _parentsDic[_root] = new Dictionary<int, Transform>();
+            }
         }
-        public UILoadCtrl(string url,string menu,Transform root)
+        public void GetGameObjectInfo(ItemInfoBase iteminfo)
         {
-            _root = root;
-            assetLoader = AssetBundleLoader.GetInstance(url, menu);
-        }
-        /// <summary>
-        /// 创建对象
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="assetName"></param>
-        /// <param name="onCreate"></param>
-        public void GetGameObjectFromBundle(UIBundleInfo trigger)
-        {
+            var trigger = iteminfo as PrefabInfo;
+
             if (_cansaleKeys.Contains(trigger.assetName)) _cansaleKeys.RemoveAll(x => x == trigger.assetName);
-			
+
             if (!_loadingKeys.Contains(trigger.IDName))
             {
                 _loadingKeys.Add(trigger.IDName);
-                assetLoader.LoadAssetFromUrlAsync<GameObject>(trigger.bundleName, trigger.assetName, (x) =>
+
+                if (trigger.prefab != null)
                 {
-                    if (x != null)
-                    {
-                        CreateInstance(x, trigger);
-                        _loadingKeys.Remove(trigger.IDName);
-                    }
-                    else
-                    {
-                        Debug.Log(trigger.bundleName + ".." + trigger.assetName +  "-->空");
-                    }
-                });
+                    CreateInstance(trigger.prefab, trigger);
+                    _loadingKeys.Remove(trigger.IDName);
+                }
+                else
+                {
+                    Debug.Log(trigger.assetName + "-->空");
+                }
             }
             else
             {
@@ -66,7 +58,7 @@ namespace BundleUISystem
         /// <summary>
         /// 获取对象实例
         /// </summary>
-        private void CreateInstance(GameObject prefab, UIBundleInfo trigger)
+        private void CreateInstance(GameObject prefab, PrefabInfo trigger)
         {
             if (_cansaleKeys.Contains(trigger.assetName))
             {
@@ -91,10 +83,11 @@ namespace BundleUISystem
             if (trigger.OnCreate != null) trigger.OnCreate(go);
         }
 
-        private void SetParent(int layer,Transform child,bool reset)
+        private void SetParent(int layer, Transform child, bool reset)
         {
             Transform parent = null;
-            if (!_parents.TryGetValue(layer,out parent))
+            var _parents = _parentsDic[_root];
+            if (!_parents.TryGetValue(layer, out parent))
             {
                 parent = new GameObject(layer.ToString()).transform;
                 if (_root is RectTransform)
@@ -111,12 +104,16 @@ namespace BundleUISystem
                 {
                     parent.SetParent(_root, true);
                 }
-                _parents.Add(layer,parent);
+                if (_parents.Count > layer)
+                {
+                    parent.SetSiblingIndex(layer);
+                }
+                _parents.Add(layer, parent);
             }
 
             child.SetParent(parent, !(_root is RectTransform));
 
-            if(reset)
+            if (reset)
             {
                 child.transform.position = Vector3.zero;
                 child.transform.localRotation = Quaternion.identity;

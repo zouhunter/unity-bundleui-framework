@@ -9,7 +9,7 @@ namespace BundleUISystem.Internal
 {
     public interface IUILoadCtrl
     {
-        void GetGameObjectFromBundle(UIBundleInfo trigger);
+        void GetGameObjectInfo(ItemInfoBase trigger);
         void CansaleLoadObject(string assetName);
     }
 }

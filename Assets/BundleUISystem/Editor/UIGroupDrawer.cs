@@ -6,7 +6,7 @@ using System.Reflection;
 using Rotorz.ReorderableList;
 using BundleUISystem;
 using System;
-
+using AssetBundle = UnityEngine.AssetBundle;
 [CustomEditor(typeof(UIGroup)), CanEditMultipleObjects]
 public class UIGroupDrawer : UIDrawerTemp
 {
@@ -20,6 +20,7 @@ public class UIGroupDrawer : UIDrawerTemp
 [CustomEditor(typeof(UIGroupObj))]
 public class UIGroupObjDrawer : UIDrawerTemp
 {
+
 }
 
 public abstract class UIDrawerTemp : Editor
@@ -34,23 +35,24 @@ public abstract class UIDrawerTemp : Editor
 
     protected DragAdapt bundlesAdapt;
     protected DragAdapt prefabsAdapt;
+    protected DragAdapt rbundlesAdapt;
     protected bool swink;
-    protected int id;
+    protected int id = 1;
     protected string[] option = new string[] { "预制", "本地", "路径" };
-    protected List<GameObject> created;
+    protected static List<GameObject> created = new List<GameObject>();
     private void OnEnable()
     {
         script = serializedObject.FindProperty("m_Script");
         bundlesProp = serializedObject.FindProperty("bundles");
-        bundlesAdapt = new DragAdapt(bundlesProp);
+        bundlesAdapt = new DragAdapt(bundlesProp, "bundles");
         prefabsProp = serializedObject.FindProperty("prefabs");
-        prefabsAdapt = new DragAdapt(prefabsProp);
-        groupObjsProp = serializedObject.FindProperty("groupObjs");
-        assetUrlProp = serializedObject.FindProperty("assetUrl");
+        prefabsAdapt = new DragAdapt(prefabsProp, "prefabs");
         rbundlesProp = serializedObject.FindProperty("rbundles");
-       
-        menuProp = serializedObject.FindProperty("menu");
+        rbundlesAdapt = new DragAdapt(rbundlesProp, "rbundles");
+        groupObjsProp = serializedObject.FindProperty("groupObjs");
 
+        assetUrlProp = serializedObject.FindProperty("assetUrl");
+        menuProp = serializedObject.FindProperty("menu");
     }
     public override void OnInspectorGUI()
     {
@@ -71,46 +73,9 @@ public abstract class UIDrawerTemp : Editor
     private void DrawOption()
     {
         EditorGUI.BeginChangeCheck();
-        id = GUILayout.Toolbar(id, option);
-        switch ((UILoadType)id)
-        {
-            case UILoadType.RemoteBundle:
-                EditorGUILayout.PropertyField(assetUrlProp);
-                EditorGUILayout.PropertyField(menuProp);
-                break;
-            default:
-                break;
-        }
+        id = GUILayout.Toolbar(id, option,EditorStyles.toolbarButton);
+        
     }
-
-    private void DrawToolButtons()
-    {
-        using (var hor = new EditorGUILayout.HorizontalScope())
-        {
-            if (GUILayout.Button("移除重复"))
-            {
-                RemoveDouble();
-            }
-            if (GUILayout.Button("快速更新"))
-            {
-                QuickUpdate();
-            }
-            if (GUILayout.Button("排序"))
-            {
-                SortAll();
-            }
-            if (GUILayout.Button("批量加载"))
-            {
-
-            }
-            if (GUILayout.Button("批量保存"))
-            {
-                SaveAll();
-            }
-        }
-
-    }
-
     protected virtual void DrawRuntimeItems()
     {
         switch ((UILoadType)id)
@@ -124,14 +89,146 @@ public abstract class UIDrawerTemp : Editor
                 Rotorz.ReorderableList.ReorderableListGUI.ListField(bundlesAdapt);
                 break;
             case UILoadType.RemoteBundle:
+                ReorderableListGUI.Title("远端动态加载资源信息列表");
+                Rotorz.ReorderableList.ReorderableListGUI.ListField(rbundlesAdapt);
                 break;
             default:
                 break;
         }
-        
+
     }
 
-    private void QuickUpdate()
+    private void DrawToolButtons()
+    {
+        var btnStyle = EditorStyles.miniButton;
+        switch ((UILoadType)id)
+        {
+            case UILoadType.LocalPrefab:
+                using (var hor = new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button(new GUIContent("%", "移除重复"), btnStyle))
+                    {
+                        RemoveBundlesDouble(prefabsProp);
+                    }
+                    if (GUILayout.Button(new GUIContent("！", "排序"), btnStyle))
+                    {
+                        SortAllBundles(prefabsProp);
+                    }
+                    if (GUILayout.Button(new GUIContent("o", "批量加载"), btnStyle))
+                    {
+                        GroupLoadPrefabs(prefabsProp);
+                    }
+                    if (GUILayout.Button(new GUIContent("c", "批量关闭"), btnStyle))
+                    {
+                        CloseAllCreated();
+                    }
+                }
+                break;
+            case UILoadType.LocalBundle:
+                using (var hor = new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button(new GUIContent("%", "移除重复"), btnStyle))
+                    {
+                        RemoveBundlesDouble(bundlesProp);
+                    }
+                    if (GUILayout.Button(new GUIContent("*", "快速更新"), btnStyle))
+                    {
+                        QuickUpdateBundles();
+                    }
+                    if (GUILayout.Button(new GUIContent("!", "排序"), btnStyle))
+                    {
+                        SortAllBundles(bundlesProp);
+                    }
+                    if (GUILayout.Button(new GUIContent("o", "批量加载"), btnStyle))
+                    {
+                        GroupLoadPrefabs(bundlesProp);
+                    }
+                    if (GUILayout.Button(new GUIContent("c", "批量关闭"), btnStyle))
+                    {
+                        CloseAllCreated();
+                    }
+                }
+                break;
+            case UILoadType.RemoteBundle:
+                using (var hor = new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button(new GUIContent("%", "移除重复"), btnStyle))
+                    {
+                        RemoveBundlesDouble(rbundlesProp);
+                    }
+                    if (GUILayout.Button(new GUIContent("!", "排序"), btnStyle))
+                    {
+                        SortAllBundles(rbundlesProp);
+                    }
+                    if (GUILayout.Button(new GUIContent("o", "批量加载"), btnStyle))
+                    {
+                        GroupPreviewFromBundles();
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+
+        switch ((UILoadType)id)
+        {
+            case UILoadType.RemoteBundle:
+                EditorGUILayout.PropertyField(assetUrlProp);
+                EditorGUILayout.PropertyField(menuProp);
+                break;
+            default:
+                break;
+        }
+
+    }
+
+    private void GroupPreviewFromBundles()
+    {
+        BundlePreview.Data data = new BundlePreview.Data();
+        var assetUrl = rbundlesProp.serializedObject.FindProperty("assetUrl");
+        var menu = rbundlesProp.serializedObject.FindProperty("menu");
+        Debug.Log(assetUrl);
+        data.assetUrl = assetUrl.stringValue;
+        data.menu = menu.stringValue;
+        for (int i = 0; i < rbundlesProp.arraySize; i++)
+        {
+            var itemProp = rbundlesProp.GetArrayElementAtIndex(i);
+            var assetProp = itemProp.FindPropertyRelative("assetName");
+            var bundleProp = itemProp.FindPropertyRelative("bundleName");
+            var resetProp = itemProp.FindPropertyRelative("reset");
+
+            var bdinfo = new BundleInfo();
+            bdinfo.assetName = assetProp.stringValue;
+            bdinfo.bundleName = bundleProp.stringValue;
+            bdinfo.reset = resetProp.boolValue;
+            data.rbundles.Add(bdinfo);
+        }
+        var path = AssetDatabase.GUIDToAssetPath("018159907ea26db409399b839477ad27");
+        UnityEditor.SceneManagement.EditorSceneManager.OpenScene(path);
+        GameObject holder = new GameObject("holder");
+        BundlePreview preview = holder.AddComponent<BundlePreview>();
+        preview.data = data;
+        EditorApplication.ExecuteMenuItem("Edit/Play");
+    }
+
+    private void GroupLoadPrefabs(SerializedProperty proprety)
+    {
+        for (int i = 0; i < proprety.arraySize; i++)
+        {
+            var itemProp = proprety.GetArrayElementAtIndex(i);
+            var prefabProp = itemProp.FindPropertyRelative("prefab");
+            var resetProp = itemProp.FindPropertyRelative("reset");
+            GameObject instence = PrefabUtility.InstantiatePrefab(prefabProp.objectReferenceValue) as GameObject;
+            if (target is UIGroup)
+            {
+                instence.transform.SetParent((target as UIGroup).transform, resetProp.boolValue);
+            }
+            if (created == null) created = new List<GameObject>();
+            created.Add(instence);
+        }
+    }
+
+    private void QuickUpdateBundles()
     {
         for (int i = 0; i < bundlesProp.arraySize; i++)
         {
@@ -162,13 +259,13 @@ public abstract class UIDrawerTemp : Editor
         UnityEditor.EditorUtility.SetDirty(this);
 
     }
-    private void RemoveDouble()
+    private void RemoveBundlesDouble(SerializedProperty property)
     {
         compair: List<string> temp = new List<string>();
 
-        for (int i = 0; i < bundlesProp.arraySize; i++)
+        for (int i = 0; i < property.arraySize; i++)
         {
-            var itemProp = bundlesProp.GetArrayElementAtIndex(i);
+            var itemProp = property.GetArrayElementAtIndex(i);
             var assetNameProp = itemProp.FindPropertyRelative("assetName");
             if (!temp.Contains(assetNameProp.stringValue))
             {
@@ -176,71 +273,61 @@ public abstract class UIDrawerTemp : Editor
             }
             else
             {
-                bundlesProp.DeleteArrayElementAtIndex(i);
+                property.DeleteArrayElementAtIndex(i);
                 goto compair;
             }
         }
     }
-    private void OpenAll()
-    {
-        if (created != null)
-        {
-            return;
-        }
-        created = new List<GameObject>();
-        for (int i = 0; i < bundlesProp.arraySize; i++)
-        {
-            var itemProp = bundlesProp.GetArrayElementAtIndex(i);
-            var prefabProp = itemProp.FindPropertyRelative("prefab");
-            var resetProp = itemProp.FindPropertyRelative("reset");
-            GameObject instence = PrefabUtility.InstantiatePrefab(prefabProp.objectReferenceValue) as GameObject;
-            if (target is UIGroup)
-            {
-                instence.transform.SetParent((target as UIGroup).transform, resetProp.boolValue);
-            }
-            created.Add(instence);
-        }
-    }
-    private void CloseAll()
+
+    private void CloseAllCreated()
     {
         if (created == null)
         {
             return;
         }
+        TrySaveAllPrefabs();
         for (int i = 0; i < created.Count; i++)
         {
-            if (created[i] != null) DestroyImmediate(created[i]);
+            if (created[i] != null)
+            {
+                DestroyImmediate(created[i]);
+            }
         }
         created.Clear();
         created = null;
     }
-    private void SortAll()
+    private void SortAllBundles(SerializedProperty property)
     {
-        for (int i = 0; i < bundlesProp.arraySize; i++)
+        for (int i = 0; i < property.arraySize; i++)
         {
-            for (int j = i; j < bundlesProp.arraySize - i - 1; j++)
+            for (int j = i; j < property.arraySize - i - 1; j++)
             {
-                var itemj = bundlesProp.GetArrayElementAtIndex(j).FindPropertyRelative("assetName");
-                var itemj1 = bundlesProp.GetArrayElementAtIndex(j + 1).FindPropertyRelative("assetName");
+                var itemj = property.GetArrayElementAtIndex(j).FindPropertyRelative("assetName");
+                var itemj1 = property.GetArrayElementAtIndex(j + 1).FindPropertyRelative("assetName");
                 if (string.Compare(itemj.stringValue, itemj1.stringValue) > 0)
                 {
-                    bundlesProp.MoveArrayElement(j, j + 1);
+                    property.MoveArrayElement(j, j + 1);
                 }
             }
         }
     }
-    private void SaveAll()
+
+    private void TrySaveAllPrefabs()
     {
-        var items = FindObjectsOfType<UIPanelTemp>();
-        foreach (var item in items)
+        if (created == null)
         {
-            var prefab = PrefabUtility.GetPrefabParent(item.gameObject);
+            return;
+        }
+
+        foreach (var item in created)
+        {
+            var prefab = PrefabUtility.GetPrefabParent(item);
             if (prefab != null)
             {
                 var root = PrefabUtility.FindPrefabRoot((GameObject)prefab);
                 if (root != null)
                 {
-                    PrefabUtility.ReplacePrefab(item.gameObject, root, ReplacePrefabOptions.ConnectToPrefab);
+                    PrefabUtility.ReplacePrefab(item, root, ReplacePrefabOptions.ConnectToPrefab);
                 }
             }
         }

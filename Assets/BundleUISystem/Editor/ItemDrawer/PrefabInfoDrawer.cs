@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using BundleUISystem.Internal;
 using BundleUISystem;
 
-[CustomPropertyDrawer(typeof(UIBundleInfo))]
-public class RtABInfoDrawer : PropertyDrawer
+[CustomPropertyDrawer(typeof(PrefabInfo))]
+public class PrefabInfoDrawer : PropertyDrawer
 {
     const float widthBt = 20;
-    const int ht = 6;
+    const int ht = 4;
     List<GameObject> created = new List<GameObject>();
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
@@ -34,23 +34,32 @@ public class RtABInfoDrawer : PropertyDrawer
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         var prefab = property.FindPropertyRelative("prefab");
-        var assetName = property.FindPropertyRelative("assetName");
-        var bundleName = property.FindPropertyRelative("bundleName");
         var typeProp = property.FindPropertyRelative("type"); ;
         var parentLayerProp = property.FindPropertyRelative("parentLayer");
         var boolProp = property.FindPropertyRelative("reset");
         var buttonProp = property.FindPropertyRelative("button");
+        var assetNamePorp = property.FindPropertyRelative("assetName");
         var toggleProp = property.FindPropertyRelative("toggle");
         float height = EditorGUIUtility.singleLineHeight;
-
         Rect rect = new Rect(position.xMin, position.yMin, position.width, height);
 
         rect.width -= widthBt * 8;
         rect.width /= 1.5f;
-        if (GUI.Button(rect, assetName.stringValue))
+        if (GUI.Button(rect, assetNamePorp.stringValue,EditorStyles.toolbar))
         {
+            //使用对象是UIGroupObj，将无法从button和Toggle加载
+            if (property.serializedObject.targetObject is UIGroupObj)
+            {
+                if (typeProp.enumValueIndex == (int)ItemInfoBase.Type.Button || typeProp.enumValueIndex == (int)ItemInfoBase.Type.Toggle)
+                {
+                    typeProp.enumValueIndex = (int)ItemInfoBase.Type.Name;
+                }
+            }
+
+            if (prefab.objectReferenceValue != null) assetNamePorp.stringValue = prefab.objectReferenceValue.name;
+
             property.isExpanded = !property.isExpanded;
-            var instence = created.Find(x => x.name == assetName.stringValue);
+            var instence = created.Find(x => x.name == assetNamePorp.stringValue);
             if (instence != null)
             {
                 created.Remove(instence);
@@ -58,11 +67,10 @@ public class RtABInfoDrawer : PropertyDrawer
             }
             if (property.isExpanded)
             {
-                string[] paths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(bundleName.stringValue, assetName.stringValue);
-                if (paths != null && paths.Length > 0)
+
+                GameObject gopfb = prefab.objectReferenceValue as GameObject;
+                if (gopfb != null)
                 {
-                    GameObject gopfb = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
-                    prefab.objectReferenceValue = gopfb;
                     GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
                     var obj = property.serializedObject.targetObject;
 
@@ -77,7 +85,7 @@ public class RtABInfoDrawer : PropertyDrawer
                             go.transform.SetParent((obj as UIGroup).transform, true);
                         }
                     }
-                    else if(obj is UIGroupObj)
+                    else if (obj is UIGroupObj)
                     {
                         if (go.GetComponent<Transform>() is RectTransform)
                         {
@@ -137,15 +145,7 @@ public class RtABInfoDrawer : PropertyDrawer
             return;
         }
 
-        EditorGUI.BeginDisabledGroup(true);
         rect = new Rect(position.xMin, position.yMin + height, position.width, height);
-        EditorGUI.PropertyField(rect, assetName, new GUIContent("name"));
-
-        rect.y += height;
-        EditorGUI.PropertyField(rect, bundleName, new GUIContent("bundle"));
-        EditorGUI.EndDisabledGroup();
-
-        rect.y += height;
         EditorGUI.PropertyField(rect, typeProp, new GUIContent("type"));
 
         switch (typeProp.enumValueIndex)

@@ -17,12 +17,10 @@ namespace BundleUISystem
         public string assetUrl;
         public string menu;
         private EventHold eventHold = new EventHold();
+        private List<IUILoadCtrl> currLoadCtrls = new List<IUILoadCtrl>();
         private event UnityAction onDestroy;
         private event UnityAction onEnable;
         private event UnityAction onDisable;
-        private IUILoadCtrl uibundleLoadCtrl;
-        private IUILoadCtrl prefabLoadCtrl;
-        private IUILoadCtrl remoteLoadCtrl;
         private const string addClose = "close";
 
         private static List<IUILoadCtrl> controllers = new List<IUILoadCtrl>();
@@ -31,9 +29,9 @@ namespace BundleUISystem
 
         void Awake()
         {
-            InitLoadControllers();
             eventHolders.Add(eventHold);
-            RegistUIEvents();
+            RegistBaseUIEvents();
+            RegistSubUIEvents();
         }
 
         private void OnEnable()
@@ -52,68 +50,99 @@ namespace BundleUISystem
         }
         private void OnDestroy()
         {
-            if (onDestroy != null){
+            if (onDestroy != null)
+            {
                 onDestroy.Invoke();
             }
-            controllers.Remove(uibundleLoadCtrl);
+            foreach (var item in currLoadCtrls)
+            {
+                if (item != null)
+                    controllers.Remove(item);
+            }
             eventHolders.Remove(eventHold);
         }
-        private void InitLoadControllers()
-        {
-            uibundleLoadCtrl = new UILoadCtrl(transform);
-            remoteLoadCtrl = new UILoadCtrl(assetUrl, menu, transform);
-            controllers.Add(uibundleLoadCtrl);
-            controllers.Add(remoteLoadCtrl);
-        }
 
-        private void RegistUIEvents()
+        private void RegistBaseUIEvents()
         {
-            RegisterPrefabEvents(prefabs);
-            RegisterBundleEvents(bundles);
-
-            foreach (var item in groupObjs)
+            if (prefabs.Count > 0)
             {
-                RegisterPrefabEvents(item.prefabs);
-                RegisterBundleEvents(item.bundles);
+                var prefabLoadCtrl = new UIPrefabLoadCtrl(transform);
+                controllers.Add(prefabLoadCtrl);
+                RegisterBundleEvents(prefabLoadCtrl, prefabs.ConvertAll<ItemInfoBase>(x => x));
+            }
+
+            if (bundles.Count > 0)
+            {
+                var uibundleLoadCtrl = new UIBundleLoadCtrl(transform);
+                controllers.Add(uibundleLoadCtrl);
+                RegisterBundleEvents(uibundleLoadCtrl, bundles.ConvertAll<ItemInfoBase>(x => x));
+            }
+
+            if (rbundles.Count > 0)
+            {
+                var remoteLoadCtrl = new UIBundleLoadCtrl(assetUrl, menu, transform);
+                controllers.Add(remoteLoadCtrl);
+                RegisterBundleEvents(remoteLoadCtrl, rbundles.ConvertAll<ItemInfoBase>(x => x));
             }
         }
-        #region 本地prefab
-        private void RegisterPrefabEvents(List<PrefabInfo> prefabs)
-        {
 
+        private void RegistSubUIEvents()
+        {
+            foreach (var item in groupObjs)
+            {
+                if (item.prefabs.Count > 0)
+                {
+                    var prefabLoadCtrl = new UIPrefabLoadCtrl(transform,false);
+                    controllers.Add(prefabLoadCtrl);
+                    RegisterBundleEvents(prefabLoadCtrl, item.prefabs.ConvertAll<ItemInfoBase>(x => x));
+                }
+
+                if (item.bundles.Count > 0)
+                {
+                    var uibundleLoadCtrl = new UIBundleLoadCtrl(transform, false);
+                    controllers.Add(uibundleLoadCtrl);
+                    RegisterBundleEvents(uibundleLoadCtrl, item.bundles.ConvertAll<ItemInfoBase>(x => x));
+                }
+
+                if (item.rbundles.Count > 0)
+                {
+                    var remoteLoadCtrl = new UIBundleLoadCtrl(item.assetUrl, item.menu, transform, false);
+                    controllers.Add(remoteLoadCtrl);
+                    RegisterBundleEvents(remoteLoadCtrl, item.rbundles.ConvertAll<ItemInfoBase>(x => x));
+                }
+            }
         }
-        #endregion
-        #region 本地bundle
-        private void RegisterBundleEvents(List<UIBundleInfo> bundles)
+        #region 事件注册
+        private void RegisterBundleEvents(IUILoadCtrl loadCtrl, List<ItemInfoBase> bundles)
         {
             for (int i = 0; i < bundles.Count; i++)
             {
-                UIBundleInfo trigger = bundles[i];
+                ItemInfoBase trigger = bundles[i];
                 switch (trigger.type)
                 {
                     case UIBundleInfo.Type.Button:
-                        RegisterButtonEvents(trigger);
+                        RegisterButtonEvents(loadCtrl, trigger);
                         break;
                     case UIBundleInfo.Type.Toggle:
-                        RegisterToggleEvents(trigger);
+                        RegisterToggleEvents(loadCtrl, trigger);
                         break;
                     case UIBundleInfo.Type.Name:
-                        RegisterMessageEvents(trigger);
+                        RegisterMessageEvents(loadCtrl, trigger);
                         break;
                     case UIBundleInfo.Type.Enable:
-                        RegisterEnableEvents(trigger);
+                        RegisterEnableEvents(loadCtrl, trigger);
                         break;
                     default:
                         break;
                 }
             }
         }
-        private void RegisterMessageEvents(UIBundleInfo trigger)
+        private void RegisterMessageEvents(IUILoadCtrl loadCtrl, ItemInfoBase trigger)
         {
             UnityAction<object> createAction = (x) =>
             {
                 trigger.Data = x;
-                uibundleLoadCtrl.GetGameObjectFromBundle(trigger);
+                loadCtrl.GetGameObjectInfo(trigger);
             };
 
             UnityAction<object> handInfoAction = (data) =>
@@ -149,14 +178,14 @@ namespace BundleUISystem
                 eventHold.Remove(trigger.assetName, createAction);
             };
         }
-        private void RegisterToggleEvents(UIBundleInfo trigger)
+        private void RegisterToggleEvents(IUILoadCtrl loadCtrl, ItemInfoBase trigger)
         {
             UnityAction<bool> CreateByToggle = (x) =>
             {
                 if (x)
                 {
                     trigger.toggle.interactable = false;
-                    uibundleLoadCtrl.GetGameObjectFromBundle(trigger);
+                    loadCtrl.GetGameObjectInfo(trigger);
                 }
                 else
                 {
@@ -190,11 +219,11 @@ namespace BundleUISystem
                 RegisterDestoryAction(trigger.assetName, x);
             };
         }
-        private void RegisterButtonEvents(UIBundleInfo trigger)
+        private void RegisterButtonEvents(IUILoadCtrl loadCtrl, ItemInfoBase trigger)
         {
             UnityAction CreateByButton = () =>
             {
-                uibundleLoadCtrl.GetGameObjectFromBundle(trigger);
+                loadCtrl.GetGameObjectInfo(trigger);
             };
             trigger.button.onClick.AddListener(CreateByButton);
             onDestroy += () => { trigger.button.onClick.RemoveAllListeners(); };
@@ -214,11 +243,11 @@ namespace BundleUISystem
                 RegisterDestoryAction(trigger.assetName, x);
             };
         }
-        private void RegisterEnableEvents(UIBundleInfo trigger)
+        private void RegisterEnableEvents(IUILoadCtrl loadCtrl, ItemInfoBase trigger)
         {
             UnityAction onEnableAction = () =>
             {
-                uibundleLoadCtrl.GetGameObjectFromBundle(trigger);
+                loadCtrl.GetGameObjectInfo(trigger);
             };
 
             trigger.OnCreate = (x) =>
@@ -253,7 +282,8 @@ namespace BundleUISystem
         {
             string key = addClose + assetName;
             eventHold.Remove(key);
-            eventHold.Record(key, new UnityAction<object>((y) => {
+            eventHold.Record(key, new UnityAction<object>((y) =>
+            {
                 if (x != null) Destroy(x);
             }));
         }

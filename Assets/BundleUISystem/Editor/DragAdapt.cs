@@ -10,6 +10,7 @@ namespace BundleUISystem
 {
     public class DragAdapt : SerializedPropertyAdaptor, IReorderableListDropTarget
     {
+        private string type;
         private const float MouseDragThresholdInPixels = 0.6f;
         private const int widthBt = 20;
         // Static reference to the list adaptor of the selected item.
@@ -38,8 +39,9 @@ namespace BundleUISystem
 
         }
 
-        public DragAdapt(SerializedProperty list) : base(list)
+        public DragAdapt(SerializedProperty list,string type) : base(list)
         {
+            this.type = type;
         }
 
         public override void DrawItemBackground(Rect position, int index)
@@ -136,7 +138,12 @@ namespace BundleUISystem
 
             // Drop insertion is possible if the current drag-and-drop operation contains
             // the supported type of custom data.
-            return DragAndDrop.GetGenericData(DraggedItem.TypeName) is DraggedItem;
+            if (!(DragAndDrop.GetGenericData(DraggedItem.TypeName) is DraggedItem))
+            {
+                return false;
+            }
+            var dragedItem = DragAndDrop.GetGenericData(DraggedItem.TypeName) as DraggedItem;
+            return dragedItem.SourceListAdaptor.type == type;
         }
 
         public void ProcessDropInsertion(int insertionIndex)
