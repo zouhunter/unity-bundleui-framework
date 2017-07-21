@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 3718461874
+CRC: 3607956371
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 3df944666222c4aea45ccf0ae5d84dc0
+    Hash: f1df80d3863505636c2348bdde868fe4
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 731121503cb24d74ad839f72bc2fb54f
+    Hash: 7a938b35f51ade196e2be02be9a28171
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -35,6 +35,8 @@ ClassTypes:
   Script: {fileID: 11500000, guid: 0e09b3ca13b47c842b642f3e6b3274b0, type: 3}
 - Class: 115
   Script: {instanceID: 0}
+- Class: 135
+  Script: {instanceID: 0}
 - Class: 213
   Script: {instanceID: 0}
 - Class: 222
@@ -42,6 +44,7 @@ ClassTypes:
 - Class: 224
   Script: {instanceID: 0}
 Assets:
+- Assets/Demos/Prefabs/Sphere.prefab
 - Assets/Demos/PopPanels.asset
 - Assets/Demos/Prefabs/Image.prefab
 - Assets/Demos/Prefabs/Cube.prefab

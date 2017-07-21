@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using BundleUISystem;
 [CreateAssetMenu(menuName ="生成/UI组")]
 public class UIGroupObj : ScriptableObject {
+#if UNITY_EDITOR
+    public ItemInfoBase.Type defultType;
+#endif
     public string assetUrl;
     public string menu;
     public List<UIBundleInfo> bundles = new List<UIBundleInfo>();

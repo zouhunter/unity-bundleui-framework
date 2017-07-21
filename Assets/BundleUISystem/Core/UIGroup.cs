@@ -10,6 +10,9 @@ namespace BundleUISystem
 {
     public class UIGroup : MonoBehaviour
     {
+#if UNITY_EDITOR
+        public ItemInfoBase.Type defultType;
+#endif
         public List<UIBundleInfo> bundles = new List<UIBundleInfo>();
         public List<BundleInfo> rbundles = new List<BundleInfo>();
         public List<PrefabInfo> prefabs = new List<PrefabInfo>();
@@ -66,7 +69,7 @@ namespace BundleUISystem
         {
             if (prefabs.Count > 0)
             {
-                var prefabLoadCtrl = new UIPrefabLoadCtrl(transform);
+                var prefabLoadCtrl = new UIBundleLoadCtrl(transform);
                 controllers.Add(prefabLoadCtrl);
                 RegisterBundleEvents(prefabLoadCtrl, prefabs.ConvertAll<ItemInfoBase>(x => x));
             }
@@ -92,7 +95,7 @@ namespace BundleUISystem
             {
                 if (item.prefabs.Count > 0)
                 {
-                    var prefabLoadCtrl = new UIPrefabLoadCtrl(transform,false);
+                    var prefabLoadCtrl = new UIBundleLoadCtrl(transform,false);
                     controllers.Add(prefabLoadCtrl);
                     RegisterBundleEvents(prefabLoadCtrl, item.prefabs.ConvertAll<ItemInfoBase>(x => x));
                 }

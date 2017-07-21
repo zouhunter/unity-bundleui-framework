@@ -32,12 +32,11 @@ public abstract class UIDrawerTemp : Editor
     protected SerializedProperty rbundlesProp;
     protected SerializedProperty assetUrlProp;
     protected SerializedProperty menuProp;
-
+    protected SerializedProperty defultTypeProp;
     protected DragAdapt bundlesAdapt;
     protected DragAdapt prefabsAdapt;
     protected DragAdapt rbundlesAdapt;
     protected bool swink;
-    protected int id = 1;
     protected string[] option = new string[] { "预制", "本地", "路径" };
     protected static List<GameObject> created = new List<GameObject>();
     private void OnEnable()
@@ -50,7 +49,7 @@ public abstract class UIDrawerTemp : Editor
         rbundlesProp = serializedObject.FindProperty("rbundles");
         rbundlesAdapt = new DragAdapt(rbundlesProp, "rbundles");
         groupObjsProp = serializedObject.FindProperty("groupObjs");
-
+        defultTypeProp = serializedObject.FindProperty("defultType");
         assetUrlProp = serializedObject.FindProperty("assetUrl");
         menuProp = serializedObject.FindProperty("menu");
     }
@@ -73,12 +72,11 @@ public abstract class UIDrawerTemp : Editor
     private void DrawOption()
     {
         EditorGUI.BeginChangeCheck();
-        id = GUILayout.Toolbar(id, option,EditorStyles.toolbarButton);
-        
+        defultTypeProp.enumValueIndex = GUILayout.Toolbar(defultTypeProp.enumValueIndex, option,EditorStyles.toolbarButton);
     }
     protected virtual void DrawRuntimeItems()
     {
-        switch ((UILoadType)id)
+        switch ((UILoadType)defultTypeProp.enumValueIndex)
         {
             case UILoadType.LocalPrefab:
                 ReorderableListGUI.Title("预制体动态加载资源信息列表");
@@ -101,7 +99,7 @@ public abstract class UIDrawerTemp : Editor
     private void DrawToolButtons()
     {
         var btnStyle = EditorStyles.miniButton;
-        switch ((UILoadType)id)
+        switch ((UILoadType)defultTypeProp.enumValueIndex)
         {
             case UILoadType.LocalPrefab:
                 using (var hor = new EditorGUILayout.HorizontalScope())
@@ -170,7 +168,7 @@ public abstract class UIDrawerTemp : Editor
                 break;
         }
 
-        switch ((UILoadType)id)
+        switch ((UILoadType)defultTypeProp.enumValueIndex)
         {
             case UILoadType.RemoteBundle:
                 EditorGUILayout.PropertyField(assetUrlProp);

@@ -12,5 +12,21 @@ public class Demo : MonoBehaviour {
         {
             BundleUISystem.UIGroup.Close<Panel1>();
         }
+        if (GUILayout.Button("打开Poppanel【层级为10】"))
+        {
+            BundleUISystem.UIGroup.Open("PopPanel");
+        }
+        if (GUILayout.Button("关闭Poppanel"))
+        {
+            BundleUISystem.UIGroup.Close("PopPanel");
+        }
+        if (GUILayout.Button("打开Poppanel1【层级为6】"))
+        {
+            BundleUISystem.UIGroup.Open("PopPanel 1");
+        }
+        if (GUILayout.Button("关闭Poppanel1"))
+        {
+            BundleUISystem.UIGroup.Close("PopPanel 1");
+        }
     }
 }
