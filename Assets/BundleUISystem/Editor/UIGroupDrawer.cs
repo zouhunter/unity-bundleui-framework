@@ -5,39 +5,52 @@ using UnityEditor;
 using System.Reflection;
 using Rotorz.ReorderableList;
 using BundleUISystem;
-[CustomEditor(typeof(UIGroup)),CanEditMultipleObjects]
+using System;
+
+[CustomEditor(typeof(UIGroup)), CanEditMultipleObjects]
 public class UIGroupDrawer : UIDrawerTemp
 {
-
+    protected override void DrawRuntimeItems()
+    {
+        ReorderableListGUI.Title("共用资源列表");
+        ReorderableListGUI.ListField(groupObjsProp);
+        base.DrawRuntimeItems();
+    }
 }
 [CustomEditor(typeof(UIGroupObj))]
 public class UIGroupObjDrawer : UIDrawerTemp
 {
-
 }
 
-public class UIDrawerTemp : Editor {
-    SerializedProperty script;
-    SerializedProperty groupObjsProp;
-    SerializedProperty bundlesProp;
-    SerializedProperty defultProp;
-    SerializedProperty assetUrlProp;
-    SerializedProperty menuProp;
+public abstract class UIDrawerTemp : Editor
+{
+    protected SerializedProperty script;
+    protected SerializedProperty groupObjsProp;
+    protected SerializedProperty bundlesProp;
+    protected SerializedProperty prefabsProp;
+    protected SerializedProperty rbundlesProp;
+    protected SerializedProperty assetUrlProp;
+    protected SerializedProperty menuProp;
 
-    DragAdapt bundlesAdapt;
-    bool swink;
-    int id;
-    string[] option = new string[] {"默认","指定" };
-    List<GameObject> created;
+    protected DragAdapt bundlesAdapt;
+    protected DragAdapt prefabsAdapt;
+    protected bool swink;
+    protected int id;
+    protected string[] option = new string[] { "预制", "本地", "路径" };
+    protected List<GameObject> created;
     private void OnEnable()
     {
         script = serializedObject.FindProperty("m_Script");
         bundlesProp = serializedObject.FindProperty("bundles");
         bundlesAdapt = new DragAdapt(bundlesProp);
+        prefabsProp = serializedObject.FindProperty("prefabs");
+        prefabsAdapt = new DragAdapt(prefabsProp);
         groupObjsProp = serializedObject.FindProperty("groupObjs");
-        defultProp = serializedObject.FindProperty("defult");
         assetUrlProp = serializedObject.FindProperty("assetUrl");
+        rbundlesProp = serializedObject.FindProperty("rbundles");
+       
         menuProp = serializedObject.FindProperty("menu");
+
     }
     public override void OnInspectorGUI()
     {
@@ -57,12 +70,16 @@ public class UIDrawerTemp : Editor {
     }
     private void DrawOption()
     {
+        EditorGUI.BeginChangeCheck();
         id = GUILayout.Toolbar(id, option);
-        defultProp.boolValue = id == 0;
-        if (!defultProp.boolValue)
+        switch ((UILoadType)id)
         {
-            EditorGUILayout.PropertyField(assetUrlProp);
-            EditorGUILayout.PropertyField(menuProp);
+            case UILoadType.RemoteBundle:
+                EditorGUILayout.PropertyField(assetUrlProp);
+                EditorGUILayout.PropertyField(menuProp);
+                break;
+            default:
+                break;
         }
     }
 
@@ -82,21 +99,38 @@ public class UIDrawerTemp : Editor {
             {
                 SortAll();
             }
+            if (GUILayout.Button("批量加载"))
+            {
+
+            }
             if (GUILayout.Button("批量保存"))
             {
                 SaveAll();
             }
         }
-       
+
     }
 
-    private void DrawRuntimeItems()
+    protected virtual void DrawRuntimeItems()
     {
-        ReorderableListGUI.Title("静态面板");
-        ReorderableListGUI.ListField(groupObjsProp);
-        ReorderableListGUI.Title("动态面板");
-        Rotorz.ReorderableList.ReorderableListGUI.ListField(bundlesAdapt);
+        switch ((UILoadType)id)
+        {
+            case UILoadType.LocalPrefab:
+                ReorderableListGUI.Title("预制体动态加载资源信息列表");
+                Rotorz.ReorderableList.ReorderableListGUI.ListField(prefabsAdapt);
+                break;
+            case UILoadType.LocalBundle:
+                ReorderableListGUI.Title("本地动态加载资源信息列表");
+                Rotorz.ReorderableList.ReorderableListGUI.ListField(bundlesAdapt);
+                break;
+            case UILoadType.RemoteBundle:
+                break;
+            default:
+                break;
+        }
+        
     }
+
     private void QuickUpdate()
     {
         for (int i = 0; i < bundlesProp.arraySize; i++)
@@ -136,7 +170,8 @@ public class UIDrawerTemp : Editor {
         {
             var itemProp = bundlesProp.GetArrayElementAtIndex(i);
             var assetNameProp = itemProp.FindPropertyRelative("assetName");
-            if(!temp.Contains(assetNameProp.stringValue)){
+            if (!temp.Contains(assetNameProp.stringValue))
+            {
                 temp.Add(assetNameProp.stringValue);
             }
             else
@@ -148,7 +183,8 @@ public class UIDrawerTemp : Editor {
     }
     private void OpenAll()
     {
-        if (created != null){
+        if (created != null)
+        {
             return;
         }
         created = new List<GameObject>();
@@ -158,7 +194,7 @@ public class UIDrawerTemp : Editor {
             var prefabProp = itemProp.FindPropertyRelative("prefab");
             var resetProp = itemProp.FindPropertyRelative("reset");
             GameObject instence = PrefabUtility.InstantiatePrefab(prefabProp.objectReferenceValue) as GameObject;
-            if(target is UIGroup)
+            if (target is UIGroup)
             {
                 instence.transform.SetParent((target as UIGroup).transform, resetProp.boolValue);
             }
@@ -173,7 +209,7 @@ public class UIDrawerTemp : Editor {
         }
         for (int i = 0; i < created.Count; i++)
         {
-            if(created[i] != null) DestroyImmediate(created[i]);
+            if (created[i] != null) DestroyImmediate(created[i]);
         }
         created.Clear();
         created = null;
@@ -186,7 +222,7 @@ public class UIDrawerTemp : Editor {
             {
                 var itemj = bundlesProp.GetArrayElementAtIndex(j).FindPropertyRelative("assetName");
                 var itemj1 = bundlesProp.GetArrayElementAtIndex(j + 1).FindPropertyRelative("assetName");
-                if (string.Compare(itemj.stringValue,itemj1.stringValue) > 0)
+                if (string.Compare(itemj.stringValue, itemj1.stringValue) > 0)
                 {
                     bundlesProp.MoveArrayElement(j, j + 1);
                 }

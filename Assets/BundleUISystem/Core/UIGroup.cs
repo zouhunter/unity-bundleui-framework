@@ -10,30 +10,32 @@ namespace BundleUISystem
 {
     public class UIGroup : MonoBehaviour
     {
-        public List<UIGroupObj> groupObjs = new List<UIGroupObj>();
         public List<UIBundleInfo> bundles = new List<UIBundleInfo>();
-        public bool defult;
+        public List<BundleInfo> rbundles = new List<BundleInfo>();
+        public List<PrefabInfo> prefabs = new List<PrefabInfo>();
+        public List<UIGroupObj> groupObjs = new List<UIGroupObj>();
         public string assetUrl;
         public string menu;
         private EventHold eventHold = new EventHold();
         private event UnityAction onDestroy;
         private event UnityAction onEnable;
         private event UnityAction onDisable;
-        private IUILoadCtrl Controller;
+        private IUILoadCtrl uibundleLoadCtrl;
+        private IUILoadCtrl prefabLoadCtrl;
+        private IUILoadCtrl remoteLoadCtrl;
         private const string addClose = "close";
 
         private static List<IUILoadCtrl> controllers = new List<IUILoadCtrl>();
         private static List<EventHold> eventHolders = new List<EventHold>();
         public static UnityEngine.Events.UnityAction<string> MessageNotHandled;
-        //private static List<UIGroupObj> usedUIGroupObj = new List<UIGroupObj>();//防止循环注册
+
         void Awake()
         {
-            if(defult) Controller = new UILoadCtrl(transform);
-            else Controller = new UILoadCtrl(assetUrl, menu,transform);
-            controllers.Add(Controller);
+            InitLoadControllers();
             eventHolders.Add(eventHold);
             RegistUIEvents();
         }
+
         private void OnEnable()
         {
             if (onEnable != null)
@@ -53,17 +55,35 @@ namespace BundleUISystem
             if (onDestroy != null){
                 onDestroy.Invoke();
             }
-            controllers.Remove(Controller);
+            controllers.Remove(uibundleLoadCtrl);
             eventHolders.Remove(eventHold);
         }
+        private void InitLoadControllers()
+        {
+            uibundleLoadCtrl = new UILoadCtrl(transform);
+            remoteLoadCtrl = new UILoadCtrl(assetUrl, menu, transform);
+            controllers.Add(uibundleLoadCtrl);
+            controllers.Add(remoteLoadCtrl);
+        }
+
         private void RegistUIEvents()
         {
+            RegisterPrefabEvents(prefabs);
             RegisterBundleEvents(bundles);
+
             foreach (var item in groupObjs)
             {
+                RegisterPrefabEvents(item.prefabs);
                 RegisterBundleEvents(item.bundles);
             }
         }
+        #region 本地prefab
+        private void RegisterPrefabEvents(List<PrefabInfo> prefabs)
+        {
+
+        }
+        #endregion
+        #region 本地bundle
         private void RegisterBundleEvents(List<UIBundleInfo> bundles)
         {
             for (int i = 0; i < bundles.Count; i++)
@@ -93,7 +113,7 @@ namespace BundleUISystem
             UnityAction<object> createAction = (x) =>
             {
                 trigger.Data = x;
-                Controller.GetGameObjectFromBundle(trigger);
+                uibundleLoadCtrl.GetGameObjectFromBundle(trigger);
             };
 
             UnityAction<object> handInfoAction = (data) =>
@@ -136,7 +156,7 @@ namespace BundleUISystem
                 if (x)
                 {
                     trigger.toggle.interactable = false;
-                    Controller.GetGameObjectFromBundle(trigger);
+                    uibundleLoadCtrl.GetGameObjectFromBundle(trigger);
                 }
                 else
                 {
@@ -174,7 +194,7 @@ namespace BundleUISystem
         {
             UnityAction CreateByButton = () =>
             {
-                Controller.GetGameObjectFromBundle(trigger);
+                uibundleLoadCtrl.GetGameObjectFromBundle(trigger);
             };
             trigger.button.onClick.AddListener(CreateByButton);
             onDestroy += () => { trigger.button.onClick.RemoveAllListeners(); };
@@ -198,7 +218,7 @@ namespace BundleUISystem
         {
             UnityAction onEnableAction = () =>
             {
-                Controller.GetGameObjectFromBundle(trigger);
+                uibundleLoadCtrl.GetGameObjectFromBundle(trigger);
             };
 
             trigger.OnCreate = (x) =>
@@ -237,6 +257,7 @@ namespace BundleUISystem
                 if (x != null) Destroy(x);
             }));
         }
+        #endregion
 
         #region 触发事件
         public static void Open(string assetName, object data = null)
