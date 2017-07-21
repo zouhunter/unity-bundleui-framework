@@ -254,9 +254,6 @@ namespace BundleUISystem
         public static void Open<T>(object data = null) where T : UIPanelTemp
         {
             string assetName = typeof(T).ToString();
-            if (assetName.Contains(".")){
-                assetName = assetName.Substring(assetName.LastIndexOf('.') + 1);
-            }
             Open(assetName, data);
         }
         public static void Close(string assetName)
@@ -279,10 +276,6 @@ namespace BundleUISystem
         public static void Close<T>() where T : UIPanelTemp
         {
             string assetName = typeof(T).ToString();
-            if (assetName.Contains("."))
-            {
-                assetName = assetName.Substring(assetName.LastIndexOf('.') + 1);
-            }
             Close(assetName);
         }
         private static void TraverseHold(UnityAction<EventHold> OnGet)
