@@ -14,4 +14,6 @@
   it work for my projects,so it will continuily update
   ### Rotorz is required
   [!Reorderable List Editor Field for Unity](https://bitbucket.org/rotorz/reorderable-list-editor-field-for-unity)
-  
+  ### AssetBundleTools is required (and define in projectSetting)
+  [!AssetBundleTools](https://github.com/zouhunter/AssetBundleTools/tree/master/AssetBundleTool)
+
