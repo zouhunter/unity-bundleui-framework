@@ -20,7 +20,8 @@ namespace BundleUISystem
         public string assetUrl;
         public string menu;
         private EventHold eventHold = new EventHold();
-        private List<IUILoadCtrl> currLoadCtrls = new List<IUILoadCtrl>();
+        private IUILoadCtrl localLoader;
+        private IUILoadCtrl remoteLoader;
         private event UnityAction onDestroy;
         private event UnityAction onEnable;
         private event UnityAction onDisable;
@@ -57,11 +58,11 @@ namespace BundleUISystem
             {
                 onDestroy.Invoke();
             }
-            foreach (var item in currLoadCtrls)
-            {
-                if (item != null)
-                    controllers.Remove(item);
-            }
+
+            if (localLoader != null) controllers.Remove(localLoader);
+
+            if (remoteLoader != null) controllers.Remove(remoteLoader);
+          
             eventHolders.Remove(eventHold);
         }
 
@@ -69,23 +70,23 @@ namespace BundleUISystem
         {
             if (prefabs.Count > 0)
             {
-                var prefabLoadCtrl = new UIBundleLoadCtrl(transform);
-                controllers.Add(prefabLoadCtrl);
-                RegisterBundleEvents(prefabLoadCtrl, prefabs.ConvertAll<ItemInfoBase>(x => x));
+                if(localLoader == null) localLoader = new UIBundleLoadCtrl(transform);
+                controllers.Add(localLoader);
+                RegisterBundleEvents(localLoader, prefabs.ConvertAll<ItemInfoBase>(x => x));
             }
 
             if (bundles.Count > 0)
             {
-                var uibundleLoadCtrl = new UIBundleLoadCtrl(transform);
-                controllers.Add(uibundleLoadCtrl);
-                RegisterBundleEvents(uibundleLoadCtrl, bundles.ConvertAll<ItemInfoBase>(x => x));
+                if (localLoader == null) localLoader = new UIBundleLoadCtrl(transform);
+                controllers.Add(localLoader);
+                RegisterBundleEvents(localLoader, bundles.ConvertAll<ItemInfoBase>(x => x));
             }
 
             if (rbundles.Count > 0)
             {
-                var remoteLoadCtrl = new UIBundleLoadCtrl(assetUrl, menu, transform);
-                controllers.Add(remoteLoadCtrl);
-                RegisterBundleEvents(remoteLoadCtrl, rbundles.ConvertAll<ItemInfoBase>(x => x));
+                if(remoteLoader == null) remoteLoader = new UIBundleLoadCtrl(assetUrl, menu, transform);
+                controllers.Add(remoteLoader);
+                RegisterBundleEvents(remoteLoader, rbundles.ConvertAll<ItemInfoBase>(x => x));
             }
         }
 
@@ -95,23 +96,23 @@ namespace BundleUISystem
             {
                 if (item.prefabs.Count > 0)
                 {
-                    var prefabLoadCtrl = new UIBundleLoadCtrl(transform,false);
-                    controllers.Add(prefabLoadCtrl);
-                    RegisterBundleEvents(prefabLoadCtrl, item.prefabs.ConvertAll<ItemInfoBase>(x => x));
+                    if (localLoader == null) localLoader = new UIBundleLoadCtrl(transform);
+                    controllers.Add(localLoader);
+                    RegisterBundleEvents(localLoader, item.prefabs.ConvertAll<ItemInfoBase>(x => x));
                 }
 
                 if (item.bundles.Count > 0)
                 {
-                    var uibundleLoadCtrl = new UIBundleLoadCtrl(transform, false);
-                    controllers.Add(uibundleLoadCtrl);
-                    RegisterBundleEvents(uibundleLoadCtrl, item.bundles.ConvertAll<ItemInfoBase>(x => x));
+                    if (localLoader == null) localLoader = new UIBundleLoadCtrl(transform);
+                    controllers.Add(localLoader);
+                    RegisterBundleEvents(localLoader, item.bundles.ConvertAll<ItemInfoBase>(x => x));
                 }
 
                 if (item.rbundles.Count > 0)
                 {
-                    var remoteLoadCtrl = new UIBundleLoadCtrl(item.assetUrl, item.menu, transform, false);
-                    controllers.Add(remoteLoadCtrl);
-                    RegisterBundleEvents(remoteLoadCtrl, item.rbundles.ConvertAll<ItemInfoBase>(x => x));
+                    if (remoteLoader == null) remoteLoader = new UIBundleLoadCtrl(assetUrl, menu, transform);
+                    controllers.Add(remoteLoader);
+                    RegisterBundleEvents(remoteLoader, item.rbundles.ConvertAll<ItemInfoBase>(x => x));
                 }
             }
         }

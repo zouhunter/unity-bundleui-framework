@@ -14,7 +14,7 @@ namespace BundleUISystem
         private List<string> _cansaleKeys = new List<string>();
         private static Dictionary<Transform, Dictionary<int, Transform>> _parentsDic = new Dictionary<Transform, Dictionary<int, Transform>>();
         private Transform _root;
-        public UIBundleLoadCtrl(Transform root, bool isRoot = true)
+        public UIBundleLoadCtrl(Transform root)
         {
             _root = root;
             if (!_parentsDic.ContainsKey(_root)){
@@ -23,7 +23,7 @@ namespace BundleUISystem
             }
             assetLoader = AssetBundleLoader.Instence;
         }
-        public UIBundleLoadCtrl(string url, string menu, Transform root, bool isRoot = true)
+        public UIBundleLoadCtrl(string url, string menu, Transform root)
         {
             _root = root;
             if (!_parentsDic.ContainsKey(_root)) {
