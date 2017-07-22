@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1126b94190e390544a9f085113fee6fe, type: 3}
+  m_Name: PopPanels
+  m_EditorClassIdentifier: 
+  defultType: 0
+  assetUrl: 
+  menu: 
+  bundles: []
+  prefabs:
+  - assetName: PopPanel
+    button: {fileID: 0}
+    toggle: {fileID: 0}
+    instence: {fileID: 0}
+    reset: 0
+    parentLayer: 10
+    type: 3
+    prefab: {fileID: 128412, guid: 50618a435dee98a4aa03af7ca21d1012, type: 2}
+  - assetName: PopPanel 1
+    button: {fileID: 0}
+    toggle: {fileID: 0}
+    instence: {fileID: 0}
+    reset: 0
+    parentLayer: 6
+    type: 3
+    prefab: {fileID: 128412, guid: af90c9c7fddf1914f9ea27883d0042f8, type: 2}
+  rbundles: []
