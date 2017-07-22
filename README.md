@@ -8,6 +8,8 @@
   ![prefab/assetbundle -scene](Pics/1.png)
   ### 2.ScriptObject
   ![prefab/assetbundle -object](Pics/2.png)
+  ### 3.No AssetBundleLoader
+  ![prefab -object](Pics/3.png)
 ## About
   it work for my projects,so it will continuily update
   ### ![require](https://bitbucket.org/rotorz/reorderable-list-editor-field-for-unity)

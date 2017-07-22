@@ -37,7 +37,11 @@ public abstract class UIDrawerTemp : Editor
     protected DragAdapt prefabsAdapt;
     protected DragAdapt rbundlesAdapt;
     protected bool swink;
+#if AssetBundleLoader
     protected string[] option = new string[] { "预制", "本地", "路径" };
+#else
+    protected string[] option = new string[] { "预制"};
+#endif
     protected static List<GameObject> created = new List<GameObject>();
     private void OnEnable()
     {
