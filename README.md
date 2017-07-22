@@ -13,5 +13,5 @@
 ## About
   it work for my projects,so it will continuily update
   ### Rotorz is required
-  [!require](https://bitbucket.org/rotorz/reorderable-list-editor-field-for-unity)
+  [!Reorderable List Editor Field for Unity](https://bitbucket.org/rotorz/reorderable-list-editor-field-for-unity)
   
