@@ -37,7 +37,7 @@ public abstract class UIDrawerTemp : Editor
     protected DragAdapt prefabsAdapt;
     protected DragAdapt rbundlesAdapt;
     protected bool swink;
-#if AssetBundleLoader
+#if AssetBundleTools
     protected string[] option = new string[] { "预制", "本地", "路径" };
 #else
     protected string[] option = new string[] { "预制"};

@@ -9,8 +9,8 @@ namespace BundleUISystem
 {
     public class UIBundleLoadCtrl : IUILoadCtrl
     {
-#if AssetBundleLoader
-        private AssetBundleLoader assetLoader; 
+#if AssetBundleTools
+        private AssetBundleTools assetLoader; 
 #endif
         private List<string> _loadingKeys = new List<string>();
         private List<string> _cansaleKeys = new List<string>();
@@ -23,8 +23,8 @@ namespace BundleUISystem
                 Debug.Log(_root);
                 _parentsDic[_root] = new Dictionary<int, Transform>();
             }
-#if AssetBundleLoader
-            assetLoader = AssetBundleLoader.Instence; 
+#if AssetBundleTools
+            assetLoader = AssetBundleTools.Instence; 
 #endif
         }
         public UIBundleLoadCtrl(string url, string menu, Transform root)
@@ -33,8 +33,8 @@ namespace BundleUISystem
             if (!_parentsDic.ContainsKey(_root)) {
                 _parentsDic[_root] = new Dictionary<int, Transform>();
             }
-#if AssetBundleLoader
-            assetLoader = AssetBundleLoader.GetInstance(url, menu); 
+#if AssetBundleTools
+            assetLoader = AssetBundleTools.GetInstance(url, menu); 
 #endif
         }
         /// <summary>
@@ -67,7 +67,7 @@ namespace BundleUISystem
         {
             var trigger = itemInfo as BundleInfo;
 
-#if AssetBundleLoader
+#if AssetBundleTools
             if (_cansaleKeys.Contains(trigger.assetName)) _cansaleKeys.RemoveAll(x => x == trigger.assetName);
 
             if (!_loadingKeys.Contains(trigger.IDName))

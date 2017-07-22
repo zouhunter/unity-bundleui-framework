@@ -5,7 +5,7 @@ using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 using BundleUISystem;
-#if AssetBundleLoader
+#if AssetBundleTools
 using AssetBundles;
 #endif
 public class BundlePreview : MonoBehaviour {
@@ -16,14 +16,14 @@ public class BundlePreview : MonoBehaviour {
         public string menu;
         public List<BundleInfo> rbundles = new List<BundleInfo>();
     }
-#if AssetBundleLoader
-    AssetBundleLoader loader; 
+#if AssetBundleTools
+    AssetBundleTools loader; 
 #endif
     public Data data;
-#if AssetBundleLoader
+#if AssetBundleTools
     public void Start()
     {
-        loader = AssetBundleLoader.GetInstance(data.assetUrl, data.menu);
+        loader = AssetBundleTools.GetInstance(data.assetUrl, data.menu);
         var canvas = FindObjectOfType<Canvas>();
         for (int i = 0; i < data.rbundles.Count; i++)
         {
