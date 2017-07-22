@@ -12,5 +12,6 @@
   ![prefab -object](Pics/3.png)
 ## About
   it work for my projects,so it will continuily update
-  ### ![require](https://bitbucket.org/rotorz/reorderable-list-editor-field-for-unity)
+  ### Rotorz is required
+  [!require](https://bitbucket.org/rotorz/reorderable-list-editor-field-for-unity)
   
