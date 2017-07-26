@@ -17,13 +17,13 @@ public class BundlePreview : MonoBehaviour {
         public List<BundleInfo> rbundles = new List<BundleInfo>();
     }
 #if AssetBundleTools
-    AssetBundleTools loader; 
+    AssetBundleLoader loader; 
 #endif
     public Data data;
 #if AssetBundleTools
     public void Start()
     {
-        loader = AssetBundleTools.GetInstance(data.assetUrl, data.menu);
+        loader = AssetBundleLoader.GetInstance(data.assetUrl, data.menu);
         var canvas = FindObjectOfType<Canvas>();
         for (int i = 0; i < data.rbundles.Count; i++)
         {

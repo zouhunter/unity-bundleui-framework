@@ -10,9 +10,9 @@ namespace BundleUISystem
     public class UIBundleLoadCtrl : IUILoadCtrl
     {
 #if AssetBundleTools
-        private AssetBundleTools assetLoader; 
+        private AssetBundleLoader assetLoader; 
 #endif
-        private List<string> _loadingKeys = new List<string>();
+        private Dictionary<string, ItemInfoBase> _loadingDic = new Dictionary<string, ItemInfoBase>();
         private List<string> _cansaleKeys = new List<string>();
         private static Dictionary<Transform, Dictionary<int, Transform>> _parentsDic = new Dictionary<Transform, Dictionary<int, Transform>>();
         private Transform _root;
@@ -24,7 +24,7 @@ namespace BundleUISystem
                 _parentsDic[_root] = new Dictionary<int, Transform>();
             }
 #if AssetBundleTools
-            assetLoader = AssetBundleTools.Instence; 
+            assetLoader = AssetBundleLoader.Instence; 
 #endif
         }
         public UIBundleLoadCtrl(string url, string menu, Transform root)
@@ -34,7 +34,7 @@ namespace BundleUISystem
                 _parentsDic[_root] = new Dictionary<int, Transform>();
             }
 #if AssetBundleTools
-            assetLoader = AssetBundleTools.GetInstance(url, menu); 
+            assetLoader = AssetBundleLoader.GetInstance(url, menu); 
 #endif
         }
         /// <summary>
@@ -70,9 +70,9 @@ namespace BundleUISystem
 #if AssetBundleTools
             if (_cansaleKeys.Contains(trigger.assetName)) _cansaleKeys.RemoveAll(x => x == trigger.assetName);
 
-            if (!_loadingKeys.Contains(trigger.IDName))
+            if (!_loadingDic.ContainsKey(trigger.IDName))
             {
-                _loadingKeys.Add(trigger.IDName);
+                _loadingDic.Add(trigger.IDName,trigger);
                 assetLoader.LoadAssetFromUrlAsync<GameObject>(trigger.bundleName, trigger.assetName, (x) =>
                 {
                     if (_root == null)
@@ -82,7 +82,7 @@ namespace BundleUISystem
                     else if (x != null)
                     {
                         CreateInstance(x, trigger);
-                        _loadingKeys.Remove(trigger.IDName);
+                        _loadingDic.Remove(trigger.IDName);
                     }
                     else
                     {
@@ -92,7 +92,8 @@ namespace BundleUISystem
             }
             else
             {
-                Debug.Log("asset:" + trigger.IDName + "isLoading");
+                Debug.Log("asset:" + trigger.IDName + "isLoading" + " append OnCreate event");
+                _loadingDic[trigger.IDName].OnCreate += itemInfo.OnCreate;
             } 
 #endif
         }
@@ -102,14 +103,14 @@ namespace BundleUISystem
 
             if (_cansaleKeys.Contains(trigger.assetName)) _cansaleKeys.RemoveAll(x => x == trigger.assetName);
 
-            if (!_loadingKeys.Contains(trigger.IDName))
+            if (!_loadingDic.ContainsKey(trigger.IDName))
             {
-                _loadingKeys.Add(trigger.IDName);
+                _loadingDic.Add(trigger.IDName,iteminfo);
 
                 if (trigger.prefab != null)
                 {
                     CreateInstance(trigger.prefab, trigger);
-                    _loadingKeys.Remove(trigger.IDName);
+                    _loadingDic.Remove(trigger.IDName);
                 }
                 else
                 {
