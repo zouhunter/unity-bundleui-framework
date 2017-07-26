@@ -12,7 +12,7 @@ namespace BundleUISystem
 #if AssetBundleTools
         private AssetBundleLoader assetLoader;
 #endif
-        private Dictionary<string, ItemInfoBase> _loadingDic = new Dictionary<string, ItemInfoBase>();
+        private List<string> _loadingKeys = new List<string>();
         private List<string> _cansaleKeys = new List<string>();
         private static Dictionary<Transform, Dictionary<int, Transform>> _parentsDic = new Dictionary<Transform, Dictionary<int, Transform>>();
         private Transform _root;
@@ -50,9 +50,9 @@ namespace BundleUISystem
         {
             if (_cansaleKeys.Contains(itemInfo.assetName)) _cansaleKeys.RemoveAll(x => x == itemInfo.assetName);
 
-            if (!_loadingDic.ContainsKey(itemInfo.IDName))
+            if (!_loadingKeys.Contains(itemInfo.IDName))
             {
-                _loadingDic.Add(itemInfo.IDName, itemInfo);
+                _loadingKeys.Add(itemInfo.IDName);
                 var bInfo = itemInfo as BundleInfo;
                 var pInfo = itemInfo as PrefabInfo;
 
@@ -85,7 +85,7 @@ namespace BundleUISystem
                 else if (x != null)
                 {
                     CreateInstance(x, trigger);
-                    _loadingDic.Remove(trigger.IDName);
+                    _loadingKeys.Remove(trigger.IDName);
                 }
                 else
                 {
@@ -105,7 +105,7 @@ namespace BundleUISystem
             if (trigger.prefab != null)
             {
                 CreateInstance(trigger.prefab, trigger);
-                _loadingDic.Remove(trigger.IDName);
+                _loadingKeys.Remove(trigger.IDName);
             }
             else
             {
