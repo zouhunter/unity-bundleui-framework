@@ -10,7 +10,7 @@ namespace BundleUISystem
     public class UIBundleLoadCtrl : IUILoadCtrl
     {
 #if AssetBundleTools
-        private AssetBundleLoader assetLoader; 
+        private AssetBundleLoader assetLoader;
 #endif
         private Dictionary<string, ItemInfoBase> _loadingDic = new Dictionary<string, ItemInfoBase>();
         private List<string> _cansaleKeys = new List<string>();
@@ -19,24 +19,27 @@ namespace BundleUISystem
         public UIBundleLoadCtrl(Transform root)
         {
             _root = root;
-            if (!_parentsDic.ContainsKey(_root)){
+            if (!_parentsDic.ContainsKey(_root))
+            {
                 Debug.Log(_root);
                 _parentsDic[_root] = new Dictionary<int, Transform>();
             }
 #if AssetBundleTools
-            assetLoader = AssetBundleLoader.Instence; 
+            assetLoader = AssetBundleLoader.Instence;
 #endif
         }
         public UIBundleLoadCtrl(string url, string menu, Transform root)
         {
             _root = root;
-            if (!_parentsDic.ContainsKey(_root)) {
+            if (!_parentsDic.ContainsKey(_root))
+            {
                 _parentsDic[_root] = new Dictionary<int, Transform>();
             }
 #if AssetBundleTools
-            assetLoader = AssetBundleLoader.GetInstance(url, menu); 
+            assetLoader = AssetBundleLoader.GetInstance(url, menu);
 #endif
         }
+
         /// <summary>
         /// 创建对象
         /// </summary>
@@ -45,20 +48,26 @@ namespace BundleUISystem
         /// <param name="onCreate"></param>
         public void GetGameObjectInfo(ItemInfoBase itemInfo)
         {
-            var bInfo = itemInfo as BundleInfo;
-            var pInfo = itemInfo as PrefabInfo;
+            if (_cansaleKeys.Contains(itemInfo.assetName)) _cansaleKeys.RemoveAll(x => x == itemInfo.assetName);
 
-            if (bInfo!= null)
+            if (!_loadingDic.ContainsKey(itemInfo.IDName))
             {
-                GetGameObjectInfo(bInfo);
-            }
-            else if (pInfo != null)
-            {
-                GetGameObjectInfo(pInfo);
+                _loadingDic.Add(itemInfo.IDName, itemInfo);
+                var bInfo = itemInfo as BundleInfo;
+                var pInfo = itemInfo as PrefabInfo;
+
+                if (bInfo != null)
+                {
+                    GetGameObjectInfo(bInfo);
+                }
+                else if (pInfo != null)
+                {
+                    GetGameObjectInfo(pInfo);
+                }
             }
         }
         /// <summary>
-        /// 创建对象
+        /// BundleInfo创建对象
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="assetName"></param>
@@ -66,60 +75,41 @@ namespace BundleUISystem
         public void GetGameObjectInfo(BundleInfo itemInfo)
         {
             var trigger = itemInfo as BundleInfo;
-
 #if AssetBundleTools
-            if (_cansaleKeys.Contains(trigger.assetName)) _cansaleKeys.RemoveAll(x => x == trigger.assetName);
-
-            if (!_loadingDic.ContainsKey(trigger.IDName))
+            assetLoader.LoadAssetFromUrlAsync<GameObject>(trigger.bundleName, trigger.assetName, (x) =>
             {
-                _loadingDic.Add(trigger.IDName,trigger);
-                assetLoader.LoadAssetFromUrlAsync<GameObject>(trigger.bundleName, trigger.assetName, (x) =>
+                if (_root == null)
                 {
-                    if (_root == null)
-                    {
-                        Debug.Log("父节点已销毁");
-                    }
-                    else if (x != null)
-                    {
-                        CreateInstance(x, trigger);
-                        _loadingDic.Remove(trigger.IDName);
-                    }
-                    else
-                    {
-                        Debug.Log(trigger.bundleName + ".." + trigger.assetName + "-->空");
-                    }
-                });
-            }
-            else
-            {
-                Debug.Log("asset:" + trigger.IDName + "isLoading" + " append OnCreate event");
-                _loadingDic[trigger.IDName].OnCreate += itemInfo.OnCreate;
-            } 
-#endif
-        }
-        public void GetGameObjectInfo(PrefabInfo iteminfo)
-        {
-            var trigger = iteminfo as PrefabInfo;
-
-            if (_cansaleKeys.Contains(trigger.assetName)) _cansaleKeys.RemoveAll(x => x == trigger.assetName);
-
-            if (!_loadingDic.ContainsKey(trigger.IDName))
-            {
-                _loadingDic.Add(trigger.IDName,iteminfo);
-
-                if (trigger.prefab != null)
+                    Debug.Log("父节点已销毁");
+                }
+                else if (x != null)
                 {
-                    CreateInstance(trigger.prefab, trigger);
+                    CreateInstance(x, trigger);
                     _loadingDic.Remove(trigger.IDName);
                 }
                 else
                 {
-                    Debug.Log(trigger.assetName + "-->空");
+                    Debug.Log(trigger.bundleName + ".." + trigger.assetName + "-->空");
                 }
+            });
+#endif
+        }
+        /// <summary>
+        /// PrefabInfo创建对象
+        /// </summary>
+        /// <param name="iteminfo"></param>
+        public void GetGameObjectInfo(PrefabInfo iteminfo)
+        {
+            var trigger = iteminfo as PrefabInfo;
+
+            if (trigger.prefab != null)
+            {
+                CreateInstance(trigger.prefab, trigger);
+                _loadingDic.Remove(trigger.IDName);
             }
             else
             {
-                Debug.Log("asset:" + trigger.IDName + "isLoading");
+                Debug.Log(trigger.assetName + "-->空");
             }
         }
         /// <summary>
@@ -133,7 +123,7 @@ namespace BundleUISystem
         /// <summary>
         /// 获取对象实例
         /// </summary>
-        private void CreateInstance(GameObject prefab, BundleInfo trigger)
+        private void CreateInstance(GameObject prefab, ItemInfoBase trigger)
         {
             if (_cansaleKeys.Contains(trigger.assetName))
             {
@@ -158,33 +148,11 @@ namespace BundleUISystem
             if (trigger.OnCreate != null) trigger.OnCreate(go);
         }
         /// <summary>
-        /// 获取对象实例
+        /// 设置实例对象父级
         /// </summary>
-        private void CreateInstance(GameObject prefab, PrefabInfo trigger)
-        {
-            if (_cansaleKeys.Contains(trigger.assetName))
-            {
-                _cansaleKeys.Remove(trigger.assetName);
-                return;
-            }
-
-            if (prefab == null || trigger == null)
-            {
-                return;
-            }
-
-            GameObject go = GameObject.Instantiate(prefab);
-
-            go.SetActive(true);
-            SetParent(trigger.parentLayer, go.transform, trigger.reset);
-            if (trigger.reset)
-            {
-                go.transform.position = Vector3.zero;
-                go.transform.localRotation = Quaternion.identity;
-            }
-            if (trigger.OnCreate != null) trigger.OnCreate(go);
-        }
-
+        /// <param name="layer"></param>
+        /// <param name="child"></param>
+        /// <param name="reset"></param>
         private void SetParent(int layer, Transform child, bool reset)
         {
             Transform parent = null;
@@ -219,10 +187,14 @@ namespace BundleUISystem
                 child.transform.localRotation = Quaternion.identity;
             }
         }
-        private void ResortParents(Dictionary<int,Transform> parentDic)
+        /// <summary>
+        /// 重新排序
+        /// </summary>
+        /// <param name="parentDic"></param>
+        private void ResortParents(Dictionary<int, Transform> parentDic)
         {
             int[] keys = new int[parentDic.Count];
-            parentDic.Keys.CopyTo(keys,0);
+            parentDic.Keys.CopyTo(keys, 0);
             Array.Sort(keys);
             for (int i = 0; i < keys.Length; i++)
             {

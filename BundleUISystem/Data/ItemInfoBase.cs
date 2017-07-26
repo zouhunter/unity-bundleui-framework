@@ -14,7 +14,7 @@ public abstract class ItemInfoBase {
     public bool reset;
     public int parentLayer;
     public Type type;
-    public object Data { get; set; }
+    public Queue<object> dataQueue = new Queue<object>();//多次打开使用
     public UnityAction<GameObject> OnCreate;
     public enum Type
     {

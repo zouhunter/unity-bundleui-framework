@@ -145,15 +145,15 @@ namespace BundleUISystem
         {
             UnityAction<object> createAction = (x) =>
             {
-                trigger.Data = x;
+                trigger.dataQueue.Enqueue(x);//
                 loadCtrl.GetGameObjectInfo(trigger);
             };
 
             UnityAction<object> handInfoAction = (data) =>
             {
-                trigger.Data = data;
+                trigger.dataQueue.Enqueue(data);//
                 IPanelName irm = trigger.instence.GetComponent<IPanelName>();
-                irm.HandleData(trigger.Data);
+                irm.HandleData(trigger.instence);
             };
 
             trigger.OnCreate = (x) =>
@@ -162,7 +162,9 @@ namespace BundleUISystem
                 if (irm != null)
                 {
                     trigger.instence = x;
-                    irm.HandleData(trigger.Data);
+                    while (trigger.dataQueue.Count > 0){
+                        irm.HandleData(trigger.dataQueue.Dequeue());
+                    }
                     eventHold.Remove(trigger.assetName, createAction);
                     eventHold.Record(trigger.assetName, handInfoAction);
                     irm.OnDelete += () =>
@@ -193,7 +195,7 @@ namespace BundleUISystem
                 }
                 else
                 {
-                    Destroy((GameObject)trigger.Data);
+                    Destroy((GameObject)trigger.instence);
                 }
             };
             trigger.toggle.onValueChanged.AddListener(CreateByToggle);
@@ -207,7 +209,7 @@ namespace BundleUISystem
             {
                 trigger.toggle.interactable = true;
 
-                trigger.Data = x;
+                trigger.instence = x;
                 IPanelToggle it = x.GetComponent<IPanelToggle>();
                 if (it != null)
                 {
@@ -256,7 +258,7 @@ namespace BundleUISystem
 
             trigger.OnCreate = (x) =>
             {
-                trigger.Data = x;
+                trigger.instence = x;
                 IPanelEnable irm = x.GetComponent<IPanelEnable>();
                 if (irm != null)
                 {
@@ -271,9 +273,9 @@ namespace BundleUISystem
                 {
                     onDisable += () =>
                     {
-                        if (trigger.Data != null && trigger.Data is GameObject)
+                        if (trigger.instence != null && trigger.instence is GameObject)
                         {
-                            Destroy((GameObject)trigger.Data);
+                            Destroy((GameObject)trigger.instence);
                         }
                     };
                 }
