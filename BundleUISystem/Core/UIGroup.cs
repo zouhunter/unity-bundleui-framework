@@ -11,7 +11,7 @@ namespace BundleUISystem
     public class UIGroup : MonoBehaviour
     {
 #if UNITY_EDITOR
-        public ItemInfoBase.Type defultType;
+        public UILoadType defultType = UILoadType.LocalBundle;
 #endif
         public List<UIBundleInfo> bundles = new List<UIBundleInfo>();
         public List<BundleInfo> rbundles = new List<BundleInfo>();
@@ -151,9 +151,8 @@ namespace BundleUISystem
 
             UnityAction<object> handInfoAction = (data) =>
             {
-                trigger.dataQueue.Enqueue(data);//
                 IPanelName irm = trigger.instence.GetComponent<IPanelName>();
-                irm.HandleData(trigger.instence);
+                irm.HandleData(data);
             };
 
             trigger.OnCreate = (x) =>
