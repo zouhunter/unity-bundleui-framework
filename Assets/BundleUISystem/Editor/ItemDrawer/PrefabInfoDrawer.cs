@@ -18,14 +18,12 @@ public class PrefabInfoDrawer : PropertyDrawer
         var typeProp = property.FindPropertyRelative("type");
         var buttonListProp = property.FindPropertyRelative("button");
         var toggleListProp = property.FindPropertyRelative("toggle");
-        switch (typeProp.enumValueIndex)
+        switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
         {
-            case 0:
+            case ItemInfoBase.Type.Button:
                 return ht * EditorGUIUtility.singleLineHeight + EditorGUI.GetPropertyHeight(buttonListProp);
-            case 1:
+            case ItemInfoBase.Type.Toggle:
                 return ht * EditorGUIUtility.singleLineHeight + EditorGUI.GetPropertyHeight(toggleListProp);
-            case 2:
-            case 3:
             default:
                 return ht * EditorGUIUtility.singleLineHeight;
         }
@@ -41,10 +39,7 @@ public class PrefabInfoDrawer : PropertyDrawer
         var assetNamePorp = property.FindPropertyRelative("assetName");
         var toggleProp = property.FindPropertyRelative("toggle");
         float height = EditorGUIUtility.singleLineHeight;
-        Rect rect = new Rect(position.xMin, position.yMin, position.width, height);
-
-        rect.width -= widthBt * 8;
-        rect.width /= 1.5f;
+        Rect rect = new Rect(position.xMin, position.yMin, position.width * 0.9f, height);
         if (GUI.Button(rect, assetNamePorp.stringValue,EditorStyles.toolbar))
         {
             //使用对象是UIGroupObj，将无法从button和Toggle加载
@@ -107,59 +102,84 @@ public class PrefabInfoDrawer : PropertyDrawer
                 }
             }
         }
-        rect.width = widthBt * 7;
-        rect.x = position.xMax - widthBt * 8;
+        switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
+        {
+            case ItemInfoBase.Type.Name:
+                break;
+            case ItemInfoBase.Type.Button:
+                if (buttonProp.objectReferenceValue == null)
+                {
+                    Worning(rect, "button lost!");
+                }
+                break;
+            case ItemInfoBase.Type.Toggle:
+                if (toggleProp.objectReferenceValue == null)
+                {
+                    Worning(rect, "toggle lost!");
+                }
+                break;
+            case ItemInfoBase.Type.Enable:
+                break;
+            default:
+                break;
+        }
 
-        prefab.objectReferenceValue = EditorGUI.ObjectField(rect, new GUIContent(""), prefab.objectReferenceValue, typeof(GameObject), false);
+        rect = new Rect(position.max.x - position.width * 0.1f, position.yMin, position.width * 0.1f, height);
 
-        //rect = new Rect(position.xMin, position.yMin, position.width, height);
+        switch (Event.current.type)
+        {
+            case EventType.DragUpdated:
+                if (rect.Contains(Event.current.mousePosition))
+                {
+                    DragAndDrop.visualMode = DragAndDropVisualMode.Move;
+                }
+                break;
+            case EventType.DragPerform:
+                if (rect.Contains(Event.current.mousePosition))
+                {
+                    if (DragAndDrop.objectReferences.Length > 0)
+                    {
+                        var obj = DragAndDrop.objectReferences[0];
+                        if (obj is GameObject)
+                        {
+                            prefab.objectReferenceValue = obj;
+                            assetNamePorp.stringValue = obj.name;
+                        }
+                    }
+                    DragAndDrop.AcceptDrag();
+                    Event.current.Use();
+                }
+                break;
+        }
+
+        if (GUI.Button(rect, "[-]", EditorStyles.textField))
+        {
+            if (prefab.objectReferenceValue != null)
+            {
+                EditorGUIUtility.PingObject(prefab.objectReferenceValue);
+            }
+        }
+
         if (!property.isExpanded)
         {
-            var width = position.width - widthBt * 8;
-            width /= 1.5f;
-            Rect draggableRect = new Rect(width + position.x, position.y, position.width - width - widthBt * 8, position.height);
-            EditorGUI.Toggle(draggableRect, false, EditorStyles.toolbarButton);
-
-            //    rect = new Rect(position.xMin, position.yMin, position.width, height);
-            //    rect.width -= widthBt * 8;
-            //    rect.x += rect.width / 1.2f;
-            //    rect.width = widthBt * 1.5f;
-            //    if (GUI.Button(rect, "[-]"))
-            //    {
-            //        Object pfbItem = prefab.objectReferenceValue;
-            //        if (pfbItem != null)
-            //        {
-            //            bool find = false;
-            //            MonoBehaviour[] scripts = ((GameObject)pfbItem).GetComponents<MonoBehaviour>();
-            //            for (int i = 0; i < scripts.Length && !find; i++)
-            //            {
-            //                MonoBehaviour item = scripts[i];
-            //                if (item is IPanelButton || item is IPanelEnable || item is IPanelName || item is IPanelToggle)
-            //                {
-            //                    find = true;
-            //                    Selection.activeObject = MonoScript.FromMonoBehaviour(item);
-            //                }
-            //            }
-            //        }
-            //    }
             return;
         }
 
         rect = new Rect(position.xMin, position.yMin + height, position.width, height);
         EditorGUI.PropertyField(rect, typeProp, new GUIContent("type"));
-
-        switch (typeProp.enumValueIndex)
+        switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
         {
-            case 0:
+            case ItemInfoBase.Type.Name:
+                break;
+            case ItemInfoBase.Type.Button:
                 rect.y += height;
                 EditorGUI.PropertyField(rect, buttonProp, new GUIContent("Button"));
                 break;
-            case 1:
+            case ItemInfoBase.Type.Toggle:
                 rect.y += height;
                 EditorGUI.PropertyField(rect, toggleProp, new GUIContent("Toggle"));
                 break;
-            case 2:
-            case 3:
+            case ItemInfoBase.Type.Enable:
                 break;
             default:
                 break;
@@ -170,7 +190,11 @@ public class PrefabInfoDrawer : PropertyDrawer
 
         rect.y += height;
         EditorGUI.PropertyField(rect, boolProp, new GUIContent("reset"));
-
-
+    }
+    void Worning(Rect rect, string info)
+    {
+        GUI.color = Color.red;
+        EditorGUI.SelectableLabel(rect, info);
+        GUI.color = Color.white;
     }
 }

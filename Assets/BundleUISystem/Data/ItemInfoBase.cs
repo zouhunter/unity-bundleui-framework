@@ -13,14 +13,14 @@ public abstract class ItemInfoBase {
     public GameObject instence;
     public bool reset;
     public int parentLayer;
-    public Type type;
+    public Type type = Type.Name;
     public Queue<object> dataQueue = new Queue<object>();//多次打开使用
     public UnityAction<GameObject> OnCreate;
     public enum Type
     {
-        Button = 0,
-        Toggle = 1,
-        Enable = 2,
-        Name = 3
+        Name = 0,
+        Button = 1,
+        Toggle = 2,
+        Enable = 3,
     }
 }

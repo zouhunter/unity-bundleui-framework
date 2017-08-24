@@ -17,14 +17,12 @@ public class BundleInfoDrawer : PropertyDrawer
         var typeProp = property.FindPropertyRelative("type");
         var buttonListProp = property.FindPropertyRelative("button");
         var toggleListProp = property.FindPropertyRelative("toggle");
-        switch (typeProp.enumValueIndex)
+        switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
         {
-            case 0:
+            case ItemInfoBase.Type.Button:
                 return ht * EditorGUIUtility.singleLineHeight + EditorGUI.GetPropertyHeight(buttonListProp);
-            case 1:
+            case ItemInfoBase.Type.Toggle:
                 return ht * EditorGUIUtility.singleLineHeight + EditorGUI.GetPropertyHeight(toggleListProp);
-            case 2:
-            case 3:
             default:
                 return ht * EditorGUIUtility.singleLineHeight;
         }
@@ -41,10 +39,7 @@ public class BundleInfoDrawer : PropertyDrawer
         var toggleProp = property.FindPropertyRelative("toggle");
         float height = EditorGUIUtility.singleLineHeight;
 
-        Rect rect = new Rect(position.xMin, position.yMin, position.width, height);
-
-        rect.width -= widthBt * 8;
-        rect.width /= 1.5f;
+        Rect rect = new Rect(position.xMin, position.yMin, position.width * 0.9f, height);
         if (GUI.Button(rect, assetName.stringValue, EditorStyles.toolbar))
         {
             //使用对象是UIGroupObj，将无法从button和Toggle加载
@@ -57,15 +52,39 @@ public class BundleInfoDrawer : PropertyDrawer
             }
             property.isExpanded = !property.isExpanded;
         }
-        rect.width = widthBt * 7;
-        rect.x = position.xMax - widthBt * 8;
-
-        if (GUI.Button(rect, bundleName.stringValue, EditorStyles.toolbar))
+        switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
         {
+            case ItemInfoBase.Type.Button:
+                if (buttonProp.objectReferenceValue == null)
+                {
+                    Worning(rect, "button lost!");
+                }
+                break;
+            case ItemInfoBase.Type.Toggle:
+                if (toggleProp.objectReferenceValue == null)
+                {
+                    Worning(rect, "toggle lost!");
+                }
+                break;
+            default:
+                break;
+        }
+        rect = new Rect(position.max.x - position.width * 0.1f, position.yMin, position.width * 0.1f, height);
+
+        if (GUI.Button(rect, "open",EditorStyles.textField))
+        {
+            var select = EditorUtility.DisplayDialog("提示", "是否打开新场景并加载资源", "是", "否");
+            if (!select)
+            {
+                return;
+            }
             BundlePreview.Data data = new BundlePreview.Data();
             var assetUrl = property.serializedObject.FindProperty("assetUrl");
             var menu = property.serializedObject.FindProperty("menu");
-            Debug.Log(assetUrl);
+            if (string.IsNullOrEmpty(assetUrl.stringValue) || string.IsNullOrEmpty(menu.stringValue))
+            {
+                return;
+            }
             data.assetUrl = assetUrl.stringValue;
             data.menu = menu.stringValue;
             var bdinfo = new BundleInfo();
@@ -81,12 +100,9 @@ public class BundleInfoDrawer : PropertyDrawer
             EditorApplication.ExecuteMenuItem("Edit/Play");
         }
 
+       
         if (!property.isExpanded)
         {
-            var width = position.width - widthBt * 8;
-            width /= 1.5f;
-            Rect draggableRect = new Rect(width + position.x, position.y, position.width - width - widthBt * 8, position.height);
-            EditorGUI.Toggle(draggableRect, false, EditorStyles.toolbarButton);
             return;
         }
 
@@ -99,27 +115,34 @@ public class BundleInfoDrawer : PropertyDrawer
         rect.y += height;
         EditorGUI.PropertyField(rect, typeProp, new GUIContent("type"));
 
-        switch (typeProp.enumValueIndex)
+        switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
         {
-            case 0:
+            case ItemInfoBase.Type.Name:
+                break;
+            case ItemInfoBase.Type.Button:
                 rect.y += height;
                 EditorGUI.PropertyField(rect, buttonProp, new GUIContent("Button"));
                 break;
-            case 1:
+            case ItemInfoBase.Type.Toggle:
                 rect.y += height;
                 EditorGUI.PropertyField(rect, toggleProp, new GUIContent("Toggle"));
                 break;
-            case 2:
-            case 3:
+            case ItemInfoBase.Type.Enable:
                 break;
             default:
                 break;
         }
-
+       
         rect.y += height;
         EditorGUI.PropertyField(rect, parentLayerProp, new GUIContent("parentLayer"));
 
         rect.y += height;
         EditorGUI.PropertyField(rect, resetProp, new GUIContent("reset"));
+    }
+    void Worning(Rect rect, string info)
+    {
+        GUI.color = Color.red;
+        EditorGUI.SelectableLabel(rect, info);
+        GUI.color = Color.white;
     }
 }

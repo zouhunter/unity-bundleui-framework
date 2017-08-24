@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 3486229544
+CRC: 3312800693
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 2056117f65c359f141e03b350516c9a2
+    Hash: 1dff628df2d0e0daffda4af097e4353e
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 2922b2ee4b899839ead43b31dfdaa2a4
+    Hash: f50b9d502cefcbbb72dd0ea0de3e659c
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -17,9 +17,17 @@ ClassTypes:
   Script: {instanceID: 0}
 - Class: 21
   Script: {instanceID: 0}
+- Class: 23
+  Script: {instanceID: 0}
 - Class: 28
   Script: {instanceID: 0}
+- Class: 33
+  Script: {instanceID: 0}
+- Class: 43
+  Script: {instanceID: 0}
 - Class: 48
+  Script: {instanceID: 0}
+- Class: 65
   Script: {instanceID: 0}
 - Class: 81
   Script: {instanceID: 0}
@@ -66,7 +74,6 @@ ClassTypes:
 Assets:
 - Assets/Demos/Scenes/Demo.unity
 Dependencies:
-- E:/Githubs/BundleUISystem/Assets/StreamingAssets/AssetBundle/bundle
 - E:/Githubs/BundleUISystem/Assets/StreamingAssets/AssetBundle/prefabs/cube
-- E:/Githubs/BundleUISystem/Assets/StreamingAssets/AssetBundle/prefabs/image
-- E:/Githubs/BundleUISystem/Assets/StreamingAssets/AssetBundle/prefabs/panel1
+- E:/Githubs/BundleUISystem/Assets/StreamingAssets/AssetBundle/prefabs/poppanel 1
+- E:/Githubs/BundleUISystem/Assets/StreamingAssets/AssetBundle/prefabs/poppanel
