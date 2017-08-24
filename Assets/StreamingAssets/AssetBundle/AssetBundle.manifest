@@ -1,0 +1,33 @@
+ManifestFileVersion: 0
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: bundle
+      Dependencies:
+        Dependency_0: prefabs/poppanel 1
+        Dependency_1: prefabs/poppanel
+    Info_1:
+      Name: scene/demo
+      Dependencies:
+        Dependency_0: bundle
+        Dependency_1: prefabs/cube
+        Dependency_2: prefabs/image
+        Dependency_3: prefabs/panel1
+    Info_2:
+      Name: prefabs/cube
+      Dependencies: {}
+    Info_3:
+      Name: prefabs/image
+      Dependencies: {}
+    Info_4:
+      Name: prefabs/panel1
+      Dependencies: {}
+    Info_5:
+      Name: prefabs/poppanel 1
+      Dependencies: {}
+    Info_6:
+      Name: prefabs/poppanel
+      Dependencies: {}
+    Info_7:
+      Name: prefabs/sphere
+      Dependencies: {}

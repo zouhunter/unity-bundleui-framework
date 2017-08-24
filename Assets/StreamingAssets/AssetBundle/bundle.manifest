@@ -1,0 +1,22 @@
+ManifestFileVersion: 0
+CRC: 2900192848
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 103a0ff3d5e3454b368a6f45621e319b
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: a18b08298c6981088f5152028a2ba3ca
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: 11500000, guid: 1126b94190e390544a9f085113fee6fe, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+Assets:
+- Assets/Demos/PopPanels.asset
+Dependencies:
+- E:/Githubs/BundleUISystem/Assets/StreamingAssets/AssetBundle/prefabs/poppanel 1
+- E:/Githubs/BundleUISystem/Assets/StreamingAssets/AssetBundle/prefabs/poppanel

@@ -1,0 +1,72 @@
+ManifestFileVersion: 0
+CRC: 3486229544
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 2056117f65c359f141e03b350516c9a2
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 2922b2ee4b899839ead43b31dfdaa2a4
+HashAppended: 0
+ClassTypes:
+- Class: 1
+  Script: {instanceID: 0}
+- Class: 4
+  Script: {instanceID: 0}
+- Class: 20
+  Script: {instanceID: 0}
+- Class: 21
+  Script: {instanceID: 0}
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 48
+  Script: {instanceID: 0}
+- Class: 81
+  Script: {instanceID: 0}
+- Class: 89
+  Script: {instanceID: 0}
+- Class: 92
+  Script: {instanceID: 0}
+- Class: 104
+  Script: {instanceID: 0}
+- Class: 108
+  Script: {instanceID: 0}
+- Class: 114
+  Script: {fileID: -619905303, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+- Class: 114
+  Script: {fileID: 1077351063, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+- Class: 114
+  Script: {fileID: 1301386320, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+- Class: 114
+  Script: {fileID: -765806418, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+- Class: 114
+  Script: {fileID: 1980459831, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 1126b94190e390544a9f085113fee6fe, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 2a1ce4eb83b58884ab0e693fb647282d, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: 8848654467659e246b9a912bb5566b84, type: 3}
+- Class: 114
+  Script: {fileID: 11500000, guid: e31ae69a9ed354348842a1ccceda43cf, type: 3}
+- Class: 115
+  Script: {instanceID: 0}
+- Class: 124
+  Script: {instanceID: 0}
+- Class: 157
+  Script: {instanceID: 0}
+- Class: 222
+  Script: {instanceID: 0}
+- Class: 223
+  Script: {instanceID: 0}
+- Class: 224
+  Script: {instanceID: 0}
+- Class: 258
+  Script: {instanceID: 0}
+Assets:
+- Assets/Demos/Scenes/Demo.unity
+Dependencies:
+- E:/Githubs/BundleUISystem/Assets/StreamingAssets/AssetBundle/bundle
+- E:/Githubs/BundleUISystem/Assets/StreamingAssets/AssetBundle/prefabs/cube
+- E:/Githubs/BundleUISystem/Assets/StreamingAssets/AssetBundle/prefabs/image
+- E:/Githubs/BundleUISystem/Assets/StreamingAssets/AssetBundle/prefabs/panel1
