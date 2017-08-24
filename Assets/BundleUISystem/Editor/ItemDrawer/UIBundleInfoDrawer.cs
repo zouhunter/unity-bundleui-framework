@@ -11,7 +11,6 @@ public class UIBundleInfoDrawer : PropertyDrawer
 {
     const float widthBt = 20;
     const int ht = 6;
-    List<GameObject> created = new List<GameObject>();
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         if (!property.isExpanded) return EditorGUIUtility.singleLineHeight;
@@ -31,6 +30,7 @@ public class UIBundleInfoDrawer : PropertyDrawer
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
+        var instanceIDProp = property.FindPropertyRelative("instanceID");
         var goodProp = property.FindPropertyRelative("good");
         var guidProp = property.FindPropertyRelative("guid");
         var assetName = property.FindPropertyRelative("assetName");
@@ -56,12 +56,6 @@ public class UIBundleInfoDrawer : PropertyDrawer
             }
 
             property.isExpanded = !property.isExpanded;
-            var instence = created.Find(x => x.name == assetName.stringValue);
-            if (instence != null)
-            {
-                created.Remove(instence);
-                Object.DestroyImmediate(instence);
-            }
 
             if (property.isExpanded)
             {
@@ -105,8 +99,17 @@ public class UIBundleInfoDrawer : PropertyDrawer
                             go.transform.position = Vector3.zero;
                             go.transform.localRotation = Quaternion.identity;
                         }
-                        created.Add(go);
+                        instanceIDProp.intValue = go.GetInstanceID();
                     }
+                }
+
+            }
+            else
+            {
+                var obj = EditorUtility.InstanceIDToObject(instanceIDProp.intValue);
+                if (obj != null)
+                {
+                    Object.DestroyImmediate(obj);
                 }
             }
         }
@@ -139,7 +142,7 @@ public class UIBundleInfoDrawer : PropertyDrawer
                     break;
             }
         }
-        
+
 
         rect = new Rect(position.max.x - position.width * 0.1f, position.yMin, position.width * 0.1f, height);
 
@@ -230,7 +233,7 @@ public class UIBundleInfoDrawer : PropertyDrawer
         EditorGUI.PropertyField(rect, boolProp, new GUIContent("reset"));
     }
 
-    void Worning(Rect rect,string info)
+    void Worning(Rect rect, string info)
     {
         GUI.color = Color.red;
         EditorGUI.SelectableLabel(rect, info);

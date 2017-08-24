@@ -6,6 +6,10 @@ using System.Collections;
 using System.Collections.Generic;
 
 public abstract class ItemInfoBase {
+#if UNITY_EDITOR
+    public int instanceID;
+#endif
+        
     public string assetName;
     public abstract string IDName { get; }
     public Button button;

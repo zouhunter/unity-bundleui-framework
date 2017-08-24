@@ -5,8 +5,6 @@ AssetBundleManifest:
       Name: scene/demo
       Dependencies:
         Dependency_0: prefabs/cube
-        Dependency_1: prefabs/poppanel 1
-        Dependency_2: prefabs/poppanel
     Info_1:
       Name: prefabs/cube
       Dependencies: {}

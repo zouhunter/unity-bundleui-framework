@@ -11,7 +11,6 @@ public class PrefabInfoDrawer : PropertyDrawer
 {
     const float widthBt = 20;
     const int ht = 4;
-    List<GameObject> created = new List<GameObject>();
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
     {
         if (!property.isExpanded) return EditorGUIUtility.singleLineHeight;
@@ -31,7 +30,8 @@ public class PrefabInfoDrawer : PropertyDrawer
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
-        var prefab = property.FindPropertyRelative("prefab");
+        var prefabProp = property.FindPropertyRelative("prefab");
+        var instanceIDProp = property.FindPropertyRelative("instanceID");
         var typeProp = property.FindPropertyRelative("type"); ;
         var parentLayerProp = property.FindPropertyRelative("parentLayer");
         var boolProp = property.FindPropertyRelative("reset");
@@ -51,19 +51,13 @@ public class PrefabInfoDrawer : PropertyDrawer
                 }
             }
 
-            if (prefab.objectReferenceValue != null) assetNamePorp.stringValue = prefab.objectReferenceValue.name;
+            if (prefabProp.objectReferenceValue != null) assetNamePorp.stringValue = prefabProp.objectReferenceValue.name;
 
             property.isExpanded = !property.isExpanded;
-            var instence = created.Find(x => x.name == assetNamePorp.stringValue);
-            if (instence != null)
-            {
-                created.Remove(instence);
-                Object.DestroyImmediate(instence);
-            }
+            
             if (property.isExpanded)
             {
-
-                GameObject gopfb = prefab.objectReferenceValue as GameObject;
+                GameObject gopfb = prefabProp.objectReferenceValue as GameObject;
                 if (gopfb != null)
                 {
                     GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
@@ -98,7 +92,15 @@ public class PrefabInfoDrawer : PropertyDrawer
                         go.transform.position = Vector3.zero;
                         go.transform.localRotation = Quaternion.identity;
                     }
-                    created.Add(go);
+                    instanceIDProp.intValue = go.GetInstanceID();
+                }
+            }
+            else
+            {
+                var obj = EditorUtility.InstanceIDToObject(instanceIDProp.intValue);
+                if (obj != null)
+                {
+                    Object.DestroyImmediate(obj);
                 }
             }
         }
@@ -142,7 +144,7 @@ public class PrefabInfoDrawer : PropertyDrawer
                         var obj = DragAndDrop.objectReferences[0];
                         if (obj is GameObject)
                         {
-                            prefab.objectReferenceValue = obj;
+                            prefabProp.objectReferenceValue = obj;
                             assetNamePorp.stringValue = obj.name;
                         }
                     }
@@ -154,9 +156,9 @@ public class PrefabInfoDrawer : PropertyDrawer
 
         if (GUI.Button(rect, "[-]", EditorStyles.textField))
         {
-            if (prefab.objectReferenceValue != null)
+            if (prefabProp.objectReferenceValue != null)
             {
-                EditorGUIUtility.PingObject(prefab.objectReferenceValue);
+                EditorGUIUtility.PingObject(prefabProp.objectReferenceValue);
             }
         }
 
