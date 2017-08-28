@@ -59,58 +59,60 @@ public class UIBundleInfoDrawer : PropertyDrawer
 
             if (property.isExpanded)
             {
-                string[] paths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(bundleName.stringValue, assetName.stringValue);
-                if (paths != null && paths.Length > 0)
+                if (instanceIDProp.intValue == 0)
                 {
-                    GameObject gopfb = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
-                    if (gopfb != null)
+                    string[] paths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(bundleName.stringValue, assetName.stringValue);
+                    if (paths != null && paths.Length > 0)
                     {
-                        var path = AssetDatabase.GetAssetPath(gopfb);
-                        guidProp.stringValue = AssetDatabase.AssetPathToGUID(path);
-                        GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
-                        var obj = property.serializedObject.targetObject;
+                        GameObject gopfb = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
+                        if (gopfb != null)
+                        {
+                            var path = AssetDatabase.GetAssetPath(gopfb);
+                            guidProp.stringValue = AssetDatabase.AssetPathToGUID(path);
+                            GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
+                            var obj = property.serializedObject.targetObject;
 
-                        if (obj is UIGroup)
-                        {
-                            if (go.GetComponent<Transform>() is RectTransform)
+                            if (obj is UIGroup)
                             {
-                                go.transform.SetParent((obj as UIGroup).transform, false);
+                                if (go.GetComponent<Transform>() is RectTransform)
+                                {
+                                    go.transform.SetParent((obj as UIGroup).transform, false);
+                                }
+                                else
+                                {
+                                    go.transform.SetParent((obj as UIGroup).transform, true);
+                                }
                             }
-                            else
+                            else if (obj is UIGroupObj)
                             {
-                                go.transform.SetParent((obj as UIGroup).transform, true);
+                                if (go.GetComponent<Transform>() is RectTransform)
+                                {
+                                    var canvas = GameObject.FindObjectOfType<Canvas>();
+                                    go.transform.SetParent(canvas.transform, false);
+                                }
+                                else
+                                {
+                                    go.transform.SetParent(null);
+                                }
                             }
-                        }
-                        else if (obj is UIGroupObj)
-                        {
-                            if (go.GetComponent<Transform>() is RectTransform)
-                            {
-                                var canvas = GameObject.FindObjectOfType<Canvas>();
-                                go.transform.SetParent(canvas.transform, false);
-                            }
-                            else
-                            {
-                                go.transform.SetParent(null);
-                            }
-                        }
 
-                        if (boolProp.boolValue)
-                        {
-                            go.transform.position = Vector3.zero;
-                            go.transform.localRotation = Quaternion.identity;
+                            if (boolProp.boolValue)
+                            {
+                                go.transform.position = Vector3.zero;
+                                go.transform.localRotation = Quaternion.identity;
+                            }
+                            instanceIDProp.intValue = go.GetInstanceID();
                         }
-                        instanceIDProp.intValue = go.GetInstanceID();
                     }
                 }
-
             }
             else
             {
                 var obj = EditorUtility.InstanceIDToObject(instanceIDProp.intValue);
-                if (obj != null)
-                {
+                if (obj != null){
                     Object.DestroyImmediate(obj);
                 }
+                instanceIDProp.intValue = 0;
             }
         }
 

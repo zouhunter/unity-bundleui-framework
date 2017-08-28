@@ -42,7 +42,6 @@ public abstract class UIDrawerTemp : Editor
 #else
     protected string[] option = new string[] { "预制"};
 #endif
-    protected static List<GameObject> created = new List<GameObject>();
     private void OnEnable()
     {
         script = serializedObject.FindProperty("m_Script");
@@ -76,7 +75,7 @@ public abstract class UIDrawerTemp : Editor
     private void DrawOption()
     {
         EditorGUI.BeginChangeCheck();
-        defultTypeProp.enumValueIndex = GUILayout.Toolbar(defultTypeProp.enumValueIndex, option,EditorStyles.toolbarButton);
+        defultTypeProp.enumValueIndex = GUILayout.Toolbar(defultTypeProp.enumValueIndex, option, EditorStyles.toolbarButton);
     }
     protected virtual void DrawRuntimeItems()
     {
@@ -122,7 +121,7 @@ public abstract class UIDrawerTemp : Editor
                     }
                     if (GUILayout.Button(new GUIContent("c", "批量关闭"), btnStyle))
                     {
-                        CloseAllCreated();
+                        CloseAllCreated(prefabsProp);
                     }
                 }
                 break;
@@ -147,7 +146,7 @@ public abstract class UIDrawerTemp : Editor
                     }
                     if (GUILayout.Button(new GUIContent("c", "批量关闭"), btnStyle))
                     {
-                        CloseAllCreated();
+                        CloseAllCreated(bundlesProp);
                     }
                 }
                 break;
@@ -218,15 +217,70 @@ public abstract class UIDrawerTemp : Editor
         for (int i = 0; i < proprety.arraySize; i++)
         {
             var itemProp = proprety.GetArrayElementAtIndex(i);
+            GameObject prefab = null;
             var prefabProp = itemProp.FindPropertyRelative("prefab");
-            var resetProp = itemProp.FindPropertyRelative("reset");
-            GameObject instence = PrefabUtility.InstantiatePrefab(prefabProp.objectReferenceValue) as GameObject;
-            if (target is UIGroup)
+            var assetNameProp = itemProp.FindPropertyRelative("assetName");
+            var instanceIDProp = itemProp.FindPropertyRelative("instanceID");
+
+            if (instanceIDProp.intValue != 0) continue;
+
+            if (prefabProp == null)
             {
-                instence.transform.SetParent((target as UIGroup).transform, resetProp.boolValue);
+                var bundleNameProp = itemProp.FindPropertyRelative("bundleName");
+                var guidProp = itemProp.FindPropertyRelative("guid");
+                var paths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(bundleNameProp.stringValue, assetNameProp.stringValue);
+                if(paths.Length > 0)
+                {
+                    prefab = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
+                    guidProp.stringValue = AssetDatabase.AssetPathToGUID(paths[0]);
+                }
             }
-            if (created == null) created = new List<GameObject>();
-            created.Add(instence);
+            else
+            {
+                prefab = prefabProp.objectReferenceValue as GameObject;
+            }
+
+            if (prefab == null)
+            {
+                UnityEditor.EditorUtility.DisplayDialog("空对象", "找不到预制体" + assetNameProp.stringValue, "确认");
+            }
+            else
+            {
+                var resetProp = itemProp.FindPropertyRelative("reset");
+                GameObject go = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
+                if (target is UIGroup)
+                {
+                    if (go.GetComponent<Transform>() is RectTransform)
+                    {
+                        go.transform.SetParent((target as UIGroup).transform, false);
+                    }
+                    else
+                    {
+                        go.transform.SetParent((target as UIGroup).transform, true);
+                    }
+                }
+                else if (target is UIGroupObj)
+                {
+                    if (go.GetComponent<Transform>() is RectTransform)
+                    {
+                        var canvas = GameObject.FindObjectOfType<Canvas>();
+                        go.transform.SetParent(canvas.transform, false);
+                    }
+                    else
+                    {
+                        go.transform.SetParent(null);
+                    }
+                }
+
+                if (resetProp.boolValue)
+                {
+                    go.transform.position = Vector3.zero;
+                    go.transform.localRotation = Quaternion.identity;
+                }
+
+                instanceIDProp.intValue = go.GetInstanceID();
+            }
+
         }
     }
 
@@ -235,21 +289,23 @@ public abstract class UIDrawerTemp : Editor
         for (int i = 0; i < bundlesProp.arraySize; i++)
         {
             var itemProp = bundlesProp.GetArrayElementAtIndex(i);
-            var prefabProp = itemProp.FindPropertyRelative("prefab");
+            var guidProp = itemProp.FindPropertyRelative("guid");
+            var goodProp = itemProp.FindPropertyRelative("good");
             var assetNameProp = itemProp.FindPropertyRelative("assetName");
             var bundleNameProp = itemProp.FindPropertyRelative("bundleName");
 
-            if (prefabProp.objectReferenceValue == null)
+            if (!goodProp.boolValue)
             {
-                UnityEditor.EditorUtility.DisplayDialog("空对象", assetNameProp.stringValue + "预制体为空", "确认");
+                UnityEditor.EditorUtility.DisplayDialog("空对象", assetNameProp.stringValue + "信息错误", "确认");
                 continue;
             }
 
-            string assetPath = UnityEditor.AssetDatabase.GetAssetPath(prefabProp.objectReferenceValue);
+            string assetPath = UnityEditor.AssetDatabase.GUIDToAssetPath(guidProp.stringValue);
+            var obj = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
 
             UnityEditor.AssetImporter importer = UnityEditor.AssetImporter.GetAtPath(assetPath);
 
-            assetNameProp.stringValue = prefabProp.objectReferenceValue.name;
+            assetNameProp.stringValue = obj.name;
             bundleNameProp.stringValue = importer.assetBundleName;
 
             if (string.IsNullOrEmpty(bundleNameProp.stringValue))
@@ -281,22 +337,19 @@ public abstract class UIDrawerTemp : Editor
         }
     }
 
-    private void CloseAllCreated()
+    private void CloseAllCreated(SerializedProperty arrayProp)
     {
-        if (created == null)
+        TrySaveAllPrefabs(arrayProp);
+        for (int i = 0; i < arrayProp.arraySize; i++)
         {
-            return;
-        }
-        TrySaveAllPrefabs();
-        for (int i = 0; i < created.Count; i++)
-        {
-            if (created[i] != null)
-            {
-                DestroyImmediate(created[i]);
+            var item = arrayProp.GetArrayElementAtIndex(i);
+            var instanceIDPorp = item.FindPropertyRelative("instanceID");
+            var obj = EditorUtility.InstanceIDToObject(instanceIDPorp.intValue);
+            if (obj != null){
+                DestroyImmediate(obj);
             }
+            instanceIDPorp.intValue = 0;
         }
-        created.Clear();
-        created = null;
     }
     private void SortAllBundles(SerializedProperty property)
     {
@@ -314,22 +367,21 @@ public abstract class UIDrawerTemp : Editor
         }
     }
 
-    private void TrySaveAllPrefabs()
+    private void TrySaveAllPrefabs(SerializedProperty arrayProp)
     {
-        if (created == null)
+        for (int i = 0; i < arrayProp.arraySize; i++)
         {
-            return;
-        }
-
-        foreach (var item in created)
-        {
-            var prefab = PrefabUtility.GetPrefabParent(item);
+            var item = arrayProp.GetArrayElementAtIndex(i);
+            var instanceIDPorp = item.FindPropertyRelative("instanceID");
+            var obj = EditorUtility.InstanceIDToObject(instanceIDPorp.intValue);
+            if (obj == null) continue;
+            var prefab = PrefabUtility.GetPrefabParent(obj);
             if (prefab != null)
             {
                 var root = PrefabUtility.FindPrefabRoot((GameObject)prefab);
                 if (root != null)
                 {
-                    PrefabUtility.ReplacePrefab(item, root, ReplacePrefabOptions.ConnectToPrefab);
+                    PrefabUtility.ReplacePrefab(obj as GameObject, root, ReplacePrefabOptions.ConnectToPrefab);
                 }
             }
         }

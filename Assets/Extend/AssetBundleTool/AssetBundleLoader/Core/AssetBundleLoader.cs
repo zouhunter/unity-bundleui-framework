@@ -116,6 +116,7 @@ public class AssetBundleLoader :MonoBehaviour
         if(canSimulation) simuationLoader = new SimulationLoader(this);
 #endif
     }
+
     void Update()
     {
         if (activeLoader != null)
@@ -305,6 +306,7 @@ public class AssetBundleLoader :MonoBehaviour
         yield return operation;
         if (onActive != null) onActive.Invoke();
     }
+
     IEnumerator WaitLoadObject<T>(AssetBundleLoadAssetOperation operation, UnityAction<T> onLoad) where T : UnityEngine.Object
     {
         yield return operation;

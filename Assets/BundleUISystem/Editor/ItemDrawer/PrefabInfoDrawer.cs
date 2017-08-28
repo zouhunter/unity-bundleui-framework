@@ -40,7 +40,7 @@ public class PrefabInfoDrawer : PropertyDrawer
         var toggleProp = property.FindPropertyRelative("toggle");
         float height = EditorGUIUtility.singleLineHeight;
         Rect rect = new Rect(position.xMin, position.yMin, position.width * 0.9f, height);
-        if (GUI.Button(rect, assetNamePorp.stringValue,EditorStyles.toolbar))
+        if (GUI.Button(rect, assetNamePorp.stringValue, EditorStyles.toolbar))
         {
             //使用对象是UIGroupObj，将无法从button和Toggle加载
             if (property.serializedObject.targetObject is UIGroupObj)
@@ -54,54 +54,57 @@ public class PrefabInfoDrawer : PropertyDrawer
             if (prefabProp.objectReferenceValue != null) assetNamePorp.stringValue = prefabProp.objectReferenceValue.name;
 
             property.isExpanded = !property.isExpanded;
-            
+
             if (property.isExpanded)
             {
-                GameObject gopfb = prefabProp.objectReferenceValue as GameObject;
-                if (gopfb != null)
+                if (instanceIDProp.intValue == 0)
                 {
-                    GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
-                    var obj = property.serializedObject.targetObject;
+                    GameObject gopfb = prefabProp.objectReferenceValue as GameObject;
+                    if (gopfb != null)
+                    {
+                        GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
+                        var obj = property.serializedObject.targetObject;
 
-                    if (obj is UIGroup)
-                    {
-                        if (go.GetComponent<Transform>() is RectTransform)
+                        if (obj is UIGroup)
                         {
-                            go.transform.SetParent((obj as UIGroup).transform, false);
+                            if (go.GetComponent<Transform>() is RectTransform)
+                            {
+                                go.transform.SetParent((obj as UIGroup).transform, false);
+                            }
+                            else
+                            {
+                                go.transform.SetParent((obj as UIGroup).transform, true);
+                            }
                         }
-                        else
+                        else if (obj is UIGroupObj)
                         {
-                            go.transform.SetParent((obj as UIGroup).transform, true);
+                            if (go.GetComponent<Transform>() is RectTransform)
+                            {
+                                var canvas = GameObject.FindObjectOfType<Canvas>();
+                                go.transform.SetParent(canvas.transform, false);
+                            }
+                            else
+                            {
+                                go.transform.SetParent(null);
+                            }
                         }
-                    }
-                    else if (obj is UIGroupObj)
-                    {
-                        if (go.GetComponent<Transform>() is RectTransform)
-                        {
-                            var canvas = GameObject.FindObjectOfType<Canvas>();
-                            go.transform.SetParent(canvas.transform, false);
-                        }
-                        else
-                        {
-                            go.transform.SetParent(null);
-                        }
-                    }
 
-                    if (boolProp.boolValue)
-                    {
-                        go.transform.position = Vector3.zero;
-                        go.transform.localRotation = Quaternion.identity;
+                        if (boolProp.boolValue)
+                        {
+                            go.transform.position = Vector3.zero;
+                            go.transform.localRotation = Quaternion.identity;
+                        }
+                        instanceIDProp.intValue = go.GetInstanceID();
                     }
-                    instanceIDProp.intValue = go.GetInstanceID();
                 }
             }
             else
             {
                 var obj = EditorUtility.InstanceIDToObject(instanceIDProp.intValue);
-                if (obj != null)
-                {
+                if (obj != null) {
                     Object.DestroyImmediate(obj);
                 }
+                instanceIDProp.intValue = 0;
             }
         }
         switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
