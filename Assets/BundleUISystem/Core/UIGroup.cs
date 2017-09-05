@@ -25,7 +25,8 @@ namespace BundleUISystem
         private event UnityAction onDestroy;
         private event UnityAction onEnable;
         private event UnityAction onDisable;
-        private const string addClose = "close";
+        private const string _close = "close";
+        private const string _onClose = "onClose";
 
         private static List<IUILoadCtrl> controllers = new List<IUILoadCtrl>();
         private static List<EventHold> eventHolders = new List<EventHold>();
@@ -177,8 +178,9 @@ namespace BundleUISystem
                     }
                     eventHold.Remove(trigger.assetName, createAction);
                     eventHold.Record(trigger.assetName, handInfoAction);
-                    irm.OnDelete += () =>
+                    irm.OnDelete += (state) =>
                     {
+                        InvokeDestroyCallBack(trigger.assetName, state);
                         trigger.instence = null;
                         eventHold.Remove(trigger.assetName, handInfoAction);
                         eventHold.Record(trigger.assetName, createAction);
@@ -227,7 +229,7 @@ namespace BundleUISystem
 
                     trigger.toggle.onValueChanged.RemoveListener(CreateByToggle);
 
-                    it.OnDelete += () =>
+                    it.OnDelete += (state) =>
                     {
                         trigger.toggle.onValueChanged.AddListener(CreateByToggle);
                     };
@@ -251,7 +253,7 @@ namespace BundleUISystem
                     ib.Btn = trigger.button;
                     trigger.button.onClick.RemoveListener(CreateByButton);
 
-                    ib.OnDelete += () =>
+                    ib.OnDelete += (state) =>
                     {
                         trigger.button.onClick.AddListener(CreateByButton);
                     };
@@ -296,17 +298,23 @@ namespace BundleUISystem
         }
         private void RegisterDestoryAction(string assetName, GameObject x)
         {
-            string key = addClose + assetName;
+            string key = _close + assetName;
             eventHold.Remove(key);
             eventHold.Record(key, new UnityAction<JSONNode>((y) =>
             {
                 if (x != null) Destroy(x);
             }));
         }
+        private void InvokeDestroyCallBack(string assetName, JSONNode node)
+        {
+            var key = _onClose + assetName;
+            eventHold.NotifyObserver(key, node);
+            eventHold.Remove(key);
+        }
         #endregion
 
         #region 触发事件
-        public static void Open(string assetName, UnityAction onClose = null, JSONNode data = null)
+        public static void Open(string assetName, UnityAction<JSONNode> onClose = null, JSONNode data = null)
         {
             bool handled = true;
             TraverseHold((eventHold) =>
@@ -319,16 +327,14 @@ namespace BundleUISystem
             }
             else if(onClose != null)
             {
-                var key = (addClose + assetName);
+                var closekey = _close + assetName;
+                var onclosekey = _onClose + assetName;
                 TraverseHold((eventHold) =>
                 {
-                    if (eventHold.HaveRecord(key))
+                    if(eventHold.HaveRecord(closekey))
                     {
-                        eventHold.Record(key,new UnityAction<JSONNode>((y) =>
-                        {
-                            onClose.Invoke();
-                        }));
-                    }   
+                        eventHold.Record(onclosekey, onClose);
+                    }
                 });
             }
         }
@@ -344,7 +350,7 @@ namespace BundleUISystem
                 NoMessageHandle(assetName);
             }
         }
-        public static void Open<T>(UnityAction onClose = null, JSONNode data = null) where T : UIPanelTemp
+        public static void Open<T>(UnityAction<JSONNode> onClose = null, JSONNode data = null) where T : UIPanelTemp
         {
             string assetName = typeof(T).ToString();
             Open(assetName, onClose, data);
@@ -365,7 +371,7 @@ namespace BundleUISystem
                 }
             }
 
-            var key = (addClose + assetName);
+            var key = (_close + assetName);
 
             TraverseHold((eventHold) =>
             {

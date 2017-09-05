@@ -9,13 +9,13 @@ public class Demo : MonoBehaviour {
         {
             var node = new JSONClass();
             node["key"] = "Hellow world";
-            UIGroup.Open<Panel1>(() => { Debug.Log("onClose panel1"); }, node);
+            UIGroup.Open<Panel1>((x) => { Debug.Log("onClose panel1"+ x); }, node);
         }
         if (GUILayout.Button("打开panel1 1000 次"))
         {
             for (int i = 0; i < 1000; i++)
             {
-                BundleUISystem.UIGroup.Open<Panel1>(()=> { Debug.Log("onClose panel1"); }, "hellow world:" + i);
+                BundleUISystem.UIGroup.Open<Panel1>((x)=> { Debug.Log("onClose panel1" + x); }, "hellow world:" + i);
             }
         }
         if (GUILayout.Button("关闭panel1"))

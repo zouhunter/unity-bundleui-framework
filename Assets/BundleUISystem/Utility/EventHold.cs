@@ -10,6 +10,7 @@ namespace BundleUISystem
     public class EventHold: IEventHold
     {
         private Dictionary<string, UnityAction<JSONNode>> m_needHandle = new Dictionary<string, UnityAction<JSONNode>>();
+
         #region 注册注销事件
         public void Record(string key, UnityAction<JSONNode> handle)
         {
@@ -79,7 +80,7 @@ namespace BundleUISystem
         #region 
         public bool HaveRecord(string key)
         {
-            return !m_needHandle.ContainsKey(key);
+            return m_needHandle.ContainsKey(key);
         }
         #endregion
     }

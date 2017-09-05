@@ -16,7 +16,8 @@ namespace BundleUISystem
         [SerializeField]
         protected Toggle.ToggleEvent m_OpenClose;
         protected Toggle m_Tog;
-        public event Action OnDelete;
+        public event UnityAction<JSONNode> OnDelete;
+
         protected virtual void OnEnable(){
             m_OnOpen.Invoke();
             m_OpenClose.Invoke(true);
@@ -43,10 +44,17 @@ namespace BundleUISystem
 
         }
 
+        public virtual JSONNode CallBackState
+        {
+            get
+            {
+                return null;
+            }
+        }
         protected virtual void OnDestroy()
         {
             m_OpenClose.Invoke(false);
-            if (OnDelete != null) OnDelete();
+            if (OnDelete != null) OnDelete(CallBackState);
         }
     }
 }

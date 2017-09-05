@@ -9,4 +9,11 @@ public class Panel1 : UIPanelTemp
     {
         Debug.Log(data.ToString());
     }
+    public override JSONNode CallBackState
+    {
+        get
+        {
+            return "表";
+        }
+    }
 }
