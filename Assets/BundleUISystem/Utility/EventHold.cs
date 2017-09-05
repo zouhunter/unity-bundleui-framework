@@ -75,5 +75,12 @@ namespace BundleUISystem
             return !lReportMissingRecipient;
         }
         #endregion
+
+        #region 
+        public bool HaveRecord(string key)
+        {
+            return !m_needHandle.ContainsKey(key);
+        }
+        #endregion
     }
 }

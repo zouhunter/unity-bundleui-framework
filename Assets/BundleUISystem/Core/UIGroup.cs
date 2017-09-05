@@ -306,7 +306,33 @@ namespace BundleUISystem
         #endregion
 
         #region 触发事件
-        public static void Open(string assetName, object data = null)
+        public static void Open(string assetName, UnityAction onClose = null, object data = null)
+        {
+            bool handled = true;
+            TraverseHold((eventHold) =>
+            {
+                handled |= eventHold.NotifyObserver(assetName, data);
+            });
+            if (!handled)
+            {
+                NoMessageHandle(assetName);
+            }
+            else if(onClose != null)
+            {
+                var key = (addClose + assetName);
+                TraverseHold((eventHold) =>
+                {
+                    if (eventHold.HaveRecord(key))
+                    {
+                        eventHold.Record(key,new UnityAction<object>((y) =>
+                        {
+                            onClose.Invoke();
+                        }));
+                    }   
+                });
+            }
+        }
+        public static void Open(string assetName,  object data)
         {
             bool handled = true;
             TraverseHold((eventHold) =>
@@ -318,11 +344,17 @@ namespace BundleUISystem
                 NoMessageHandle(assetName);
             }
         }
-        public static void Open<T>(object data = null) where T : UIPanelTemp
+        public static void Open<T>(UnityAction onClose = null, object data = null) where T : UIPanelTemp
         {
             string assetName = typeof(T).ToString();
-            Open(assetName, data);
+            Open(assetName, onClose, data);
         }
+        public static void Open<T>(object data) where T : UIPanelTemp
+        {
+            string assetName = typeof(T).ToString();
+            Open(assetName, null, data);
+        }
+
         public static void Close(string assetName)
         {
             foreach (var item in controllers)

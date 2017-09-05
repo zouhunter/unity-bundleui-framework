@@ -80,8 +80,12 @@ public abstract class UIDrawerTemp : Editor
     {
         serializedObject.Update();
         DrawScript();
-        DrawOption();
-        DrawToolButtons();
+        using (var hor = new EditorGUILayout.HorizontalScope())
+        {
+            DrawOption();
+            DrawToolButtons();
+        }
+       
         DrawRuntimeItems();
         serializedObject.ApplyModifiedProperties();
     }
@@ -95,7 +99,7 @@ public abstract class UIDrawerTemp : Editor
     private void DrawOption()
     {
         EditorGUI.BeginChangeCheck();
-        defultTypeProp.enumValueIndex = GUILayout.Toolbar(defultTypeProp.enumValueIndex, option, EditorStyles.toolbarButton);
+        defultTypeProp.enumValueIndex = EditorGUILayout.Popup(defultTypeProp.enumValueIndex, option, EditorStyles.toolbarPopup);// GUILayout.Toolbar(defultTypeProp.enumValueIndex, option, EditorStyles.toolbarButton);
     }
     protected virtual void DrawRuntimeItems()
     {
@@ -184,10 +188,11 @@ public abstract class UIDrawerTemp : Editor
     private void DrawToolButtons()
     {
         var btnStyle = EditorStyles.miniButton;
+        var widthSytle = GUILayout.Width(20);
         switch ((UILoadType)defultTypeProp.enumValueIndex)
         {
             case UILoadType.LocalPrefab:
-                using (var hor = new EditorGUILayout.HorizontalScope())
+                using (var hor = new EditorGUILayout.HorizontalScope(widthSytle))
                 {
                     if (GUILayout.Button(new GUIContent("%", "移除重复"), btnStyle))
                     {
@@ -208,7 +213,7 @@ public abstract class UIDrawerTemp : Editor
                 }
                 break;
             case UILoadType.LocalBundle:
-                using (var hor = new EditorGUILayout.HorizontalScope())
+                using (var hor = new EditorGUILayout.HorizontalScope(widthSytle))
                 {
                     if (GUILayout.Button(new GUIContent("%", "移除重复"), btnStyle))
                     {
@@ -233,7 +238,7 @@ public abstract class UIDrawerTemp : Editor
                 }
                 break;
             case UILoadType.RemoteBundle:
-                using (var hor = new EditorGUILayout.HorizontalScope())
+                using (var hor = new EditorGUILayout.HorizontalScope(widthSytle))
                 {
                     if (GUILayout.Button(new GUIContent("%", "移除重复"), btnStyle))
                     {

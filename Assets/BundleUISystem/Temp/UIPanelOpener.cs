@@ -29,7 +29,7 @@ public UIPanelTemp panelTemp;
     public bool destroyOnOpen;
     public void OpenSend(object data)
     {
-        UIGroup.Open(panelName,data);
+        UIGroup.Open(panelName,null,data);
         if(destroyOnOpen)
         {
             Destroy(gameObject);

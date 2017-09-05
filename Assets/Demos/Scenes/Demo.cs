@@ -6,13 +6,13 @@ public class Demo : MonoBehaviour {
     {
         if (GUILayout.Button("打开panel1"))
         {
-            BundleUISystem.UIGroup.Open<Panel1>("hellow world");
+            BundleUISystem.UIGroup.Open<Panel1>(() => { Debug.Log("onClose panel1"); }, "hellow world");
         }
         if (GUILayout.Button("打开panel1 1000 次"))
         {
             for (int i = 0; i < 1000; i++)
             {
-                BundleUISystem.UIGroup.Open<Panel1>("hellow world:" + i);
+                BundleUISystem.UIGroup.Open<Panel1>(()=> { Debug.Log("onClose panel1"); }, "hellow world:" + i);
             }
         }
         if (GUILayout.Button("关闭panel1"))
