@@ -6,10 +6,10 @@ namespace BundleUISystem.Internal
 {
     public interface IEventHold
     {
-        void Record(string key, UnityAction<object> handle);
-        bool Remove(string key, UnityAction<object> handle);
+        void Record(string key, UnityAction<JSONNode> handle);
+        bool Remove(string key, UnityAction<JSONNode> handle);
         void Remove(string key);
         bool NotifyObserver(string key);
-        bool NotifyObserver(string key, object value);
+        bool NotifyObserver(string key, JSONNode value);
     }
 }

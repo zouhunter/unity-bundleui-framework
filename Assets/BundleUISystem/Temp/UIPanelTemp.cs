@@ -38,7 +38,7 @@ namespace BundleUISystem
             }
         }
 
-        public virtual void HandleData(object data)
+        public virtual void HandleData(JSONNode data)
         {
 
         }

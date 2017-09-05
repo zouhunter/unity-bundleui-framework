@@ -1,12 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using BundleUISystem;
 public class Demo : MonoBehaviour {
     void OnGUI()
     {
         if (GUILayout.Button("打开panel1"))
         {
-            BundleUISystem.UIGroup.Open<Panel1>(() => { Debug.Log("onClose panel1"); }, "hellow world");
+            var node = new JSONClass();
+            node["key"] = "Hellow world";
+            UIGroup.Open<Panel1>(() => { Debug.Log("onClose panel1"); }, node);
         }
         if (GUILayout.Button("打开panel1 1000 次"))
         {

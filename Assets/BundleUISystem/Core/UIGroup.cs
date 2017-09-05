@@ -154,13 +154,13 @@ namespace BundleUISystem
         }
         private void RegisterMessageEvents(IUILoadCtrl loadCtrl, ItemInfoBase trigger)
         {
-            UnityAction<object> createAction = (x) =>
+            UnityAction<JSONNode> createAction = (x) =>
             {
                 trigger.dataQueue.Enqueue(x);//
                 loadCtrl.GetGameObjectInfo(trigger);
             };
 
-            UnityAction<object> handInfoAction = (data) =>
+            UnityAction<JSONNode> handInfoAction = (data) =>
             {
                 IPanelName irm = trigger.instence.GetComponent<IPanelName>();
                 irm.HandleData(data);
@@ -298,7 +298,7 @@ namespace BundleUISystem
         {
             string key = addClose + assetName;
             eventHold.Remove(key);
-            eventHold.Record(key, new UnityAction<object>((y) =>
+            eventHold.Record(key, new UnityAction<JSONNode>((y) =>
             {
                 if (x != null) Destroy(x);
             }));
@@ -306,7 +306,7 @@ namespace BundleUISystem
         #endregion
 
         #region 触发事件
-        public static void Open(string assetName, UnityAction onClose = null, object data = null)
+        public static void Open(string assetName, UnityAction onClose = null, JSONNode data = null)
         {
             bool handled = true;
             TraverseHold((eventHold) =>
@@ -324,7 +324,7 @@ namespace BundleUISystem
                 {
                     if (eventHold.HaveRecord(key))
                     {
-                        eventHold.Record(key,new UnityAction<object>((y) =>
+                        eventHold.Record(key,new UnityAction<JSONNode>((y) =>
                         {
                             onClose.Invoke();
                         }));
@@ -332,7 +332,7 @@ namespace BundleUISystem
                 });
             }
         }
-        public static void Open(string assetName,  object data)
+        public static void Open(string assetName, JSONNode data)
         {
             bool handled = true;
             TraverseHold((eventHold) =>
@@ -344,12 +344,12 @@ namespace BundleUISystem
                 NoMessageHandle(assetName);
             }
         }
-        public static void Open<T>(UnityAction onClose = null, object data = null) where T : UIPanelTemp
+        public static void Open<T>(UnityAction onClose = null, JSONNode data = null) where T : UIPanelTemp
         {
             string assetName = typeof(T).ToString();
             Open(assetName, onClose, data);
         }
-        public static void Open<T>(object data) where T : UIPanelTemp
+        public static void Open<T>(JSONNode data) where T : UIPanelTemp
         {
             string assetName = typeof(T).ToString();
             Open(assetName, null, data);

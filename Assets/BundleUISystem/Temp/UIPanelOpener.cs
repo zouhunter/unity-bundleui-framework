@@ -27,7 +27,7 @@ public UIPanelTemp panelTemp;
 #endif
     public string panelName;
     public bool destroyOnOpen;
-    public void OpenSend(object data)
+    public void OpenSend(JSONNode data)
     {
         UIGroup.Open(panelName,null,data);
         if(destroyOnOpen)
