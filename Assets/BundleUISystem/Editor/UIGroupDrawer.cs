@@ -4,8 +4,11 @@ using UnityEngine;
 using UnityEditor;
 using System.Reflection;
 using Rotorz.ReorderableList;
+using Rotorz.ReorderableList.Internal;
 using BundleUISystem;
 using System;
+using UnityEngine.Serialization;
+
 using AssetBundle = UnityEngine.AssetBundle;
 [CustomEditor(typeof(UIGroup)), CanEditMultipleObjects]
 public class UIGroupDrawer : UIDrawerTemp
@@ -37,6 +40,14 @@ public abstract class UIDrawerTemp : Editor
     protected DragAdapt prefabsAdapt;
     protected DragAdapt rbundlesAdapt;
     protected bool swink;
+    private string query;
+    private SerializedProperty prefabsPropWorp;
+    private SerializedProperty bundlesPropWorp;
+    private SerializedProperty rbundlesPropWorp;
+    protected DragAdapt prefabsAdaptWorp;
+    protected DragAdapt bundlesAdaptWorp;
+    protected DragAdapt rbundlesAdaptWorp;
+
 #if AssetBundleTools
     protected string[] option = new string[] { "预制", "本地", "路径" };
 #else
@@ -55,7 +66,16 @@ public abstract class UIDrawerTemp : Editor
         defultTypeProp = serializedObject.FindProperty("defultType");
         assetUrlProp = serializedObject.FindProperty("assetUrl");
         menuProp = serializedObject.FindProperty("menu");
+
+        var sobj = new SerializedObject(UIGroupObj.CreateInstance<UIGroupObj>());
+        prefabsPropWorp = sobj.FindProperty("prefabs");
+        bundlesPropWorp = sobj.FindProperty("bundles");
+        rbundlesPropWorp = sobj.FindProperty("rbundles");
+        prefabsAdaptWorp = new DragAdapt(prefabsPropWorp, "prefabsWorp");
+        bundlesAdaptWorp = new DragAdapt(bundlesPropWorp, "bundlesWorp");
+        rbundlesAdaptWorp = new DragAdapt(rbundlesPropWorp, "rbundlesWorp");
     }
+
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
@@ -79,24 +99,86 @@ public abstract class UIDrawerTemp : Editor
     }
     protected virtual void DrawRuntimeItems()
     {
-        switch ((UILoadType)defultTypeProp.enumValueIndex)
+        EditorGUI.BeginChangeCheck();
+        query = EditorGUILayout.TextField(query);
+        if (EditorGUI.EndChangeCheck())
         {
-            case UILoadType.LocalPrefab:
-                ReorderableListGUI.Title("预制体动态加载资源信息列表");
-                Rotorz.ReorderableList.ReorderableListGUI.ListField(prefabsAdapt);
-                break;
-            case UILoadType.LocalBundle:
-                ReorderableListGUI.Title("本地动态加载资源信息列表");
-                Rotorz.ReorderableList.ReorderableListGUI.ListField(bundlesAdapt);
-                break;
-            case UILoadType.RemoteBundle:
-                ReorderableListGUI.Title("远端动态加载资源信息列表");
-                Rotorz.ReorderableList.ReorderableListGUI.ListField(rbundlesAdapt);
-                break;
-            default:
-                break;
+            MarchList();
+        }
+        if (string.IsNullOrEmpty(query))
+        {
+            switch ((UILoadType)defultTypeProp.enumValueIndex)
+            {
+                case UILoadType.LocalPrefab:
+                    ReorderableListGUI.Title("预制体动态加载资源信息列表");
+                    Rotorz.ReorderableList.ReorderableListGUI.ListField(prefabsAdapt);
+                    break;
+                case UILoadType.LocalBundle:
+                    ReorderableListGUI.Title("本地动态加载资源信息列表");
+                    Rotorz.ReorderableList.ReorderableListGUI.ListField(bundlesAdapt);
+                    break;
+                case UILoadType.RemoteBundle:
+                    ReorderableListGUI.Title("远端动态加载资源信息列表");
+                    Rotorz.ReorderableList.ReorderableListGUI.ListField(rbundlesAdapt);
+                    break;
+                default:
+                    break;
+            }
+        }
+       else
+        {
+            ReorderableListGUI.Title("[March]");
+            switch ((UILoadType)defultTypeProp.enumValueIndex)
+            {
+                case UILoadType.LocalPrefab:
+                    Rotorz.ReorderableList.ReorderableListGUI.ListField(prefabsAdaptWorp);
+                    break;
+                case UILoadType.LocalBundle:
+                    Rotorz.ReorderableList.ReorderableListGUI.ListField(bundlesAdaptWorp);
+                    break;
+                case UILoadType.RemoteBundle:
+                    Rotorz.ReorderableList.ReorderableListGUI.ListField(rbundlesAdaptWorp);
+                    break;
+                default:
+                    break;
+            }
         }
 
+    }
+    private void MarchList()
+    {
+        SerializedProperty property = null;
+        SerializedProperty targetProperty = null;
+        if (!string.IsNullOrEmpty(query))
+        {
+            switch ((UILoadType)defultTypeProp.enumValueIndex)
+            {
+                case UILoadType.LocalPrefab:
+                    property = prefabsProp;
+                    targetProperty = prefabsPropWorp;
+                    break;
+                case UILoadType.LocalBundle:
+                    property = bundlesProp;
+                    targetProperty = bundlesPropWorp;
+                    break;
+                case UILoadType.RemoteBundle:
+                    property = rbundlesProp;
+                    targetProperty = rbundlesPropWorp;
+                    break;
+                default:
+                    break;
+            }
+            targetProperty.ClearArray();
+            for (int i = 0; i < property.arraySize; i++)
+            {
+                var assetNameProp = property.GetArrayElementAtIndex(i).FindPropertyRelative("assetName");
+                if (assetNameProp.stringValue.ToLower().Contains(query.ToLower()))
+                {
+                    targetProperty.InsertArrayElementAtIndex(0);
+                    SerializedPropertyUtility.CopyPropertyValue(targetProperty.GetArrayElementAtIndex(0), property.GetArrayElementAtIndex(i));
+                }
+            }
+        }
     }
 
     private void DrawToolButtons()
