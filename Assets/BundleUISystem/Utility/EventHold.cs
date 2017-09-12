@@ -9,10 +9,10 @@ namespace BundleUISystem
 
     public class EventHold: IEventHold
     {
-        private Dictionary<string, UnityAction<JSONNode>> m_needHandle = new Dictionary<string, UnityAction<JSONNode>>();
+        private Dictionary<string, UnityAction<JSNode>> m_needHandle = new Dictionary<string, UnityAction<JSNode>>();
 
         #region 注册注销事件
-        public void Record(string key, UnityAction<JSONNode> handle)
+        public void Record(string key, UnityAction<JSNode> handle)
         {
             // First check if we know about the message type
             if (!m_needHandle.ContainsKey(key))
@@ -25,7 +25,7 @@ namespace BundleUISystem
             }
         }
 
-        public bool Remove(string key, UnityAction<JSONNode> handle)
+        public bool Remove(string key, UnityAction<JSNode> handle)
         {
             if (m_needHandle.ContainsKey(key))
             {
@@ -62,7 +62,7 @@ namespace BundleUISystem
 
             return !lReportMissingRecipient;
         }
-        public bool NotifyObserver(string key, JSONNode value)
+        public bool NotifyObserver(string key, JSNode value)
         {
             bool lReportMissingRecipient = true;
 
