@@ -71,9 +71,9 @@ public abstract class UIDrawerTemp : Editor
         prefabsPropWorp = sobj.FindProperty("prefabs");
         bundlesPropWorp = sobj.FindProperty("bundles");
         rbundlesPropWorp = sobj.FindProperty("rbundles");
-        prefabsAdaptWorp = new DragAdapt(prefabsPropWorp, "prefabsWorp");
-        bundlesAdaptWorp = new DragAdapt(bundlesPropWorp, "bundlesWorp");
-        rbundlesAdaptWorp = new DragAdapt(rbundlesPropWorp, "rbundlesWorp");
+        prefabsAdaptWorp = new DragAdapt(prefabsPropWorp, "prefabs");
+        bundlesAdaptWorp = new DragAdapt(bundlesPropWorp, "bundles");
+        rbundlesAdaptWorp = new DragAdapt(rbundlesPropWorp, "rbundles");
     }
 
     public override void OnInspectorGUI()

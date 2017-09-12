@@ -10,18 +10,9 @@ namespace BundleUISystem
 {
     public class UIPanelTemp : MonoBehaviour, IPanelButton, IPanelName, IPanelToggle
     {
-        [SerializeField]
-        protected UnityEvent m_OnOpen;
         protected Button m_Btn;
-        [SerializeField]
-        protected Toggle.ToggleEvent m_OpenClose;
         protected Toggle m_Tog;
         public event UnityAction<JSONNode> OnDelete;
-
-        protected virtual void OnEnable(){
-            m_OnOpen.Invoke();
-            m_OpenClose.Invoke(true);
-        }
         public virtual Button Btn
         {
             set
@@ -53,7 +44,6 @@ namespace BundleUISystem
         }
         protected virtual void OnDestroy()
         {
-            m_OpenClose.Invoke(false);
             if (OnDelete != null) OnDelete(CallBackState);
         }
     }
