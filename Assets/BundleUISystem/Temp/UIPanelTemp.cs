@@ -12,7 +12,7 @@ namespace BundleUISystem
     {
         protected Button m_Btn;
         protected Toggle m_Tog;
-        public event UnityAction<JSNode> OnDelete;
+        public event UnityAction<JSONObject> OnDelete;
         public virtual Button Btn
         {
             set
@@ -30,12 +30,12 @@ namespace BundleUISystem
             }
         }
 
-        public virtual void HandleData(JSNode data)
+        public virtual void HandleData(JSONObject data)
         {
 
         }
 
-        public virtual JSNode CallBackState
+        public virtual JSONObject CallBackState
         {
             get
             {

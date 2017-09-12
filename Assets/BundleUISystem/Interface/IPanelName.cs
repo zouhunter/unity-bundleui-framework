@@ -9,8 +9,8 @@ namespace BundleUISystem.Internal
 {
     public interface IPanelName
     {
-        event UnityAction<JSNode> OnDelete;
-        void HandleData(JSNode data);
+        event UnityAction<JSONObject> OnDelete;
+        void HandleData(JSONObject data);
     }
 
 }
