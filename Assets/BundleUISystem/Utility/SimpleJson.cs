@@ -180,6 +180,10 @@ namespace BundleUISystem
         {
             return new JSONData(s);
         }
+        public static implicit operator JSONNode(int i)
+        {
+            return new JSONData(i);
+        }
         public static implicit operator string(JSONNode d)
         {
             return (d == null) ? null : d.Value;
