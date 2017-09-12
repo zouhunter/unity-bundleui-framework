@@ -85,7 +85,7 @@ public abstract class UIDrawerTemp : Editor
             DrawOption();
             DrawToolButtons();
         }
-       
+        DrawParameter();
         DrawRuntimeItems();
         serializedObject.ApplyModifiedProperties();
     }
@@ -257,17 +257,37 @@ public abstract class UIDrawerTemp : Editor
             default:
                 break;
         }
+    }
 
+    private void DrawParameter()
+    {
         switch ((UILoadType)defultTypeProp.enumValueIndex)
         {
             case UILoadType.RemoteBundle:
-                EditorGUILayout.PropertyField(assetUrlProp);
-                EditorGUILayout.PropertyField(menuProp);
+                using (var hor = new EditorGUILayout.HorizontalScope())
+                {
+                    if(GUILayout.Button(new GUIContent("rPath:","相对于exe的路径"),EditorStyles.label, GUILayout.Width(60))){
+                        var t = new TextEditor();
+                        t.text = assetUrlProp.stringValue;
+                        t.Copy(); 
+                    }
+                    assetUrlProp.stringValue = EditorGUILayout.TextField(assetUrlProp.stringValue);
+                }
+
+                using (var hor = new EditorGUILayout.HorizontalScope())
+                {
+                    if (GUILayout.Button(new GUIContent("Menu:", "AssetBundleManifest"), EditorStyles.label, GUILayout.Width(60)))
+                    {
+                        var t = new TextEditor();
+                        t.text = menuProp.stringValue;
+                        t.Copy();
+                    }
+                    menuProp.stringValue = EditorGUILayout.TextField(menuProp.stringValue);
+                }
                 break;
             default:
                 break;
         }
-
     }
 
     private void GroupPreviewFromBundles()
