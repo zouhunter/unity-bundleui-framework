@@ -163,7 +163,7 @@ namespace BundleUISystem
                     // Nope, we are moving the item!
                     this.Insert(insertionIndex);
                     SerializedPropertyUtility.CopyPropertyValue(this[insertionIndex], draggedItem.ShoppingItem);
-                    draggedItem.SourceListAdaptor.Remove(draggedItem.Index);
+                    if(!Event.current.control) draggedItem.SourceListAdaptor.Remove(draggedItem.Index);
                     draggedItem.SourceListAdaptor.arrayProperty.serializedObject.ApplyModifiedProperties();
                     // Ensure that the item remains selected at its new location!
                     s_SelectedList = this;
