@@ -20,7 +20,7 @@ namespace BundleUISystem
 {
 
 
-    public class JSONObject
+    public partial class JSONObject
     {
 #if POOLING
         const int MAX_POOL_SIZE = 10000;
@@ -1188,7 +1188,9 @@ namespace BundleUISystem
             }
         }
 #endif
-
+    }
+    public partial class JSONObject
+    {
         #region operators
         public static implicit operator JSONObject(string s)
         {
@@ -1209,6 +1211,15 @@ namespace BundleUISystem
         public static implicit operator string(JSONObject d)
         {
             return (d == null) ? null : d.str;
+        }
+        public static implicit operator JSONObject(string[] s)
+        {
+            if (s == null) return null;
+            var obj = JSONObject.Create(Type.ARRAY);
+            for (int i = 0; i < s.Length; i++){
+                obj.Add(s[i]);
+            }
+            return obj;
         }
         //public static bool operator ==(JSONObject a, object b)
         //{

@@ -87,6 +87,7 @@ public abstract class UIDrawerTemp : Editor
         }
         DrawParameter();
         DrawRuntimeItems();
+        DrawAcceptRegion();
         serializedObject.ApplyModifiedProperties();
     }
 
@@ -129,7 +130,7 @@ public abstract class UIDrawerTemp : Editor
                     break;
             }
         }
-       else
+        else
         {
             ReorderableListGUI.Title("[March]");
             switch ((UILoadType)defultTypeProp.enumValueIndex)
@@ -266,10 +267,11 @@ public abstract class UIDrawerTemp : Editor
             case UILoadType.RemoteBundle:
                 using (var hor = new EditorGUILayout.HorizontalScope())
                 {
-                    if(GUILayout.Button(new GUIContent("rPath:","相对于exe的路径"),EditorStyles.label, GUILayout.Width(60))){
+                    if (GUILayout.Button(new GUIContent("rPath:", "相对于exe的路径"), EditorStyles.label, GUILayout.Width(60)))
+                    {
                         var t = new TextEditor();
                         t.text = assetUrlProp.stringValue;
-                        t.Copy(); 
+                        t.Copy();
                     }
                     assetUrlProp.stringValue = EditorGUILayout.TextField(assetUrlProp.stringValue);
                 }
@@ -289,6 +291,52 @@ public abstract class UIDrawerTemp : Editor
                 break;
         }
     }
+    /// <summary>
+    /// 绘制作快速导入的区域
+    /// </summary>
+    private void DrawAcceptRegion()
+    {
+        var rect = GUILayoutUtility.GetRect(new GUIContent("哈哈"), EditorStyles.toolbarButton);
+        rect.y -= EditorGUIUtility.singleLineHeight;
+        switch (Event.current.type)
+        {
+            case EventType.DragUpdated:
+                if (rect.Contains(Event.current.mousePosition))
+                {
+                    DragAndDrop.visualMode = DragAndDropVisualMode.Move;
+                }
+                break;
+            case EventType.DragPerform:
+                if (DragAndDrop.objectReferences.Length > 0)
+                {
+                    var objs = DragAndDrop.objectReferences;
+                    for (int i = 0; i < objs.Length; i++)
+                    {
+                        var obj = objs[i];
+                        switch ((UILoadType)defultTypeProp.enumValueIndex)
+                        {
+                            case UILoadType.LocalPrefab:
+                                prefabsProp.InsertArrayElementAtIndex(prefabsProp.arraySize);
+                                var itemprefab = prefabsProp.GetArrayElementAtIndex(prefabsProp.arraySize - 1);
+                                itemprefab.FindPropertyRelative("prefab").objectReferenceValue = obj;
+                                break;
+                            case UILoadType.LocalBundle:
+                                bundlesProp.InsertArrayElementAtIndex(bundlesProp.arraySize);
+                                var itembundle = bundlesProp.GetArrayElementAtIndex(bundlesProp.arraySize - 1);
+                                var guidProp = itembundle.FindPropertyRelative("guid");
+                                var goodProp = itembundle.FindPropertyRelative("good");
+                                var path = AssetDatabase.GetAssetPath(obj);
+                                guidProp.stringValue = AssetDatabase.AssetPathToGUID(path);
+                                goodProp.boolValue = true;
+                                UpdateOnLocalBundleInfo(itembundle);
+                                break;
+                        }
+                    }
+                }
+                break;
+        }
+    }
+
 
     private void GroupPreviewFromBundles()
     {
@@ -336,7 +384,7 @@ public abstract class UIDrawerTemp : Editor
                 var bundleNameProp = itemProp.FindPropertyRelative("bundleName");
                 var guidProp = itemProp.FindPropertyRelative("guid");
                 var paths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(bundleNameProp.stringValue, assetNameProp.stringValue);
-                if(paths.Length > 0)
+                if (paths.Length > 0)
                 {
                     prefab = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
                     guidProp.stringValue = AssetDatabase.AssetPathToGUID(paths[0]);
@@ -396,17 +444,25 @@ public abstract class UIDrawerTemp : Editor
         for (int i = 0; i < bundlesProp.arraySize; i++)
         {
             var itemProp = bundlesProp.GetArrayElementAtIndex(i);
-            var guidProp = itemProp.FindPropertyRelative("guid");
-            var goodProp = itemProp.FindPropertyRelative("good");
-            var assetNameProp = itemProp.FindPropertyRelative("assetName");
-            var bundleNameProp = itemProp.FindPropertyRelative("bundleName");
+            UpdateOnLocalBundleInfo(itemProp);
+        }
+        UnityEditor.EditorUtility.SetDirty(this);
 
-            if (!goodProp.boolValue)
-            {
-                UnityEditor.EditorUtility.DisplayDialog("空对象", assetNameProp.stringValue + "信息错误", "确认");
-                continue;
-            }
+    }
 
+    private void UpdateOnLocalBundleInfo(SerializedProperty itemProp)
+    {
+        var guidProp = itemProp.FindPropertyRelative("guid");
+        var goodProp = itemProp.FindPropertyRelative("good");
+        var assetNameProp = itemProp.FindPropertyRelative("assetName");
+        var bundleNameProp = itemProp.FindPropertyRelative("bundleName");
+
+        if (!goodProp.boolValue)
+        {
+            UnityEditor.EditorUtility.DisplayDialog("空对象", assetNameProp.stringValue + "信息错误", "确认");
+        }
+        else
+        {
             string assetPath = UnityEditor.AssetDatabase.GUIDToAssetPath(guidProp.stringValue);
             var obj = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
 
@@ -418,15 +474,12 @@ public abstract class UIDrawerTemp : Editor
             if (string.IsNullOrEmpty(bundleNameProp.stringValue))
             {
                 UnityEditor.EditorUtility.DisplayDialog("提示", "预制体" + assetNameProp.stringValue + "没有assetBundle标记", "确认");
-                return;
             }
         }
-        UnityEditor.EditorUtility.SetDirty(this);
-
     }
     private void RemoveBundlesDouble(SerializedProperty property)
     {
-        compair: List<string> temp = new List<string>();
+    compair: List<string> temp = new List<string>();
 
         for (int i = 0; i < property.arraySize; i++)
         {
@@ -452,7 +505,8 @@ public abstract class UIDrawerTemp : Editor
             var item = arrayProp.GetArrayElementAtIndex(i);
             var instanceIDPorp = item.FindPropertyRelative("instanceID");
             var obj = EditorUtility.InstanceIDToObject(instanceIDPorp.intValue);
-            if (obj != null){
+            if (obj != null)
+            {
                 DestroyImmediate(obj);
             }
             instanceIDPorp.intValue = 0;
