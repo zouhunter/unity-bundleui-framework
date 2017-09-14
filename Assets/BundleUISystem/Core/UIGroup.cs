@@ -316,26 +316,27 @@ namespace BundleUISystem
         #region 触发事件
         public static void Open(string assetName, UnityAction<JSONObject> onClose = null, JSONObject data = null)
         {
-            bool handled = true;
+            List<EventHold> haveEventHolds = new List<EventHold>();
             TraverseHold((eventHold) =>
             {
-                handled |= eventHold.NotifyObserver(assetName, data);
+                var handle = eventHold.NotifyObserver(assetName, data);
+                if (handle)
+                {
+                    haveEventHolds.Add(eventHold);
+                }
             });
-            if (!handled)
+
+            if (haveEventHolds.Count == 0)
             {
                 NoMessageHandle(assetName);
             }
             else if(onClose != null)
             {
-                var closekey = _close + assetName;
                 var onclosekey = _onClose + assetName;
-                TraverseHold((eventHold) =>
+                for (int i = 0; i < haveEventHolds.Count; i++)
                 {
-                    if(eventHold.HaveRecord(closekey))
-                    {
-                        eventHold.Record(onclosekey, onClose);
-                    }
-                });
+                    haveEventHolds[i].Record(onclosekey, onClose);
+                }
             }
         }
         public static void Open(string assetName, JSONObject data)
