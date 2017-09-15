@@ -9,7 +9,8 @@ namespace BundleUISystem.Internal
 {
     public interface IPanelName
     {
-        event UnityAction<JSONObject> OnDelete;
+        event UnityAction onDelete;
+        event UnityAction<JSONObject> onCallBack;
         void HandleData(JSONObject data);
     }
 

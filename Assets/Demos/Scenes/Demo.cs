@@ -8,7 +8,7 @@ public class Demo : MonoBehaviour {
     {
         if (GUILayout.Button("打开panel1"))
         {
-            UIGroup.Open(panel1, (x) => { Debug.Log("onClose panel1"+ x); },"Hellow world");
+            UIGroup.Open(panel1, (x) => { Debug.Log("callBack panel1"+ x); },"Hellow world");
         }
         if (GUILayout.Button("打开panel1 1000 次"))
         {

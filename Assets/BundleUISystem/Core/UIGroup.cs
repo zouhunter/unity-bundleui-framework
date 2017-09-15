@@ -26,7 +26,7 @@ namespace BundleUISystem
         private event UnityAction onEnable;
         private event UnityAction onDisable;
         private const string _close = "close";
-        private const string _onClose = "onClose";
+        private const string _onCallBack = "onCallBack";
 
         private static List<IUILoadCtrl> controllers = new List<IUILoadCtrl>();
         private static List<EventHold> eventHolders = new List<EventHold>();
@@ -178,12 +178,15 @@ namespace BundleUISystem
                     }
                     eventHold.Remove(trigger.assetName, createAction);
                     eventHold.Record(trigger.assetName, handInfoAction);
-                    irm.OnDelete += (state) =>
+                    irm.onDelete += () =>
                     {
-                        InvokeDestroyCallBack(trigger.assetName, state);
                         trigger.instence = null;
                         eventHold.Remove(trigger.assetName, handInfoAction);
                         eventHold.Record(trigger.assetName, createAction);
+                    };
+                    irm.onCallBack += (state) =>
+                    {
+                        InvokeCallBack(trigger.assetName, state);
                     };
                 }
                 RegisterDestoryAction(trigger.assetName, x);
@@ -229,7 +232,7 @@ namespace BundleUISystem
 
                     trigger.toggle.onValueChanged.RemoveListener(CreateByToggle);
 
-                    it.OnDelete += (state) =>
+                    it.onDelete += () =>
                     {
                         trigger.toggle.onValueChanged.AddListener(CreateByToggle);
                     };
@@ -253,7 +256,7 @@ namespace BundleUISystem
                     ib.Btn = trigger.button;
                     trigger.button.onClick.RemoveListener(CreateByButton);
 
-                    ib.OnDelete += (state) =>
+                    ib.onDelete += () =>
                     {
                         trigger.button.onClick.AddListener(CreateByButton);
                     };
@@ -305,16 +308,15 @@ namespace BundleUISystem
                 if (x != null) Destroy(x);
             }));
         }
-        private void InvokeDestroyCallBack(string assetName, JSONObject node)
+        private void InvokeCallBack(string assetName, JSONObject node)
         {
-            var key = _onClose + assetName;
+            var key = _onCallBack + assetName;
             eventHold.NotifyObserver(key, node);
-            eventHold.Remove(key);
         }
         #endregion
 
         #region 触发事件
-        public static void Open(string assetName, UnityAction<JSONObject> onClose = null, JSONObject data = null)
+        public static void Open(string assetName, UnityAction<JSONObject> onCallBack = null, JSONObject data = null)
         {
             List<EventHold> haveEventHolds = new List<EventHold>();
             TraverseHold((eventHold) =>
@@ -330,12 +332,12 @@ namespace BundleUISystem
             {
                 NoMessageHandle(assetName);
             }
-            else if(onClose != null)
+            else if(onCallBack != null)
             {
-                var onclosekey = _onClose + assetName;
+                var callBackKey = _onCallBack + assetName;
                 for (int i = 0; i < haveEventHolds.Count; i++)
                 {
-                    haveEventHolds[i].Record(onclosekey, onClose);
+                    haveEventHolds[i].Record(callBackKey, onCallBack);
                 }
             }
         }

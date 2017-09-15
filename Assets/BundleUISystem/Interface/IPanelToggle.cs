@@ -10,6 +10,6 @@ namespace BundleUISystem.Internal
     public interface IPanelToggle
     {
         Toggle toggle { set; }
-        event UnityAction<JSONObject> OnDelete;
+        event UnityAction onDelete;
     }
 }

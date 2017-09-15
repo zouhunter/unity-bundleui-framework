@@ -10,6 +10,6 @@ namespace BundleUISystem.Internal
     public interface IPanelButton
     {
         Button Btn { set; }
-        event UnityAction<JSONObject> OnDelete;
+        event UnityAction onDelete;
     }
 }

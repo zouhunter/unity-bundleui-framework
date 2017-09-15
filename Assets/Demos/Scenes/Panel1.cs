@@ -2,18 +2,24 @@
 using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 using BundleUISystem;
-public class Panel1 : UIPanelTemp
+using System;
+
+public class Panel1 : UIPanelTemp,IPointerClickHandler
 {
     public override void HandleData(JSONObject data)
     {
         Debug.Log(data.str);
     }
-    public override JSONObject CallBackState
+    protected override void OnDestroy()
     {
-        get
-        {
-            return "[返回状态]";
-        }
+        base.OnDestroy();
+        CallBack("[返回状态]");
+    }
+
+    void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
+    {
+        CallBack(eventData.clickTime);
     }
 }

@@ -12,7 +12,9 @@ namespace BundleUISystem
     {
         protected Button m_Btn;
         protected Toggle m_Tog;
-        public event UnityAction<JSONObject> OnDelete;
+        public event UnityAction onDelete;
+        public event UnityAction<JSONObject> onCallBack;
+
         public virtual Button Btn
         {
             set
@@ -32,19 +34,19 @@ namespace BundleUISystem
 
         public virtual void HandleData(JSONObject data)
         {
-
+            gameObject.SetActive(true);
         }
 
-        public virtual JSONObject CallBackState
+        protected void CallBack(JSONObject statu)
         {
-            get
+            if(onCallBack != null && statu != null)
             {
-                return null;
+                onCallBack.Invoke(statu);
             }
         }
         protected virtual void OnDestroy()
         {
-            if (OnDelete != null) OnDelete(CallBackState);
+            if (onDelete != null) onDelete();
         }
     }
 }
