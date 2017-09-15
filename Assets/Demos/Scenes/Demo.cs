@@ -3,22 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 using BundleUISystem;
 public class Demo : MonoBehaviour {
+    string panel1 = "Panel1";
     void OnGUI()
     {
         if (GUILayout.Button("打开panel1"))
         {
-            UIGroup.Open<Panel1>((x) => { Debug.Log("onClose panel1"+ x); },"Hellow world");
+            UIGroup.Open(panel1, (x) => { Debug.Log("onClose panel1"+ x); },"Hellow world");
         }
         if (GUILayout.Button("打开panel1 1000 次"))
         {
             for (int i = 0; i < 1000; i++)
             {
-                BundleUISystem.UIGroup.Open<Panel1>((x)=> { Debug.Log("onClose panel1" + x); }, "hellow world:" + i);
+                BundleUISystem.UIGroup.Open(panel1, (x)=> { Debug.Log("onClose panel1" + x); }, "hellow world:" + i);
             }
         }
         if (GUILayout.Button("关闭panel1"))
         {
-            BundleUISystem.UIGroup.Close<Panel1>();
+            BundleUISystem.UIGroup.Close(panel1);
         }
         if (GUILayout.Button("打开Poppanel【层级为10】"))
         {

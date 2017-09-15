@@ -351,17 +351,6 @@ namespace BundleUISystem
                 NoMessageHandle(assetName);
             }
         }
-        public static void Open<T>(UnityAction<JSONObject> onClose = null, JSONObject data = null) where T : UIPanelTemp
-        {
-            string assetName = typeof(T).ToString();
-            Open(assetName, onClose, data);
-        }
-        public static void Open<T>(JSONObject data) where T : UIPanelTemp
-        {
-            string assetName = typeof(T).ToString();
-            Open(assetName, null, data);
-        }
-
         public static void Close(string assetName)
         {
             foreach (var item in controllers)
@@ -378,11 +367,6 @@ namespace BundleUISystem
             {
                 eventHold.NotifyObserver(key);
             });
-        }
-        public static void Close<T>() where T : UIPanelTemp
-        {
-            string assetName = typeof(T).ToString();
-            Close(assetName);
         }
         private static void TraverseHold(UnityAction<EventHold> OnGet)
         {
