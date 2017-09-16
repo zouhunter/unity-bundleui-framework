@@ -15,7 +15,7 @@ MonoBehaviour:
   assetUrl: 
   menu: 
   bundles:
-  - instanceID: -2400
+  - instanceID: 0
     assetName: PopPanel
     button: {fileID: 0}
     toggle: {fileID: 0}

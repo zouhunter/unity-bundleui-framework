@@ -109,7 +109,8 @@ public class UIBundleInfoDrawer : PropertyDrawer
             else
             {
                 var obj = EditorUtility.InstanceIDToObject(instanceIDProp.intValue);
-                if (obj != null){
+                if (obj != null)
+                {
                     Object.DestroyImmediate(obj);
                 }
                 instanceIDProp.intValue = 0;
@@ -185,16 +186,24 @@ public class UIBundleInfoDrawer : PropertyDrawer
         }
 
 
-        if (GUI.Button(rect, "[-]", EditorStyles.textField))
+        if (goodProp.boolValue)
         {
-            if (goodProp.boolValue)
+            if (GUI.Button(rect, "", EditorStyles.objectFieldMiniThumb))
             {
                 var path = AssetDatabase.GUIDToAssetPath(guidProp.stringValue);
                 var obj = AssetDatabase.LoadAssetAtPath<GameObject>(path);
                 EditorGUIUtility.PingObject(obj);
             }
         }
-
+        else
+        {
+            var obj = EditorGUI.ObjectField(rect, null, typeof(GameObject), false);
+            if (obj != null)
+            {
+                var path = AssetDatabase.GetAssetPath(obj);
+                guidProp.stringValue = AssetDatabase.AssetPathToGUID(path);
+            }
+        }
         if (!property.isExpanded)
         {
             return;

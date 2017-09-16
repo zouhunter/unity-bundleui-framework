@@ -157,12 +157,17 @@ public class PrefabInfoDrawer : PropertyDrawer
                 break;
         }
 
-        if (GUI.Button(rect, "[-]", EditorStyles.textField))
+        
+        if (prefabProp.objectReferenceValue != null)
         {
-            if (prefabProp.objectReferenceValue != null)
+            if (GUI.Button(rect, "", EditorStyles.objectFieldMiniThumb))
             {
                 EditorGUIUtility.PingObject(prefabProp.objectReferenceValue);
             }
+        }
+        else
+        {
+            prefabProp.objectReferenceValue = EditorGUI.ObjectField(rect, null, typeof(GameObject), false);
         }
 
         if (!property.isExpanded)

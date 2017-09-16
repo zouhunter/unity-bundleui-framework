@@ -228,7 +228,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8848654467659e246b9a912bb5566b84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defultType: 2
+  defultType: 0
   bundles:
   - instanceID: 0
     assetName: Image
