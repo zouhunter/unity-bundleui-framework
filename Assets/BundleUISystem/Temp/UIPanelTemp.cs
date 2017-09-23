@@ -38,7 +38,7 @@ namespace BundleUISystem
 
         protected void CallBack(JSONObject statu)
         {
-            if(onCallBack != null && statu != null)
+            if(onCallBack != null)
             {
                 onCallBack.Invoke(statu);
             }
