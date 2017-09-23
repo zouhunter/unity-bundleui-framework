@@ -31,7 +31,6 @@ namespace BundleUISystem
                 m_Tog.onValueChanged.AddListener((x) => { gameObject.SetActive(x); });
             }
         }
-
         public virtual void HandleData(JSONObject data)
         {
             gameObject.SetActive(true);

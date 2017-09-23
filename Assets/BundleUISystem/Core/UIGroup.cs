@@ -337,6 +337,7 @@ namespace BundleUISystem
                 var callBackKey = _onCallBack + assetName;
                 for (int i = 0; i < haveEventHolds.Count; i++)
                 {
+                    haveEventHolds[i].Remove(callBackKey);
                     haveEventHolds[i].Record(callBackKey, onCallBack);
                 }
             }
