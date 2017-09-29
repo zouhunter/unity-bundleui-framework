@@ -35,26 +35,6 @@ namespace BundleUISystem
             }
             return obj;
         }
-        public static bool operator ==(JSONObject a, object b)
-        {
-            if (b == null && a is JSONObject)
-                return true;
-            return System.Object.ReferenceEquals(a, b);
-        }
-
-        public static bool operator !=(JSONObject a, object b)
-        {
-            return !(a == b);
-        }
-        public override bool Equals(object obj)
-        {
-            return System.Object.ReferenceEquals(this, obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
 
         #endregion operators
 

@@ -20,6 +20,7 @@ public class Panel1Data
     }
     public static implicit operator Panel1Data(JSONObject s)
     {
+        Debug.Log(s.ToString());
         return JsonUtility.FromJson<Panel1Data>(s.ToString());
     }
 }

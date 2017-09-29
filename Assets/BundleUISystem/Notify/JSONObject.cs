@@ -18,6 +18,7 @@ using Debug = UnityEngine.Debug;
  */
 namespace BundleUISystem
 {
+
     public partial class JSONObject
     {
 #if POOLING

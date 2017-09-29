@@ -35,7 +35,6 @@ namespace BundleUISystem
         {
             gameObject.SetActive(true);
         }
-
         protected void CallBack(JSONObject statu)
         {
             if(onCallBack != null)
