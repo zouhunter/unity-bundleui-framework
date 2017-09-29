@@ -6,12 +6,30 @@ using UnityEngine.EventSystems;
 using BundleUISystem;
 using System;
 
+[System.Serializable]
+public class Panel1Data
+{
+    public string arg0;
+    public Panel1Data(string arg0)
+    {
+        this.arg0 = arg0;
+    }
+    public static implicit operator JSONObject(Panel1Data s)
+    {
+        return new JSONObject( JsonUtility.ToJson(s));
+    }
+    public static implicit operator Panel1Data(JSONObject s)
+    {
+        return JsonUtility.FromJson<Panel1Data>(s.ToString());
+    }
+}
+
 public class Panel1 : UIPanelTemp,IPointerClickHandler
 {
-    public override void HandleData(JSONObject data)
+    public override void HandleData(JSONObject obj)
     {
-        base.HandleData(data);
-        Debug.Log(data.str);
+        Panel1Data data = obj;
+        Debug.Log(data.arg0);
         Debug.Log("注意：现在可实现关闭不销毁");
     }
     protected override void OnDestroy()

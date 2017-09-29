@@ -18,8 +18,6 @@ using Debug = UnityEngine.Debug;
  */
 namespace BundleUISystem
 {
-
-
     public partial class JSONObject
     {
 #if POOLING
@@ -1188,60 +1186,5 @@ namespace BundleUISystem
             }
         }
 #endif
-    }
-    public partial class JSONObject
-    {
-        #region operators
-        public static implicit operator JSONObject(string s)
-        {
-            return CreateStringObject(s);
-        }
-        public static implicit operator JSONObject(int i)
-        {
-            return Create(i);
-        }
-        public static implicit operator JSONObject(float f)
-        {
-            return Create(f);
-        }
-        public static implicit operator JSONObject(bool b)
-        {
-            return Create(b);
-        }
-        public static implicit operator string(JSONObject d)
-        {
-            return (d == null) ? null : d.str;
-        }
-        public static implicit operator JSONObject(string[] s)
-        {
-            if (s == null) return null;
-            var obj = JSONObject.Create(Type.ARRAY);
-            for (int i = 0; i < s.Length; i++){
-                obj.Add(s[i]);
-            }
-            return obj;
-        }
-        //public static bool operator ==(JSONObject a, object b)
-        //{
-        //    if (b == null && a is JSONObject)
-        //        return true;
-        //    return System.Object.ReferenceEquals(a, b);
-        //}
-
-        //public static bool operator !=(JSONObject a, object b)
-        //{
-        //    return !(a == b);
-        //}
-        //public override bool Equals(object obj)
-        //{
-        //    return System.Object.ReferenceEquals(this, obj);
-        //}
-
-        //public override int GetHashCode()
-        //{
-        //    return base.GetHashCode();
-        //}
-
-        #endregion operators
     }
 }

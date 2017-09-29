@@ -2,20 +2,74 @@ using UnityEngine;
 
 namespace BundleUISystem
 {
-    public static partial class JSONTemplates
+    public partial class JSONObject
     {
+        #region simple operators
+        public static implicit operator JSONObject(string s)
+        {
+            return CreateStringObject(s);
+        }
+        public static implicit operator JSONObject(int i)
+        {
+            return Create(i);
+        }
+        public static implicit operator JSONObject(float f)
+        {
+            return Create(f);
+        }
+        public static implicit operator JSONObject(bool b)
+        {
+            return Create(b);
+        }
+        public static implicit operator string(JSONObject d)
+        {
+            return (d == null) ? null : d.str;
+        }
+        public static implicit operator JSONObject(string[] s)
+        {
+            if (s == null) return null;
+            var obj = JSONObject.Create(Type.ARRAY);
+            for (int i = 0; i < s.Length; i++)
+            {
+                obj.Add(s[i]);
+            }
+            return obj;
+        }
+        public static bool operator ==(JSONObject a, object b)
+        {
+            if (b == null && a is JSONObject)
+                return true;
+            return System.Object.ReferenceEquals(a, b);
+        }
 
+        public static bool operator !=(JSONObject a, object b)
+        {
+            return !(a == b);
+        }
+        public override bool Equals(object obj)
+        {
+            return System.Object.ReferenceEquals(this, obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        #endregion operators
+
+        #region Unity Struct Operate
         /*
          * Vector2
          */
-        public static Vector2 ToVector2(JSONObject obj)
+        public static implicit operator Vector2(JSONObject obj)
         {
             float x = obj["x"] ? obj["x"].f : 0;
             float y = obj["y"] ? obj["y"].f : 0;
             return new Vector2(x, y);
         }
 
-        public static JSONObject FromVector2(Vector2 v)
+        public static implicit operator JSONObject(Vector2 v)
         {
             JSONObject vdata = JSONObject.obj;
             if (v.x != 0) vdata.AddField("x", v.x);
@@ -26,7 +80,7 @@ namespace BundleUISystem
         /*
          * Vector3
          */
-        public static JSONObject FromVector3(Vector3 v)
+        public static implicit operator JSONObject(Vector3 v)
         {
             JSONObject vdata = JSONObject.obj;
             if (v.x != 0) vdata.AddField("x", v.x);
@@ -35,7 +89,7 @@ namespace BundleUISystem
             return vdata;
         }
 
-        public static Vector3 ToVector3(JSONObject obj)
+        public static implicit operator Vector3(JSONObject obj)
         {
             float x = obj["x"] ? obj["x"].f : 0;
             float y = obj["y"] ? obj["y"].f : 0;
@@ -46,7 +100,7 @@ namespace BundleUISystem
         /*
          * Vector4
          */
-        public static JSONObject FromVector4(Vector4 v)
+        public static implicit operator JSONObject(Vector4 v)
         {
             JSONObject vdata = JSONObject.obj;
             if (v.x != 0) vdata.AddField("x", v.x);
@@ -56,7 +110,7 @@ namespace BundleUISystem
             return vdata;
         }
 
-        public static Vector4 ToVector4(JSONObject obj)
+        public static implicit operator Vector4(JSONObject obj)
         {
             float x = obj["x"] ? obj["x"].f : 0;
             float y = obj["y"] ? obj["y"].f : 0;
@@ -68,7 +122,7 @@ namespace BundleUISystem
         /*
          * Matrix4x4
          */
-        public static JSONObject FromMatrix4x4(Matrix4x4 m)
+        public static implicit operator JSONObject(Matrix4x4 m)
         {
             JSONObject mdata = JSONObject.obj;
             if (m.m00 != 0) mdata.AddField("m00", m.m00);
@@ -90,7 +144,7 @@ namespace BundleUISystem
             return mdata;
         }
 
-        public static Matrix4x4 ToMatrix4x4(JSONObject obj)
+        public static implicit operator Matrix4x4(JSONObject obj)
         {
             Matrix4x4 result = new Matrix4x4();
             if (obj["m00"]) result.m00 = obj["m00"].f;
@@ -115,7 +169,7 @@ namespace BundleUISystem
         /*
          * Quaternion
          */
-        public static JSONObject FromQuaternion(Quaternion q)
+        public static implicit operator JSONObject(Quaternion q)
         {
             JSONObject qdata = JSONObject.obj;
             if (q.w != 0) qdata.AddField("w", q.w);
@@ -125,7 +179,7 @@ namespace BundleUISystem
             return qdata;
         }
 
-        public static Quaternion ToQuaternion(JSONObject obj)
+        public static implicit operator Quaternion(JSONObject obj)
         {
             float x = obj["x"] ? obj["x"].f : 0;
             float y = obj["y"] ? obj["y"].f : 0;
@@ -137,7 +191,7 @@ namespace BundleUISystem
         /*
          * Color
          */
-        public static JSONObject FromColor(Color c)
+        public static implicit operator JSONObject(Color c)
         {
             JSONObject cdata = JSONObject.obj;
             if (c.r != 0) cdata.AddField("r", c.r);
@@ -147,7 +201,7 @@ namespace BundleUISystem
             return cdata;
         }
 
-        public static Color ToColor(JSONObject obj)
+        public static implicit operator Color(JSONObject obj)
         {
             Color c = new Color();
             for (int i = 0; i < obj.Count; i++)
@@ -174,20 +228,20 @@ namespace BundleUISystem
         /*
          * Layer Mask
          */
-        public static JSONObject FromLayerMask(LayerMask l)
+        public static implicit operator JSONObject(LayerMask l)
         {
             JSONObject result = JSONObject.obj;
             result.AddField("value", l.value);
             return result;
         }
 
-        public static LayerMask ToLayerMask(JSONObject obj)
+        public static implicit operator LayerMask(JSONObject obj)
         {
             LayerMask l = new LayerMask {value = (int) obj["value"].n};
             return l;
         }
 
-        public static JSONObject FromRect(Rect r)
+        public static implicit operator JSONObject(Rect r)
         {
             JSONObject result = JSONObject.obj;
             if (r.x != 0) result.AddField("x", r.x);
@@ -197,7 +251,7 @@ namespace BundleUISystem
             return result;
         }
 
-        public static Rect ToRect(JSONObject obj)
+        public static implicit operator Rect(JSONObject obj)
         {
             Rect r = new Rect();
             for (int i = 0; i < obj.Count; i++)
@@ -221,7 +275,7 @@ namespace BundleUISystem
             return r;
         }
 
-        public static JSONObject FromRectOffset(RectOffset r)
+        public static implicit operator JSONObject(RectOffset r)
         {
             JSONObject result = JSONObject.obj;
             if (r.bottom != 0) result.AddField("bottom", r.bottom);
@@ -231,7 +285,7 @@ namespace BundleUISystem
             return result;
         }
 
-        public static RectOffset ToRectOffset(JSONObject obj)
+        public static implicit operator RectOffset(JSONObject obj)
         {
             RectOffset r = new RectOffset();
             for (int i = 0; i < obj.Count; i++)
@@ -255,7 +309,7 @@ namespace BundleUISystem
             return r;
         }
 
-        public static AnimationCurve ToAnimationCurve(JSONObject obj)
+        public static implicit operator AnimationCurve(JSONObject obj)
         {
             AnimationCurve a = new AnimationCurve();
             if (obj.HasField("keys"))
@@ -263,7 +317,7 @@ namespace BundleUISystem
                 JSONObject keys = obj.GetField("keys");
                 for (int i = 0; i < keys.list.Count; i++)
                 {
-                    a.AddKey(ToKeyframe(keys[i]));
+                    a.AddKey(keys[i]);
                 }
             }
             if (obj.HasField("preWrapMode"))
@@ -273,7 +327,7 @@ namespace BundleUISystem
             return a;
         }
 
-        public static JSONObject FromAnimationCurve(AnimationCurve a)
+        public static implicit operator JSONObject(AnimationCurve a)
         {
             JSONObject result = JSONObject.obj;
             result.AddField("preWrapMode", a.preWrapMode.ToString());
@@ -283,14 +337,14 @@ namespace BundleUISystem
                 JSONObject keysJSON = JSONObject.Create();
                 for (int i = 0; i < a.keys.Length; i++)
                 {
-                    keysJSON.Add(FromKeyframe(a.keys[i]));
+                    keysJSON.Add(a.keys[i]);
                 }
                 result.AddField("keys", keysJSON);
             }
             return result;
         }
 
-        public static Keyframe ToKeyframe(JSONObject obj)
+        public static implicit operator Keyframe(JSONObject obj)
         {
             Keyframe k = new Keyframe(obj.HasField("time") ? obj.GetField("time").n : 0,
                 obj.HasField("value") ? obj.GetField("value").n : 0);
@@ -301,7 +355,7 @@ namespace BundleUISystem
             return k;
         }
 
-        public static JSONObject FromKeyframe(Keyframe k)
+        public static implicit operator JSONObject(Keyframe k)
         {
             JSONObject result = JSONObject.obj;
             if (k.inTangent != 0) result.AddField("inTangent", k.inTangent);
@@ -311,6 +365,6 @@ namespace BundleUISystem
             if (k.value != 0) result.AddField("value", k.value);
             return result;
         }
-
+        #endregion
     }
 }
