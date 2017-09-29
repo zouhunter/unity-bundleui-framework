@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using BundleUISystem;
 using System;
+using System.Collections;
+
 
 [System.Serializable]
 public class Panel1Data
@@ -27,6 +29,12 @@ public class Panel1Data
 
 public class Panel1 : UIPanelTemp,IPointerClickHandler
 {
+    public object obj;
+    private void Start()
+    {
+        var table = new Hashtable();
+        table["a"] = 1;
+    }
     public override void HandleData(JSONObject obj)
     {
         Panel1Data data = obj;
