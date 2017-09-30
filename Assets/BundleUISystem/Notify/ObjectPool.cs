@@ -9,9 +9,12 @@ namespace BundleUISystem
     /// track the instances that we hand out.
     /// </summary>
     /// <typeparam name="T">The type of object in the pool.</typeparam>
-    public sealed class ObjectPool<T>
-        where T : new()
+    public sealed class ObjectPool<T> /*where T : new()*/
     {
+        /// <summary>
+        /// 创建方法
+        /// </summary>
+        Func<T> CreateFunc;
         /// <summary>
         /// Number of items to grow the array by if needed
         /// </summary>
@@ -31,8 +34,9 @@ namespace BundleUISystem
         /// Initializes a new instance of the ObjectPool class.
         /// </summary>
         /// <param name="size">The size of the object pool.</param>
-        public ObjectPool(int rSize)
+        public ObjectPool(int rSize,Func<T> createFunc)
         {
+            this.CreateFunc = createFunc;
             // Initialize the pool
             Resize(rSize, false);
         }
@@ -83,7 +87,7 @@ namespace BundleUISystem
         public T Allocate()
         {
             T lItem = default(T);
-
+            if(mPool.Length > 21) UnityEngine.Debug.Log("mPool.Length:" + mPool.Length);
             // Creates extra items if needed
             if (mNextIndex >= mPool.Length)
             {
@@ -168,7 +172,7 @@ namespace BundleUISystem
                 // Allocate items in the new array
                 for (int i = lCount; i < rSize; i++)
                 {
-                    lNewPool[i] = new T();
+                    lNewPool[i] = CreateFunc.Invoke();
                 }
 
                 // Replace the old array

@@ -164,7 +164,11 @@ namespace BundleUISystem
             UnityAction<UIData> handInfoAction = (data) =>
             {
                 IPanelName irm = trigger.instence.GetComponent<IPanelName>();
-                irm.HandleData(data);
+                if(data != null)
+                {
+                    irm.HandleData(data);
+                    data.Release();
+                }
             };
 
             trigger.OnCreate = (x) =>
@@ -174,7 +178,11 @@ namespace BundleUISystem
                 {
                     trigger.instence = x;
                     while (trigger.dataQueue.Count > 0){
-                        irm.HandleData(trigger.dataQueue.Dequeue());
+                        var data = trigger.dataQueue.Dequeue();
+                        if(data != null){
+                            irm.HandleData(data);
+                            data.Release();
+                        }
                     }
                     eventHold.Remove(trigger.assetName, createAction);
                     eventHold.Record(trigger.assetName, handInfoAction);
@@ -316,6 +324,11 @@ namespace BundleUISystem
         #endregion
 
         #region 触发事件
+        public static void Open<T>(string assetName, UnityAction<UIData> onCallBack = null, T data = default(T))
+        {
+            UIData uidata = UIData.Allocate<T>(data);
+            Open(assetName, onCallBack, uidata);
+        }
         public static void Open(string assetName, UnityAction<UIData> onCallBack = null, UIData data = null)
         {
             List<EventHold> haveEventHolds = new List<EventHold>();
@@ -341,6 +354,12 @@ namespace BundleUISystem
                     haveEventHolds[i].Record(callBackKey, onCallBack);
                 }
             }
+        }
+
+        public static void Open<T>(string assetName, T data) 
+        {
+            UIData uidata = UIData.Allocate<T>(data);
+            Open(assetName, (UIData)uidata);
         }
         public static void Open(string assetName, UIData data)
         {

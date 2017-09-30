@@ -241,7 +241,7 @@ MonoBehaviour:
     bundleName: prefabs/image
     guid: f71e2a5440629ad4ab59c38ab3b972bf
     good: 1
-  - instanceID: -3108
+  - instanceID: 0
     assetName: Panel1
     button: {fileID: 0}
     toggle: {fileID: 0}

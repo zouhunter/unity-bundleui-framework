@@ -12,72 +12,88 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-namespace BundleUISystem {
+namespace BundleUISystem
+{
     public partial class UIData
     {
-        protected object data;
-        private Hashtable tableContent = new Hashtable();
-        public enum Type { STRING, INT, FLOAT, OBJECT, ARRAY,Table, BOOL }
-        public Type type = Type.OBJECT;
-        public bool isContainer { get { return (type == Type.OBJECT)||(type==Type.ARRAY)||type==Type.Table; } }
-        public int Count
-        {
-            get
-            {
-                if (tableContent == null)
-                    return -1;
-                return tableContent.Count;
-            }
-        }
+        protected object _data;
+        private Dictionary<object, UIData> tableContent = new Dictionary<object, UIData>();
+        public enum Type { NULL, STRING, INT, FLOAT, OBJECT, DIC, BOOL }
+        public Type type = Type.NULL;
 
-        private int n;
-        private float f;
-        private bool b;
-        private string str;
+        public bool b { get { if (type == Type.BOOL) return (bool)data; return false; } set { type = Type.BOOL; data = value; } }
+        public float f { get { if (type == Type.FLOAT) return (float)data; return 0; } set { type = Type.FLOAT; data = value; } }
+        public int n { get { if (type == Type.INT) return (int)data; return 0; } set { type = Type.INT; data = value; } }
+        public string str { get { if (type == Type.STRING) return (string)data; return ""; } set { type = Type.STRING; data = value; } }
+        public object data { get { return _data; } set { _data = value; } }
 
-        public bool B { get { return b; } set { type = Type.BOOL; Data = b = value; } }
-        public float F { get { return f; } set { type = Type.FLOAT; Data = f = value; } }
-        public int Num { get { return n; } set { type = Type.INT; Data = n = value; } }
-        public string Str { get { return str; }set { type = Type.STRING;Data = str = value; } }
-        public object Data { get { return data; }set { data = value; } }
-        public Hashtable Table { get { return tableContent; }set { type = Type.Table;data = tableContent = value; } }
         #region constractors
-        public static UIData Allocate(Type t)
+        private UIData() { type = Type.OBJECT; }
+        public static UIData Allocate()
         {
             var uidata = poolObject.Allocate();
+            uidata.type = Type.NULL;
+            if(poolObject.Length > 50){
+                poolObject.Reset();
+            }
+            return uidata;
+        }
+        public static UIData Allocate(Type t)
+        {
+            var uidata = Allocate();
             uidata.type = t;
             return uidata;
         }
-
-        public static UIData Allocate(Type t,object data) {
-            var uidata = poolObject.Allocate();
+        public static UIData Allocate<T>(T data)
+        {
+            if (data is string)
+            {
+                return Allocate(Type.STRING, data);
+            }
+            else if (data is int)
+            {
+                return Allocate(Type.INT, data);
+            }
+            else if (data is float)
+            {
+                return Allocate(Type.FLOAT, data);
+            }
+            else if (data is bool)
+            {
+                return Allocate(Type.BOOL, data);
+            }
+            else if (data is Dictionary<object, UIData>)
+            {
+                return Allocate(Type.DIC, data);
+            }
+            else
+            {
+                return Allocate(Type.OBJECT, data);
+            }
+        }
+        public static UIData Allocate(Type t, object data)
+        {
+            var uidata = Allocate();
             uidata.type = t;
             switch (t)
             {
                 case Type.STRING:
-                    uidata.Str = (string)data;
+                    uidata.str = (string)data;
                     break;
                 case Type.INT:
-                    uidata.Num = (int)data;
+                    uidata.n = (int)data;
                     break;
                 case Type.FLOAT:
-                    uidata.F = (float)data;
+                    uidata.f = (float)data;
                     break;
                 case Type.OBJECT:
-                    uidata.data = data;
+                    uidata._data = data;
                     break;
                 case Type.BOOL:
-                    uidata.B = (bool)data;
+                    uidata.b = (bool)data;
                     break;
-                case Type.ARRAY:
-                    var objarray = (object[])data;
-                    for (int i = 0; i < objarray.Length; i++){
-                        uidata.tableContent[i] = objarray[i];
-                    }
-                    uidata.data = data;
-                    break;
-                case Type.Table:
-                    uidata.data = uidata.tableContent = (Hashtable)data;
+                case Type.DIC:
+                    uidata._data = uidata.tableContent = (Dictionary<object, UIData>)data;
                     break;
                 default:
                     break;
@@ -85,36 +101,70 @@ namespace BundleUISystem {
             return uidata;
         }
 
-        public void Clear()
-        {
-            this.data = default(object);
-            n = default(int);
-            f = default(float);
-            b = default(bool);
-            str = default(string);
-            tableContent.Clear();
-        }
-
-        static ObjectPool<UIData> poolObject = new ObjectPool<UIData>(1);
+        static ObjectPool<UIData> poolObject = new ObjectPool<UIData>(1, () => { return new UIData(); });
 
         public void Release()
         {
-            Clear();
+            this._data = default(object);
+            tableContent.Clear();
             poolObject.Release(this);
         }
 
         #endregion
 
-        public object this[object index]
+        #region Switch
+        private static UIData emptyData = UIData.Allocate(Type.NULL);
+
+        public UIData this[object index]
         {
             get
             {
-                return tableContent[index];
+                if (!tableContent.ContainsKey(index))
+                {
+                    return emptyData;
+                }
+                else
+                {
+                    return tableContent[index] as UIData;
+                }
             }
             set
             {
+                type = Type.DIC;
                 tableContent[index] = value;
             }
         }
+
+        public T OfType<T>()
+        {
+            if (data is T)
+            {
+                return (T)data;
+            }
+            return default(T);
+        }
+
+        public bool IsEmpty { get { return type == Type.NULL; } }
+
+        #endregion
+        #region simple operators
+        public static implicit operator UIData(string s)
+        {
+            return UIData.Allocate(Type.STRING, s);
+        }
+        public static implicit operator UIData(int i)
+        {
+            return UIData.Allocate(Type.INT, i);
+        }
+        public static implicit operator UIData(float f)
+        {
+            return UIData.Allocate(Type.FLOAT, f);
+        }
+        public static implicit operator UIData(bool b)
+        {
+            return UIData.Allocate(Type.BOOL, b);
+        }
+        #endregion operators
     }
+
 }

@@ -42,6 +42,13 @@ namespace BundleUISystem
                 onCallBack.Invoke(statu);
             }
         }
+        protected void CallBack<T>(T statu)
+        {
+            if (onCallBack != null)
+            {
+                onCallBack.Invoke(UIData.Allocate<T>(statu));
+            }
+        }
         protected virtual void OnDestroy()
         {
             if (onDelete != null) onDelete();
