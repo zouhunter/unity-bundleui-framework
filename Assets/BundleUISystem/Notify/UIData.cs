@@ -10,82 +10,110 @@ using UnityEngine.Assertions.Must;
 using UnityEngine.Assertions.Comparers;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
-public partial class UIData
-{
-    public static Queue<UIData> releaseQueue = new Queue<UIData>();
-    private Hashtable tableContent = new Hashtable();
-    public object data;
+namespace BundleUISystem {
+    public partial class UIData
+    {
+        protected object data;
+        private Hashtable tableContent = new Hashtable();
+        public enum Type { STRING, INT, FLOAT, OBJECT, ARRAY,Table, BOOL }
+        public Type type = Type.OBJECT;
+        public bool isContainer { get { return (type == Type.OBJECT)||(type==Type.ARRAY)||type==Type.Table; } }
+        public int Count
+        {
+            get
+            {
+                if (tableContent == null)
+                    return -1;
+                return tableContent.Count;
+            }
+        }
 
-    public enum Type { NULL, STRING,INT,FLOAT, OBJECT, ARRAY, BOOL, BAKED }
-    public bool isContainer { get { return (type == Type.ARRAY || type == Type.OBJECT); } }
-    public Type type = Type.NULL;
-    public int Count
-    {
-        get
+        private int n;
+        private float f;
+        private bool b;
+        private string str;
+
+        public bool B { get { return b; } set { type = Type.BOOL;b = value; } }
+        public float F { get { return f; } set { type = Type.FLOAT;f = value; } }
+        public int Num { get { return n; } set { type = Type.INT;n = value; } }
+        public string Str { get { return str; }set { type = Type.STRING;str = value; } }
+        public object Data { get { return data; }set { data = value; } }
+        #region constractors
+        public static UIData Allocate(Type t)
         {
-            if (tableContent == null)
-                return -1;
-            return tableContent.Count;
+            var uidata = poolObject.Allocate();
+            uidata.type = t;
+            return uidata;
         }
-    }
-    public int n;
-    public float f;
-    public bool b;
-    public string str;
-    #region constractors
-    public UIData() { }
-    public UIData(object data)
-    {
-        this.data = data;
-    }
-    public UIData(Type t)
-    {
-        type = t;
-        switch (t)
-        {
-            case Type.NULL:
-                break;
-            case Type.STRING:
-                break;
-            case Type.INT:
-                break;
-            case Type.FLOAT:
-                break;
-            case Type.OBJECT:
-                break;
-            case Type.ARRAY:
-                break;
-            case Type.BOOL:
-                break;
-            case Type.BAKED:
-                break;
-            default:
-                break;
+
+        public static UIData Allocate(Type t,object data) {
+            var uidata = poolObject.Allocate();
+            uidata.type = t;
+            switch (t)
+            {
+                case Type.STRING:
+                    uidata.Str = (string)data;
+                    break;
+                case Type.INT:
+                    uidata.Num = (int)data;
+                    break;
+                case Type.FLOAT:
+                    uidata.F = (float)data;
+                    break;
+                case Type.OBJECT:
+                    uidata.data = data;
+                    break;
+                case Type.BOOL:
+                    uidata.B = (bool)data;
+                    break;
+                case Type.ARRAY:
+                    var objarray = (object[])data;
+                    for (int i = 0; i < objarray.Length; i++){
+                        uidata.tableContent[i] = objarray[i];
+                    }
+                    uidata.data = data;
+                    break;
+                case Type.Table:
+                    uidata.data = uidata.tableContent = (Hashtable)data;
+                    break;
+                default:
+                    break;
+            }
+            return uidata;
         }
-    }
-    #endregion
-    public UIData this[int index]
-    {
-        get
+
+        public void Clear()
         {
-            return null;
+            this.data = default(object);
+            n = default(int);
+            f = default(float);
+            b = default(bool);
+            str = default(string);
+            tableContent.Clear();
         }
-        set
+
+        static ObjectPool<UIData> poolObject = new ObjectPool<UIData>(1);
+
+        public void Release()
         {
-            
+            Clear();
+            poolObject.Release(this);
         }
-    }
-    public UIData this[string index]
-    {
-        get
+
+        #endregion
+
+        public object this[object index]
         {
-           
-            return null;
-        }
-        set
-        {
-            
+            get
+            {
+                return tableContent[index];
+            }
+            set
+            {
+                tableContent[index] = value;
+            }
         }
     }
 }
