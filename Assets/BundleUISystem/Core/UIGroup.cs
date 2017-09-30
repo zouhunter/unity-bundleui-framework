@@ -155,13 +155,13 @@ namespace BundleUISystem
         }
         private void RegisterMessageEvents(IUILoadCtrl loadCtrl, ItemInfoBase trigger)
         {
-            UnityAction<JSONObject> createAction = (x) =>
+            UnityAction<UIData> createAction = (x) =>
             {
                 trigger.dataQueue.Enqueue(x);//
                 loadCtrl.GetGameObjectInfo(trigger);
             };
 
-            UnityAction<JSONObject> handInfoAction = (data) =>
+            UnityAction<UIData> handInfoAction = (data) =>
             {
                 IPanelName irm = trigger.instence.GetComponent<IPanelName>();
                 irm.HandleData(data);
@@ -303,12 +303,12 @@ namespace BundleUISystem
         {
             string key = _close + assetName;
             eventHold.Remove(key);
-            eventHold.Record(key, new UnityAction<JSONObject>((y) =>
+            eventHold.Record(key, new UnityAction<UIData>((y) =>
             {
                 if (x != null) Destroy(x);
             }));
         }
-        private void InvokeCallBack(string assetName, JSONObject node)
+        private void InvokeCallBack(string assetName, UIData node)
         {
             var key = _onCallBack + assetName;
             eventHold.NotifyObserver(key, node);
@@ -316,7 +316,7 @@ namespace BundleUISystem
         #endregion
 
         #region 触发事件
-        public static void Open(string assetName, UnityAction<JSONObject> onCallBack = null, JSONObject data = null)
+        public static void Open(string assetName, UnityAction<UIData> onCallBack = null, UIData data = null)
         {
             List<EventHold> haveEventHolds = new List<EventHold>();
             TraverseHold((eventHold) =>
@@ -342,7 +342,7 @@ namespace BundleUISystem
                 }
             }
         }
-        public static void Open(string assetName, JSONObject data)
+        public static void Open(string assetName, UIData data)
         {
             bool handled = true;
             TraverseHold((eventHold) =>

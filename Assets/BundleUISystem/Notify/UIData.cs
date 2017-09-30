@@ -35,11 +35,12 @@ namespace BundleUISystem {
         private bool b;
         private string str;
 
-        public bool B { get { return b; } set { type = Type.BOOL;b = value; } }
-        public float F { get { return f; } set { type = Type.FLOAT;f = value; } }
-        public int Num { get { return n; } set { type = Type.INT;n = value; } }
-        public string Str { get { return str; }set { type = Type.STRING;str = value; } }
+        public bool B { get { return b; } set { type = Type.BOOL; Data = b = value; } }
+        public float F { get { return f; } set { type = Type.FLOAT; Data = f = value; } }
+        public int Num { get { return n; } set { type = Type.INT; Data = n = value; } }
+        public string Str { get { return str; }set { type = Type.STRING;Data = str = value; } }
         public object Data { get { return data; }set { data = value; } }
+        public Hashtable Table { get { return tableContent; }set { type = Type.Table;data = tableContent = value; } }
         #region constractors
         public static UIData Allocate(Type t)
         {

@@ -12,18 +12,9 @@ using System.Collections;
 public class Panel1Data
 {
     public string arg0;
-    public Panel1Data(string arg0)
+    public Panel1Data(string ar0)
     {
-        this.arg0 = arg0;
-    }
-    public static implicit operator JSONObject(Panel1Data s)
-    {
-        return new JSONObject( JsonUtility.ToJson(s));
-    }
-    public static implicit operator Panel1Data(JSONObject s)
-    {
-        Debug.Log(s.ToString());
-        return JsonUtility.FromJson<Panel1Data>(s.ToString());
+        this.arg0 = "你好";
     }
 }
 
@@ -35,10 +26,11 @@ public class Panel1 : UIPanelTemp,IPointerClickHandler
         var table = new Hashtable();
         table["a"] = 1;
     }
-    public override void HandleData(JSONObject obj)
+    public override void HandleData(UIData obj)
     {
-        Panel1Data data = obj;
-        Debug.Log(data.arg0);
+        var table = obj.Table;
+        //Panel1Data data = (Panel1Data)obj.Data;
+        Debug.Log(table["tableItem1"]);
         Debug.Log("注意：现在可实现关闭不销毁");
     }
     protected override void OnDestroy()

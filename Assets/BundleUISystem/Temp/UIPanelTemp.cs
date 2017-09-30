@@ -13,7 +13,7 @@ namespace BundleUISystem
         protected Button m_Btn;
         protected Toggle m_Tog;
         public event UnityAction onDelete;
-        public event UnityAction<JSONObject> onCallBack;
+        public event UnityAction<UIData> onCallBack;
 
         public virtual Button Btn
         {
@@ -31,11 +31,11 @@ namespace BundleUISystem
                 m_Tog.onValueChanged.AddListener((x) => { gameObject.SetActive(x); });
             }
         }
-        public virtual void HandleData(JSONObject data)
+        public virtual void HandleData(UIData data)
         {
             gameObject.SetActive(true);
         }
-        protected void CallBack(JSONObject statu)
+        protected void CallBack(UIData statu)
         {
             if(onCallBack != null)
             {

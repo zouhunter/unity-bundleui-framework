@@ -13,6 +13,14 @@ namespace BundleUISystem {
     public partial class UIData {
 
         #region simple operators
+        public static implicit operator Hashtable(UIData data)
+        {
+            return data.tableContent;
+        }
+        public static implicit operator UIData(Hashtable table)
+        {
+            return UIData.Allocate(Type.Table, table);
+        }
         public static implicit operator UIData(string s)
         {
             return UIData.Allocate(Type.STRING, s);

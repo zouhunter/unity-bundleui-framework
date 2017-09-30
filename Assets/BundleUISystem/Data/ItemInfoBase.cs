@@ -20,7 +20,7 @@ namespace BundleUISystem
         public bool reset;
         public int parentLayer;
         public Type type = Type.Name;
-        public Queue<JSONObject> dataQueue = new Queue<JSONObject>();//多次打开使用
+        public Queue<UIData> dataQueue = new Queue<UIData>();//多次打开使用
         public UnityAction<GameObject> OnCreate;
         public enum Type
         {
