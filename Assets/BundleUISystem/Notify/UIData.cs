@@ -14,31 +14,32 @@ using System;
 
 namespace BundleUISystem
 {
+    public enum DataType { NULL, STRING, INT, FLOAT, OBJECT, DIC, BOOL }
+
     public class UIData
     {
-        protected object _data;
         private Dictionary<object, UIData> tableContent = new Dictionary<object, UIData>();
-        public enum Type { NULL, STRING, INT, FLOAT, OBJECT, DIC, BOOL }
-        public Type type = Type.NULL;
+        public DataType type = DataType.NULL;
+        protected object _data;
 
-        public bool b { get { if (type == Type.BOOL) return (bool)data; return false; } set { type = Type.BOOL; data = value; } }
-        public float f { get { if (type == Type.FLOAT) return (float)data; return 0; } set { type = Type.FLOAT; data = value; } }
-        public int n { get { if (type == Type.INT) return (int)data; return 0; } set { type = Type.INT; data = value; } }
-        public string str { get { if (type == Type.STRING) return (string)data; return ""; } set { type = Type.STRING; data = value; } }
+        public bool b { get { if (type == DataType.BOOL) return (bool)data; return false; } set { type = DataType.BOOL; data = value; } }
+        public float f { get { if (type == DataType.FLOAT) return (float)data; return 0; } set { type = DataType.FLOAT; data = value; } }
+        public int n { get { if (type == DataType.INT) return (int)data; return 0; } set { type = DataType.INT; data = value; } }
+        public string str { get { if (type == DataType.STRING) return (string)data; return ""; } set { type = DataType.STRING; data = value; } }
         public object data { get { return _data; } set { _data = value; } }
 
         #region constractors
-        private UIData() { type = Type.OBJECT;  }
+        private UIData() { type = DataType.OBJECT;  }
         public static UIData Allocate()
         {
             var uidata = poolObject.Allocate();
-            uidata.type = Type.NULL;
+            uidata.type = DataType.NULL;
             if(poolObject.Length > 50){
                 poolObject.Reset();
             }
             return uidata;
         }
-        public static UIData Allocate(Type t)
+        public static UIData Allocate(DataType t)
         {
             var uidata = Allocate();
             uidata.type = t;
@@ -48,52 +49,52 @@ namespace BundleUISystem
         {
             if (data is string)
             {
-                return Allocate(Type.STRING, data);
+                return Allocate(DataType.STRING, data);
             }
             else if (data is int)
             {
-                return Allocate(Type.INT, data);
+                return Allocate(DataType.INT, data);
             }
             else if (data is float)
             {
-                return Allocate(Type.FLOAT, data);
+                return Allocate(DataType.FLOAT, data);
             }
             else if (data is bool)
             {
-                return Allocate(Type.BOOL, data);
+                return Allocate(DataType.BOOL, data);
             }
             else if (data is Dictionary<object, UIData>)
             {
-                return Allocate(Type.DIC, data);
+                return Allocate(DataType.DIC, data);
             }
             else
             {
-                return Allocate(Type.OBJECT, data);
+                return Allocate(DataType.OBJECT, data);
             }
         }
 
-        public static UIData Allocate(Type t, object data)
+        public static UIData Allocate(DataType t, object data)
         {
             var uidata = Allocate();
             uidata.type = t;
             switch (t)
             {
-                case Type.STRING:
+                case DataType.STRING:
                     uidata.str = (string)data;
                     break;
-                case Type.INT:
+                case DataType.INT:
                     uidata.n = (int)data;
                     break;
-                case Type.FLOAT:
+                case DataType.FLOAT:
                     uidata.f = (float)data;
                     break;
-                case Type.OBJECT:
+                case DataType.OBJECT:
                     uidata._data = data;
                     break;
-                case Type.BOOL:
+                case DataType.BOOL:
                     uidata.b = (bool)data;
                     break;
-                case Type.DIC:
+                case DataType.DIC:
                     uidata._data = uidata.tableContent = (Dictionary<object, UIData>)data;
                     break;
                 default:
@@ -119,7 +120,7 @@ namespace BundleUISystem
         #endregion
 
         #region Switch
-        private static UIData emptyData = UIData.Allocate(Type.NULL);
+        private static UIData emptyData = UIData.Allocate(DataType.NULL);
 
         public UIData this[object index]
         {
@@ -136,7 +137,7 @@ namespace BundleUISystem
             }
             set
             {
-                type = Type.DIC;
+                type = DataType.DIC;
                 tableContent[index] = value;
             }
         }
@@ -150,26 +151,26 @@ namespace BundleUISystem
             return default(T);
         }
 
-        public bool IsEmpty { get { return type == Type.NULL; } }
+        public bool IsEmpty { get { return type == DataType.NULL; } }
 
         #endregion
 
         #region simple operators
         public static implicit operator UIData(string s)
         {
-            return UIData.Allocate(Type.STRING, s);
+            return UIData.Allocate(DataType.STRING, s);
         }
         public static implicit operator UIData(int i)
         {
-            return UIData.Allocate(Type.INT, i);
+            return UIData.Allocate(DataType.INT, i);
         }
         public static implicit operator UIData(float f)
         {
-            return UIData.Allocate(Type.FLOAT, f);
+            return UIData.Allocate(DataType.FLOAT, f);
         }
         public static implicit operator UIData(bool b)
         {
-            return UIData.Allocate(Type.BOOL, b);
+            return UIData.Allocate(DataType.BOOL, b);
         }
         #endregion operators
 
