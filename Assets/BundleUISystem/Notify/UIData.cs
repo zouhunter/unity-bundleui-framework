@@ -14,7 +14,7 @@ using System;
 
 namespace BundleUISystem
 {
-    public partial class UIData
+    public class UIData
     {
         protected object _data;
         private Dictionary<object, UIData> tableContent = new Dictionary<object, UIData>();
@@ -28,7 +28,7 @@ namespace BundleUISystem
         public object data { get { return _data; } set { _data = value; } }
 
         #region constractors
-        private UIData() { type = Type.OBJECT; }
+        private UIData() { type = Type.OBJECT;  }
         public static UIData Allocate()
         {
             var uidata = poolObject.Allocate();
@@ -71,6 +71,7 @@ namespace BundleUISystem
                 return Allocate(Type.OBJECT, data);
             }
         }
+
         public static UIData Allocate(Type t, object data)
         {
             var uidata = Allocate();
@@ -105,8 +106,13 @@ namespace BundleUISystem
 
         public void Release()
         {
-            this._data = default(object);
+            foreach (var item in tableContent)
+            {
+                var childData = item.Value;
+                childData.Release();
+            }
             tableContent.Clear();
+            this._data = default(object);
             poolObject.Release(this);
         }
 
@@ -147,6 +153,7 @@ namespace BundleUISystem
         public bool IsEmpty { get { return type == Type.NULL; } }
 
         #endregion
+
         #region simple operators
         public static implicit operator UIData(string s)
         {
@@ -165,6 +172,11 @@ namespace BundleUISystem
             return UIData.Allocate(Type.BOOL, b);
         }
         #endregion operators
+
+        public override string ToString()
+        {
+            return str;
+        }
     }
 
 }

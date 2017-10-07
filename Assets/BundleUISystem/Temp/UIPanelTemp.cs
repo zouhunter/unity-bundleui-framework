@@ -14,7 +14,6 @@ namespace BundleUISystem
         protected Toggle m_Tog;
         public event UnityAction onDelete;
         public event UnityAction<UIData> onCallBack;
-
         public virtual Button Btn
         {
             set
@@ -22,7 +21,6 @@ namespace BundleUISystem
                 m_Btn = value;
             }
         }
-
         public virtual Toggle toggle
         {
             set
@@ -31,26 +29,35 @@ namespace BundleUISystem
                 m_Tog.onValueChanged.AddListener((x) => { gameObject.SetActive(x); });
             }
         }
+        private UIData _data;
+        protected UIData Data { get { return _data; } }
+
         public virtual void HandleData(UIData data)
         {
+            this._data = data;
             gameObject.SetActive(true);
         }
-        protected void CallBack(UIData statu)
+
+        protected void CallBack(UIData callBackData)
         {
-            if(onCallBack != null)
-            {
-                onCallBack.Invoke(statu);
+            if(onCallBack != null){
+                onCallBack.Invoke(callBackData);
+                //callBackData.Release();
             }
         }
-        protected void CallBack<T>(T statu)
+
+        protected void CallBack<T>(T data)
         {
             if (onCallBack != null)
             {
-                onCallBack.Invoke(UIData.Allocate<T>(statu));
+                var callBackData = UIData.Allocate<T>(data);
+                onCallBack.Invoke(callBackData);
+                //callBackData.Release();
             }
         }
         protected virtual void OnDestroy()
         {
+            //if (_data != null) _data.Release();
             if (onDelete != null) onDelete();
         }
     }

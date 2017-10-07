@@ -18,30 +18,21 @@ public class Panel1Data
     }
 }
 
-public class Panel1 : UIPanelTemp,IPointerClickHandler
+public class Panel1 : UIPanelTemp
 {
     public object obj;
-    private void Start()
+
+    public override void HandleData(UIData data)
     {
-        var table = new Hashtable();
-        table["a"] = 1;
-    }
-    public override void HandleData(UIData obj)
-    {
-        var table = obj.Table;
+        base.HandleData(data);
         //Panel1Data data = (Panel1Data)obj.Data;
-        Debug.Log(table["tableItem1"]);
-        Debug.Log("注意：现在可实现关闭不销毁");
+        Debug.Log(Data["tableItem1"]);
+        Debug.Log("注意：现在可实现任意时间调用CallBack不销毁");
+        CallBack("[接收状态]");
     }
     protected override void OnDestroy()
     {
         base.OnDestroy();
         CallBack("[返回状态]");
-    }
-
-    void IPointerClickHandler.OnPointerClick(PointerEventData eventData)
-    {
-        CallBack(eventData.clickTime);
-        gameObject.SetActive(false);
     }
 }

@@ -87,7 +87,11 @@ namespace BundleUISystem
         public T Allocate()
         {
             T lItem = default(T);
-            if(mPool.Length > 21) UnityEngine.Debug.Log("mPool.Length:" + mPool.Length);
+            if (mPool.Length > 30)
+            {
+                UnityEngine.Debug.Log("mPool.Length:" + mPool.Length + "Reseted");
+                Reset();
+            }
             // Creates extra items if needed
             if (mNextIndex >= mPool.Length)
             {
@@ -140,7 +144,7 @@ namespace BundleUISystem
         {
             // Determine the length to initialize
             int lLength = mGrowSize;
-            if (mPool != null) { lLength = mPool.Length; }
+            //if (mPool != null) { lLength = mPool.Length; }
 
             // Rebuild our elements
             Resize(lLength, false);

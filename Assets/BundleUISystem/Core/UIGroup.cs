@@ -86,7 +86,7 @@ namespace BundleUISystem
             if (_localLoader != null) controllers.Remove(_localLoader);
 
             if (_remoteLoader != null) controllers.Remove(_remoteLoader);
-          
+
             eventHolders.Remove(eventHold);
         }
 
@@ -164,10 +164,9 @@ namespace BundleUISystem
             UnityAction<UIData> handInfoAction = (data) =>
             {
                 IPanelName irm = trigger.instence.GetComponent<IPanelName>();
-                if(data != null)
+                if (data != null)
                 {
                     irm.HandleData(data);
-                    data.Release();
                 }
             };
 
@@ -177,13 +176,6 @@ namespace BundleUISystem
                 if (irm != null)
                 {
                     trigger.instence = x;
-                    while (trigger.dataQueue.Count > 0){
-                        var data = trigger.dataQueue.Dequeue();
-                        if(data != null){
-                            irm.HandleData(data);
-                            data.Release();
-                        }
-                    }
                     eventHold.Remove(trigger.assetName, createAction);
                     eventHold.Record(trigger.assetName, handInfoAction);
                     irm.onDelete += () =>
@@ -196,6 +188,15 @@ namespace BundleUISystem
                     {
                         InvokeCallBack(trigger.assetName, state);
                     };
+
+                    while (trigger.dataQueue.Count > 0)
+                    {
+                        var data = trigger.dataQueue.Dequeue();
+                        if (data != null)
+                        {
+                            irm.HandleData(data);
+                        }
+                    }
                 }
                 RegisterDestoryAction(trigger.assetName, x);
             };
@@ -334,7 +335,7 @@ namespace BundleUISystem
             List<EventHold> haveEventHolds = new List<EventHold>();
             TraverseHold((eventHold) =>
             {
-                var handle = eventHold.NotifyObserver(assetName, data);
+                var handle = eventHold.HaveRecord(assetName);
                 if (handle)
                 {
                     haveEventHolds.Add(eventHold);
@@ -345,18 +346,26 @@ namespace BundleUISystem
             {
                 NoMessageHandle(assetName);
             }
-            else if(onCallBack != null)
+            else
             {
-                var callBackKey = _onCallBack + assetName;
+                if (onCallBack != null)
+                {
+                    var callBackKey = _onCallBack + assetName;
+                    for (int i = 0; i < haveEventHolds.Count; i++)
+                    {
+
+                        haveEventHolds[i].Remove(callBackKey);
+                        haveEventHolds[i].Record(callBackKey, onCallBack);
+                    }
+                }
                 for (int i = 0; i < haveEventHolds.Count; i++)
                 {
-                    haveEventHolds[i].Remove(callBackKey);
-                    haveEventHolds[i].Record(callBackKey, onCallBack);
+                    haveEventHolds[i].NotifyObserver(assetName, data);
                 }
             }
         }
 
-        public static void Open<T>(string assetName, T data) 
+        public static void Open<T>(string assetName, T data)
         {
             UIData uidata = UIData.Allocate<T>(data);
             Open(assetName, (UIData)uidata);
