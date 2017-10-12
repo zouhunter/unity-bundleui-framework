@@ -325,11 +325,7 @@ namespace BundleUISystem
         #endregion
 
         #region 触发事件
-        public static void Open<T>(string assetName, UnityAction<UIData> onCallBack = null, T data = default(T))
-        {
-            UIData uidata = UIData.Allocate<T>(data);
-            Open(assetName, onCallBack, uidata);
-        }
+     
         public static void Open(string assetName, UnityAction<UIData> onCallBack = null, UIData data = null)
         {
             List<EventHold> haveEventHolds = new List<EventHold>();
@@ -348,13 +344,13 @@ namespace BundleUISystem
             }
             else
             {
-                if (onCallBack != null)
-                {
-                    var callBackKey = _onCallBack + assetName;
-                    for (int i = 0; i < haveEventHolds.Count; i++)
-                    {
 
-                        haveEventHolds[i].Remove(callBackKey);
+                var callBackKey = _onCallBack + assetName;
+                for (int i = 0; i < haveEventHolds.Count; i++)
+                {
+                    haveEventHolds[i].Remove(callBackKey);
+                    if (onCallBack != null)
+                    {
                         haveEventHolds[i].Record(callBackKey, onCallBack);
                     }
                 }
@@ -364,23 +360,19 @@ namespace BundleUISystem
                 }
             }
         }
-
+        public static void Open<T>(string assetName, UnityAction<UIData> onCallBack = null, T data = default(T))
+        {
+            UIData uidata = UIData.Allocate<T>(data);
+            Open(assetName, onCallBack, uidata);
+        }
         public static void Open<T>(string assetName, T data)
         {
             UIData uidata = UIData.Allocate<T>(data);
-            Open(assetName, (UIData)uidata);
+            Open(assetName, null, (UIData)uidata);
         }
         public static void Open(string assetName, UIData data)
         {
-            bool handled = true;
-            TraverseHold((eventHold) =>
-            {
-                handled |= eventHold.NotifyObserver(assetName, data);
-            });
-            if (!handled)
-            {
-                NoMessageHandle(assetName);
-            }
+            Open(assetName, null, data);
         }
         public static void Close(string assetName)
         {
