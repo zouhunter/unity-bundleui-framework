@@ -164,10 +164,7 @@ namespace BundleUISystem
             UnityAction<UIData> handInfoAction = (data) =>
             {
                 IPanelName irm = trigger.instence.GetComponent<IPanelName>();
-                if (data != null)
-                {
-                    irm.HandleData(data);
-                }
+                irm.HandleData(data);
             };
 
             trigger.OnCreate = (x) =>
@@ -192,10 +189,7 @@ namespace BundleUISystem
                     while (trigger.dataQueue.Count > 0)
                     {
                         var data = trigger.dataQueue.Dequeue();
-                        if (data != null)
-                        {
-                            irm.HandleData(data);
-                        }
+                        irm.HandleData(data);
                     }
                 }
                 RegisterDestoryAction(trigger.assetName, x);

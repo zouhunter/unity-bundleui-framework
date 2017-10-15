@@ -24,4 +24,8 @@ public class UIPanelSwither : MonoBehaviour {
             Destroy(gameObject);
         }
     }
+    public void Close()
+    {
+        UIGroup.Close(panelName);
+    }
 }

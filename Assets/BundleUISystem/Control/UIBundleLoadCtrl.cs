@@ -21,7 +21,7 @@ namespace BundleUISystem
             _root = root;
             if (!_parentsDic.ContainsKey(_root))
             {
-                Debug.Log(_root);
+                //Debug.Log(_root);
                 _parentsDic[_root] = new Dictionary<int, Transform>();
             }
 #if AssetBundleTools

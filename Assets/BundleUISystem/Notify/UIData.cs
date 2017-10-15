@@ -144,8 +144,7 @@ namespace BundleUISystem
 
         public T OfType<T>()
         {
-            if (data is T)
-            {
+            if (data is T){
                 return (T)data;
             }
             return default(T);
