@@ -16,7 +16,7 @@ namespace BundleUISystem
         public List<UIBundleInfo> bundles = new List<UIBundleInfo>();
         public List<BundleInfo> rbundles = new List<BundleInfo>();
         public List<PrefabInfo> prefabs = new List<PrefabInfo>();
-        public List<UIGroupObj> groupObjs = new List<UIGroupObj>();
+        public List<GroupObj> groupObjs = new List<GroupObj>();
         public string assetUrl;
         public string menu;
         private EventHold eventHold = new EventHold();

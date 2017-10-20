@@ -20,7 +20,7 @@ public class UIGroupDrawer : UIDrawerTemp
         base.DrawRuntimeItems();
     }
 }
-[CustomEditor(typeof(UIGroupObj))]
+[CustomEditor(typeof(GroupObj))]
 public class UIGroupObjDrawer : UIDrawerTemp
 {
 
@@ -67,7 +67,7 @@ public abstract class UIDrawerTemp : Editor
         assetUrlProp = serializedObject.FindProperty("assetUrl");
         menuProp = serializedObject.FindProperty("menu");
 
-        var sobj = new SerializedObject(UIGroupObj.CreateInstance<UIGroupObj>());
+        var sobj = new SerializedObject(GroupObj.CreateInstance<GroupObj>());
         prefabsPropWorp = sobj.FindProperty("prefabs");
         bundlesPropWorp = sobj.FindProperty("bundles");
         rbundlesPropWorp = sobj.FindProperty("rbundles");
@@ -414,7 +414,7 @@ public abstract class UIDrawerTemp : Editor
                         go.transform.SetParent((target as UIGroup).transform, true);
                     }
                 }
-                else if (target is UIGroupObj)
+                else if (target is GroupObj)
                 {
                     if (go.GetComponent<Transform>() is RectTransform)
                     {

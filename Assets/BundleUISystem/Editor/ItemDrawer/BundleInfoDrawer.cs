@@ -43,7 +43,7 @@ public class BundleInfoDrawer : PropertyDrawer
         if (GUI.Button(rect, assetName.stringValue, EditorStyles.toolbar))
         {
             //使用对象是UIGroupObj，将无法从button和Toggle加载
-            if (property.serializedObject.targetObject is UIGroupObj)
+            if (property.serializedObject.targetObject is GroupObj)
             {
                 if (typeProp.enumValueIndex == (int)ItemInfoBase.Type.Button || typeProp.enumValueIndex == (int)ItemInfoBase.Type.Toggle)
                 {

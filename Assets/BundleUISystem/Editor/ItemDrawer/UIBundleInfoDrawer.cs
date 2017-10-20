@@ -47,7 +47,7 @@ public class UIBundleInfoDrawer : PropertyDrawer
         if (GUI.Button(rect, assetName.stringValue, EditorStyles.toolbar))
         {
             //使用对象是UIGroupObj，将无法从button和Toggle加载
-            if (property.serializedObject.targetObject is UIGroupObj)
+            if (property.serializedObject.targetObject is GroupObj)
             {
                 if (typeProp.enumValueIndex == (int)ItemInfoBase.Type.Button || typeProp.enumValueIndex == (int)ItemInfoBase.Type.Toggle)
                 {
@@ -83,7 +83,7 @@ public class UIBundleInfoDrawer : PropertyDrawer
                                     go.transform.SetParent((obj as UIGroup).transform, true);
                                 }
                             }
-                            else if (obj is UIGroupObj)
+                            else if (obj is GroupObj)
                             {
                                 if (go.GetComponent<Transform>() is RectTransform)
                                 {
