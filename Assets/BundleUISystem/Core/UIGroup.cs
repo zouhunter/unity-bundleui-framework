@@ -20,12 +20,15 @@ namespace BundleUISystem
         public string assetUrl;
         public string menu;
         private EventHold eventHold = new EventHold();
+
+
         private IUILoadCtrl _localLoader;
         private IUILoadCtrl _remoteLoader;
         private event UnityAction onDestroy;
         private event UnityAction onEnable;
         private event UnityAction onDisable;
         private const string _close = "close";
+        private const string _hide = "hide";
         private const string _onCallBack = "onCallBack";
 
         private static List<IUILoadCtrl> controllers = new List<IUILoadCtrl>();
@@ -192,7 +195,7 @@ namespace BundleUISystem
                         irm.HandleData(data);
                     }
                 }
-                RegisterDestoryAction(trigger.assetName, x);
+                RegisterHideAndDestroyAction(trigger.assetName, x);
             };
 
             eventHold.Record(trigger.assetName, createAction);
@@ -240,7 +243,7 @@ namespace BundleUISystem
                         trigger.toggle.onValueChanged.AddListener(CreateByToggle);
                     };
                 }
-                RegisterDestoryAction(trigger.assetName, x);
+                RegisterHideAndDestroyAction(trigger.assetName, x);
             };
         }
         private void RegisterButtonEvents(IUILoadCtrl loadCtrl, ItemInfoBase trigger)
@@ -264,7 +267,7 @@ namespace BundleUISystem
                         trigger.button.onClick.AddListener(CreateByButton);
                     };
                 }
-                RegisterDestoryAction(trigger.assetName, x);
+                RegisterHideAndDestroyAction(trigger.assetName, x);
             };
         }
         private void RegisterEnableEvents(IUILoadCtrl loadCtrl, ItemInfoBase trigger)
@@ -297,18 +300,25 @@ namespace BundleUISystem
                         }
                     };
                 }
-                RegisterDestoryAction(trigger.assetName, x);
+                RegisterHideAndDestroyAction(trigger.assetName, x);
             };
 
             onEnable += onEnableAction;
         }
-        private void RegisterDestoryAction(string assetName, GameObject x)
+        private void RegisterHideAndDestroyAction(string assetName, GameObject x)
         {
             string key = _close + assetName;
             eventHold.Remove(key);
             eventHold.Record(key, new UnityAction<UIData>((y) =>
             {
                 if (x != null) Destroy(x);
+            }));
+
+            key = _hide + assetName;
+            eventHold.Remove(key);
+            eventHold.Record(key, new UnityAction<UIData>((y) =>
+            {
+                if (x != null) x.gameObject.SetActive(false);
             }));
         }
         private void InvokeCallBack(string assetName, UIData node)
@@ -379,6 +389,15 @@ namespace BundleUISystem
             }
 
             var key = (_close + assetName);
+
+            TraverseHold((eventHold) =>
+            {
+                eventHold.NotifyObserver(key);
+            });
+        }
+        public static void Hide(string assetName)
+        {
+            var key = (_hide + assetName);
 
             TraverseHold((eventHold) =>
             {

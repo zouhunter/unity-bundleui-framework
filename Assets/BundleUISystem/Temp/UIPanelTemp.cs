@@ -29,12 +29,8 @@ namespace BundleUISystem
                 m_Tog.onValueChanged.AddListener((x) => { gameObject.SetActive(x); });
             }
         }
-        private UIData _data;
-        protected UIData Data { get { return _data; } }
-
         public virtual void HandleData(UIData data)
         {
-            this._data = data;
             gameObject.SetActive(true);
         }
 
@@ -42,7 +38,6 @@ namespace BundleUISystem
         {
             if(onCallBack != null){
                 onCallBack.Invoke(callBackData);
-                //callBackData.Release();
             }
         }
 
@@ -52,12 +47,10 @@ namespace BundleUISystem
             {
                 var callBackData = UIData.Allocate<T>(data);
                 onCallBack.Invoke(callBackData);
-                //callBackData.Release();
             }
         }
         protected virtual void OnDestroy()
         {
-            //if (_data != null) _data.Release();
             if (onDelete != null) onDelete();
         }
     }

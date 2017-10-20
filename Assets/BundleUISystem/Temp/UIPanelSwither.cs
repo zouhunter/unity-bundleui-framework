@@ -28,4 +28,12 @@ public class UIPanelSwither : MonoBehaviour {
     {
         UIGroup.Close(panelName);
     }
+
+    private void OnDestroy()
+    {
+        if (!destroyOnOpen)
+        {
+            UIGroup.Close(panelName);
+        }
+    }
 }
