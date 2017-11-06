@@ -7,112 +7,37 @@ using BundleUISystem.Internal;
 using BundleUISystem;
 
 [CustomPropertyDrawer(typeof(BundleInfo))]
-public class BundleInfoDrawer : PropertyDrawer
+public class BundleInfoDrawer : ItemInfoBaseDrawer
 {
-    const float widthBt = 20;
     const int ht = 6;
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    protected SerializedProperty bundleNameProp;//bundle
+
+    protected override void InitPropertys(SerializedProperty property)
     {
-        if (!property.isExpanded) return EditorGUIUtility.singleLineHeight;
-        var typeProp = property.FindPropertyRelative("type");
-        var buttonListProp = property.FindPropertyRelative("button");
-        var toggleListProp = property.FindPropertyRelative("toggle");
+        base.InitPropertys(property);
+        bundleNameProp = property.FindPropertyRelative("bundleName");
+    }
+    protected override float GetInfoItemHeight()
+    {
         switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
         {
             case ItemInfoBase.Type.Button:
-                return ht * EditorGUIUtility.singleLineHeight + EditorGUI.GetPropertyHeight(buttonListProp);
+                return ht * EditorGUIUtility.singleLineHeight + EditorGUI.GetPropertyHeight(buttonProp);
             case ItemInfoBase.Type.Toggle:
-                return ht * EditorGUIUtility.singleLineHeight + EditorGUI.GetPropertyHeight(toggleListProp);
+                return ht * EditorGUIUtility.singleLineHeight + EditorGUI.GetPropertyHeight(toggleProp);
             default:
                 return ht * EditorGUIUtility.singleLineHeight;
         }
     }
-
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    protected override void DrawExpanded(Rect opendRect)
     {
-        var assetName = property.FindPropertyRelative("assetName");
-        var bundleName = property.FindPropertyRelative("bundleName");
-        var typeProp = property.FindPropertyRelative("type"); ;
-        var parentLayerProp = property.FindPropertyRelative("parentLayer");
-        var resetProp = property.FindPropertyRelative("reset");
-        var buttonProp = property.FindPropertyRelative("button");
-        var toggleProp = property.FindPropertyRelative("toggle");
-        float height = EditorGUIUtility.singleLineHeight;
+        var rect = new Rect(opendRect.xMin, opendRect.yMin, opendRect.width, singleHeight);
+        EditorGUI.PropertyField(rect, assetNameProp, new GUIContent("name"));
 
-        Rect rect = new Rect(position.xMin, position.yMin, position.width * 0.9f, height);
-        if (GUI.Button(rect, assetName.stringValue, EditorStyles.toolbar))
-        {
-            //使用对象是UIGroupObj，将无法从button和Toggle加载
-            if (property.serializedObject.targetObject is GroupObj)
-            {
-                if (typeProp.enumValueIndex == (int)ItemInfoBase.Type.Button || typeProp.enumValueIndex == (int)ItemInfoBase.Type.Toggle)
-                {
-                    typeProp.enumValueIndex = (int)ItemInfoBase.Type.Name;
-                }
-            }
-            property.isExpanded = !property.isExpanded;
-        }
-        switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
-        {
-            case ItemInfoBase.Type.Button:
-                if (buttonProp.objectReferenceValue == null)
-                {
-                    Worning(rect, "button lost!");
-                }
-                break;
-            case ItemInfoBase.Type.Toggle:
-                if (toggleProp.objectReferenceValue == null)
-                {
-                    Worning(rect, "toggle lost!");
-                }
-                break;
-            default:
-                break;
-        }
-        rect = new Rect(position.max.x - position.width * 0.1f, position.yMin, position.width * 0.1f, height);
+        rect.y += singleHeight;
+        EditorGUI.PropertyField(rect, bundleNameProp, new GUIContent("bundle"));
 
-        if (GUI.Button(rect, "open",EditorStyles.textField))
-        {
-            var select = EditorUtility.DisplayDialog("提示", "是否打开新场景并加载资源", "是", "否");
-            if (!select)
-            {
-                return;
-            }
-            BundlePreview.Data data = new BundlePreview.Data();
-            var assetUrl = property.serializedObject.FindProperty("assetUrl");
-            var menu = property.serializedObject.FindProperty("menu");
-            if (string.IsNullOrEmpty(assetUrl.stringValue) || string.IsNullOrEmpty(menu.stringValue))
-            {
-                return;
-            }
-            data.assetUrl = assetUrl.stringValue;
-            data.menu = menu.stringValue;
-            var bdinfo = new BundleInfo();
-            bdinfo.assetName = assetName.stringValue;
-            bdinfo.bundleName = bundleName.stringValue;
-            bdinfo.reset = resetProp.boolValue;
-            data.rbundles.Add(bdinfo);
-            var path = AssetDatabase.GUIDToAssetPath("018159907ea26db409399b839477ad27");
-            UnityEditor.SceneManagement.EditorSceneManager.OpenScene(path);
-            GameObject holder = new GameObject("holder");
-            BundlePreview preview = holder.AddComponent<BundlePreview>();
-            preview.data = data;
-            EditorApplication.ExecuteMenuItem("Edit/Play");
-        }
-
-       
-        if (!property.isExpanded)
-        {
-            return;
-        }
-
-        rect = new Rect(position.xMin, position.yMin + height, position.width, height);
-        EditorGUI.PropertyField(rect, assetName, new GUIContent("name"));
-
-        rect.y += height;
-        EditorGUI.PropertyField(rect, bundleName, new GUIContent("bundle"));
-
-        rect.y += height;
+        rect.y += singleHeight;
         EditorGUI.PropertyField(rect, typeProp, new GUIContent("type"));
 
         switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
@@ -120,11 +45,11 @@ public class BundleInfoDrawer : PropertyDrawer
             case ItemInfoBase.Type.Name:
                 break;
             case ItemInfoBase.Type.Button:
-                rect.y += height;
+                rect.y += singleHeight;
                 EditorGUI.PropertyField(rect, buttonProp, new GUIContent("Button"));
                 break;
             case ItemInfoBase.Type.Toggle:
-                rect.y += height;
+                rect.y += singleHeight;
                 EditorGUI.PropertyField(rect, toggleProp, new GUIContent("Toggle"));
                 break;
             case ItemInfoBase.Type.Enable:
@@ -132,17 +57,89 @@ public class BundleInfoDrawer : PropertyDrawer
             default:
                 break;
         }
-       
-        rect.y += height;
+
+        rect.y += singleHeight;
         EditorGUI.PropertyField(rect, parentLayerProp, new GUIContent("parentLayer"));
 
-        rect.y += height;
+        rect.y += singleHeight;
         EditorGUI.PropertyField(rect, resetProp, new GUIContent("reset"));
     }
-    void Worning(Rect rect, string info)
+
+    protected override void DrawObjectField(Rect acceptRect)
     {
-        GUI.color = Color.red;
-        EditorGUI.SelectableLabel(rect, info);
-        GUI.color = Color.white;
+        if (!string.IsNullOrEmpty(assetNameProp.stringValue) && !string.IsNullOrEmpty(assetNameProp.stringValue))
+        {
+            if (GUI.Button(acceptRect, "", EditorStyles.objectFieldMiniThumb))
+            {
+                var select = EditorUtility.DisplayDialog("提示", "是否打开新场景并加载资源", "是", "否");
+                if (!select)
+                {
+                    return;
+                }
+                BundlePreview.Data data = new BundlePreview.Data();
+                var assetUrl = serializedObject.FindProperty("assetUrl");
+                var menu = serializedObject.FindProperty("menu");
+                if (string.IsNullOrEmpty(assetUrl.stringValue) || string.IsNullOrEmpty(menu.stringValue))
+                {
+                    return;
+                }
+                data.assetUrl = assetUrl.stringValue;
+                data.menu = menu.stringValue;
+                var bdinfo = new BundleInfo();
+                bdinfo.assetName = assetNameProp.stringValue;
+                bdinfo.bundleName = bundleNameProp.stringValue;
+                bdinfo.reset = resetProp.boolValue;
+                data.rbundles.Add(bdinfo);
+                var path = AssetDatabase.GUIDToAssetPath("018159907ea26db409399b839477ad27");
+                UnityEditor.SceneManagement.EditorSceneManager.OpenScene(path);
+                GameObject holder = new GameObject("holder");
+                BundlePreview preview = holder.AddComponent<BundlePreview>();
+                preview.data = data;
+                EditorApplication.ExecuteMenuItem("Edit/Play");
+            }
+        }
+        else
+        {
+            var obj = EditorGUI.ObjectField(acceptRect, null, typeof(GameObject), false);
+            if(obj != null)
+            {
+                assetNameProp.stringValue = obj.name;
+                var path = AssetDatabase.GetAssetPath(obj);
+                AssetImporter import = AssetImporter.GetAtPath(path);
+                if(!string.IsNullOrEmpty(import.assetBundleName)){
+                    bundleNameProp.stringValue = import.assetBundleName;
+                }
+            }
+        }
+    }
+
+
+    protected override void OnDragPerformGameObject(GameObject go)
+    {
+        var path = AssetDatabase.GetAssetPath(go);
+        if (!string.IsNullOrEmpty(path))
+        {
+            AssetImporter importer = AssetImporter.GetAtPath(path);
+            assetNameProp.stringValue = go.name;
+            bundleNameProp.stringValue = importer.assetBundleName;
+        }
+    }
+    protected override GameObject GetPrefabItem()
+    {
+        string[] paths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(bundleNameProp.stringValue, assetNameProp.stringValue);
+        if (paths != null && paths.Length > 0)
+        {
+            GameObject gopfb = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
+            return gopfb;
+        }
+        return null;
+    }
+    protected override void HideItemIfInstenced()
+    {
+        var obj = EditorUtility.InstanceIDToObject(instanceIDProp.intValue);
+        if (obj != null){
+            Object.DestroyImmediate(obj);
+        }
+        instanceIDProp.intValue = 0;
     }
 }

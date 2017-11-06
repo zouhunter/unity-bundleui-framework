@@ -7,228 +7,67 @@ using BundleUISystem.Internal;
 using BundleUISystem;
 
 [CustomPropertyDrawer(typeof(UIBundleInfo))]
-public class UIBundleInfoDrawer : PropertyDrawer
+public class UIBundleInfoDrawer : ItemInfoBaseDrawer
 {
-    const float widthBt = 20;
-    const int ht = 6;
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    protected SerializedProperty goodProp;//uibundle = property.FindPropertyRelative("good");
+    protected SerializedProperty guidProp;//uibundle = property.FindPropertyRelative("guid");
+    protected SerializedProperty bundleNameProp;//bundle
+
+    protected const int ht = 6;
+
+    protected override void InitPropertys(SerializedProperty property)
     {
-        if (!property.isExpanded) return EditorGUIUtility.singleLineHeight;
-        var typeProp = property.FindPropertyRelative("type");
-        var buttonListProp = property.FindPropertyRelative("button");
-        var toggleListProp = property.FindPropertyRelative("toggle");
+        base.InitPropertys(property);
+        goodProp = property.FindPropertyRelative("good");
+        guidProp = property.FindPropertyRelative("guid");
+        bundleNameProp = property.FindPropertyRelative("bundleName");
+    }
+    protected override float GetInfoItemHeight()
+    {
         switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
         {
             case ItemInfoBase.Type.Button:
-                return ht * EditorGUIUtility.singleLineHeight + EditorGUI.GetPropertyHeight(buttonListProp);
+                return ht * EditorGUIUtility.singleLineHeight + EditorGUI.GetPropertyHeight(buttonProp);
             case ItemInfoBase.Type.Toggle:
-                return ht * EditorGUIUtility.singleLineHeight + EditorGUI.GetPropertyHeight(toggleListProp);
+                return ht * EditorGUIUtility.singleLineHeight + EditorGUI.GetPropertyHeight(toggleProp);
             default:
                 return ht * EditorGUIUtility.singleLineHeight;
         }
     }
 
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    protected override void DragAndDrapAction(Rect acceptRect)
     {
-        var instanceIDProp = property.FindPropertyRelative("instanceID");
-        var goodProp = property.FindPropertyRelative("good");
-        var guidProp = property.FindPropertyRelative("guid");
-        var assetName = property.FindPropertyRelative("assetName");
-        var bundleName = property.FindPropertyRelative("bundleName");
-        var typeProp = property.FindPropertyRelative("type"); ;
-        var parentLayerProp = property.FindPropertyRelative("parentLayer");
-        var boolProp = property.FindPropertyRelative("reset");
-        var buttonProp = property.FindPropertyRelative("button");
-        var toggleProp = property.FindPropertyRelative("toggle");
-        float height = EditorGUIUtility.singleLineHeight;
-
-        Rect rect = new Rect(position.x, position.y, position.width * 0.9f, height);
-
-        if (GUI.Button(rect, assetName.stringValue, EditorStyles.toolbar))
+        base.DragAndDrapAction(acceptRect);
+        if (Event.current.type == EventType.Repaint)
         {
-            //使用对象是UIGroupObj，将无法从button和Toggle加载
-            if (property.serializedObject.targetObject is GroupObj)
-            {
-                if (typeProp.enumValueIndex == (int)ItemInfoBase.Type.Button || typeProp.enumValueIndex == (int)ItemInfoBase.Type.Toggle)
-                {
-                    typeProp.enumValueIndex = (int)ItemInfoBase.Type.Name;
-                }
-            }
-
-            property.isExpanded = !property.isExpanded;
-
-            if (property.isExpanded)
-            {
-                if (instanceIDProp.intValue == 0)
-                {
-                    string[] paths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(bundleName.stringValue, assetName.stringValue);
-                    if (paths != null && paths.Length > 0)
-                    {
-                        GameObject gopfb = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
-                        if (gopfb != null)
-                        {
-                            var path = AssetDatabase.GetAssetPath(gopfb);
-                            guidProp.stringValue = AssetDatabase.AssetPathToGUID(path);
-                            GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
-                            var obj = property.serializedObject.targetObject;
-
-                            if (obj is UIGroup)
-                            {
-                                if (go.GetComponent<Transform>() is RectTransform)
-                                {
-                                    go.transform.SetParent((obj as UIGroup).transform, false);
-                                }
-                                else
-                                {
-                                    go.transform.SetParent((obj as UIGroup).transform, true);
-                                }
-                            }
-                            else if (obj is GroupObj)
-                            {
-                                if (go.GetComponent<Transform>() is RectTransform)
-                                {
-                                    var canvas = GameObject.FindObjectOfType<Canvas>();
-                                    go.transform.SetParent(canvas.transform, false);
-                                }
-                                else
-                                {
-                                    go.transform.SetParent(null);
-                                }
-                            }
-
-                            if (boolProp.boolValue)
-                            {
-                                go.transform.position = Vector3.zero;
-                                go.transform.localRotation = Quaternion.identity;
-                            }
-                            instanceIDProp.intValue = go.GetInstanceID();
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var obj = EditorUtility.InstanceIDToObject(instanceIDProp.intValue);
-                if (obj != null)
-                {
-                    Object.DestroyImmediate(obj);
-                }
-                instanceIDProp.intValue = 0;
-            }
+            var path0 = AssetDatabase.GUIDToAssetPath(guidProp.stringValue);
+            var obj0 = AssetDatabase.LoadAssetAtPath<GameObject>(path0);
+            goodProp.boolValue = obj0 != null;
         }
+    }
 
-        if (!goodProp.boolValue)
-        {
-            Worning(rect, assetName.stringValue + " Changed！!!");
-        }
-        else
-        {
-            switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
-            {
-                case ItemInfoBase.Type.Name:
-                    break;
-                case ItemInfoBase.Type.Button:
-                    if (buttonProp.objectReferenceValue == null)
-                    {
-                        Worning(rect, "button lost!");
-                    }
-                    break;
-                case ItemInfoBase.Type.Toggle:
-                    if (toggleProp.objectReferenceValue == null)
-                    {
-                        Worning(rect, "toggle lost!");
-                    }
-                    break;
-                case ItemInfoBase.Type.Enable:
-                    break;
-                default:
-                    break;
-            }
-        }
-
-
-        rect = new Rect(position.max.x - position.width * 0.1f, position.yMin, position.width * 0.1f, height);
-
-        switch (Event.current.type)
-        {
-            case EventType.DragUpdated:
-                if (rect.Contains(Event.current.mousePosition))
-                {
-                    DragAndDrop.visualMode = DragAndDropVisualMode.Move;
-                }
-                break;
-            case EventType.DragPerform:
-                if (rect.Contains(Event.current.mousePosition))
-                {
-                    if (DragAndDrop.objectReferences.Length > 0)
-                    {
-                        var obj = DragAndDrop.objectReferences[0];
-                        if (obj is GameObject)
-                        {
-                            var path = AssetDatabase.GetAssetPath(obj);
-                            if (!string.IsNullOrEmpty(path))
-                            {
-                                guidProp.stringValue = AssetDatabase.AssetPathToGUID(path);
-                                AssetImporter importer = AssetImporter.GetAtPath(path);
-                                assetName.stringValue = obj.name;
-                                bundleName.stringValue = importer.assetBundleName;
-                            }
-                        }
-                    }
-                    DragAndDrop.AcceptDrag();
-                }
-                break;
-            case EventType.Repaint:
-                var path0 = AssetDatabase.GUIDToAssetPath(guidProp.stringValue);
-                var obj0 = AssetDatabase.LoadAssetAtPath<GameObject>(path0);
-                goodProp.boolValue = obj0 != null;
-                break;
-        }
-
-
-        if (goodProp.boolValue)
-        {
-            if (GUI.Button(rect, "", EditorStyles.objectFieldMiniThumb))
-            {
-                var path = AssetDatabase.GUIDToAssetPath(guidProp.stringValue);
-                var obj = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                EditorGUIUtility.PingObject(obj);
-            }
-        }
-        else
-        {
-            var obj = EditorGUI.ObjectField(rect, null, typeof(GameObject), false);
-            if (obj != null)
-            {
-                var path = AssetDatabase.GetAssetPath(obj);
-                guidProp.stringValue = AssetDatabase.AssetPathToGUID(path);
-            }
-        }
-        if (!property.isExpanded)
-        {
-            return;
-        }
+    protected override void DrawExpanded(Rect opendRect)
+    {
+        var rect = new Rect(opendRect.x, opendRect.y, opendRect.width, singleHeight);
 
         EditorGUI.BeginDisabledGroup(true);
-        rect = new Rect(position.xMin, position.yMin + height, position.width, height);
-        EditorGUI.PropertyField(rect, assetName, new GUIContent("name"));
-
-        rect.y += height;
-        EditorGUI.PropertyField(rect, bundleName, new GUIContent("bundle"));
+        EditorGUI.PropertyField(rect, assetNameProp, new GUIContent("name"));
+        rect.y += singleHeight;
+        EditorGUI.PropertyField(rect, bundleNameProp, new GUIContent("bundle"));
         EditorGUI.EndDisabledGroup();
 
-        rect.y += height;
+        rect.y += singleHeight;
         EditorGUI.PropertyField(rect, typeProp, new GUIContent("type"));
         switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
         {
             case ItemInfoBase.Type.Name:
                 break;
             case ItemInfoBase.Type.Button:
-                rect.y += height;
+                rect.y += singleHeight;
                 EditorGUI.PropertyField(rect, buttonProp, new GUIContent("Button"));
                 break;
             case ItemInfoBase.Type.Toggle:
-                rect.y += height;
+                rect.y += singleHeight;
                 EditorGUI.PropertyField(rect, toggleProp, new GUIContent("Toggle"));
                 break;
             case ItemInfoBase.Type.Enable:
@@ -237,17 +76,80 @@ public class UIBundleInfoDrawer : PropertyDrawer
                 break;
         }
 
-        rect.y += height;
+        rect.y += singleHeight;
         EditorGUI.PropertyField(rect, parentLayerProp, new GUIContent("parentLayer"));
 
-        rect.y += height;
-        EditorGUI.PropertyField(rect, boolProp, new GUIContent("reset"));
+        rect.y += singleHeight;
+        EditorGUI.PropertyField(rect, resetProp, new GUIContent("reset"));
     }
 
-    void Worning(Rect rect, string info)
+    protected override void DrawObjectField(Rect acceptRect)
     {
-        GUI.color = Color.red;
-        EditorGUI.SelectableLabel(rect, info);
-        GUI.color = Color.white;
+        if (goodProp.boolValue)
+        {
+            if (GUI.Button(acceptRect, "", EditorStyles.objectFieldMiniThumb))
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guidProp.stringValue);
+                var obj = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                EditorGUIUtility.PingObject(obj);
+            }
+        }
+        else
+        {
+            var obj = EditorGUI.ObjectField(acceptRect, null, typeof(GameObject), false);
+            if (obj != null)
+            {
+                var path = AssetDatabase.GetAssetPath(obj);
+                guidProp.stringValue = AssetDatabase.AssetPathToGUID(path);
+            }
+        }
+
+    }
+
+    protected override void WorningIfNotRight(Rect rect)
+    {
+        base.WorningIfNotRight(rect);
+        if (!goodProp.boolValue)
+        {
+            Worning(rect, assetNameProp.stringValue + " Changed！!!");
+        }
+    }
+
+    protected override void OnDragPerformGameObject(GameObject go)
+    {
+        var path = AssetDatabase.GetAssetPath(go);
+        if (!string.IsNullOrEmpty(path))
+        {
+            guidProp.stringValue = AssetDatabase.AssetPathToGUID(path);
+            AssetImporter importer = AssetImporter.GetAtPath(path);
+            assetNameProp.stringValue = go.name;
+            bundleNameProp.stringValue = importer.assetBundleName;
+        }
+    }
+    protected override void InstantiatePrefab(GameObject gopfb)
+    {
+        base.InstantiatePrefab(gopfb);
+        var path = AssetDatabase.GetAssetPath(gopfb);
+        guidProp.stringValue = AssetDatabase.AssetPathToGUID(path);
+    }
+    protected override void HideItemIfInstenced()
+    {
+        var obj = EditorUtility.InstanceIDToObject(instanceIDProp.intValue);
+        if (obj != null)
+        {
+            Object.DestroyImmediate(obj);
+        }
+        instanceIDProp.intValue = 0;
+    }
+
+    protected override GameObject GetPrefabItem()
+    {
+        string[] paths = AssetDatabase.GetAssetPathsFromAssetBundleAndAssetName(bundleNameProp.stringValue, assetNameProp.stringValue);
+        if (paths != null && paths.Length > 0)
+        {
+            GameObject gopfb = AssetDatabase.LoadAssetAtPath<GameObject>(paths[0]);
+            return gopfb;
+        }
+        return null;
     }
 }
