@@ -64,7 +64,7 @@ public abstract class ItemInfoBaseDrawer : PropertyDrawer
                 if (instanceIDProp.intValue == 0)
                 {
                     var gopfb = GetPrefabItem();
-                    if(gopfb != null)
+                    if (gopfb != null)
                     {
                         InstantiatePrefab(gopfb);
                     }
@@ -76,7 +76,7 @@ public abstract class ItemInfoBaseDrawer : PropertyDrawer
             }
             else
             {
-                if(instanceIDProp.intValue != 0)
+                if (instanceIDProp.intValue != 0)
                 {
                     HideItemIfInstenced();
                 }
@@ -110,13 +110,20 @@ public abstract class ItemInfoBaseDrawer : PropertyDrawer
         GUI.color = new Color(0.3f, 0.5f, 0.8f);
         EditorGUI.SelectableLabel(infoRect, string.Format("[{0}]", ((ItemInfoBase.Type)typeProp.enumValueIndex).ToString().Substring(0, 1)));
 
-        infoRect.x += infoRect.width *3;
+        infoRect.x += infoRect.width * 3;
         infoRect.width = 100;
         GUI.color = new Color(0.8f, 0.8f, 0.4f);
-        EditorGUI.SelectableLabel(infoRect, string.Format("[{0}]",((ItemInfoBase.Layer)parentLayerProp.enumValueIndex)));
-
+        string str = UIBundleLoadCtrl.LayerToString((ItemInfoBase.Layer)parentLayerProp.intValue, false);// LayerToString();
+        EditorGUI.SelectableLabel(infoRect, str);
         GUI.color = Color.white;
     }
+
+    private bool LayerContains(ItemInfoBase.Layer layerEnum)
+    {
+        var layer = (int)layerEnum;
+        return (parentLayerProp.intValue & layer) == layer;
+    }
+
     protected abstract void DrawExpanded(Rect opendRect);
 
     protected abstract void DrawObjectField(Rect acceptRect);
@@ -179,9 +186,18 @@ public abstract class ItemInfoBaseDrawer : PropertyDrawer
     protected virtual void HideItemIfInstenced()
     {
         var obj = EditorUtility.InstanceIDToObject(instanceIDProp.intValue);
-        if (obj != null){
-            UISystemUtility.ApplyPrefab(obj as GameObject);
-            Object.DestroyImmediate(obj);
+        if (obj != null)
+        {
+            var go = obj as GameObject;
+            UISystemUtility.ApplyPrefab(go);
+            if(go.transform.parent.GetComponent<UIGroup>() == null && go.transform.parent.childCount == 1)
+            {
+                Object.DestroyImmediate(go.transform.parent.gameObject);
+            }
+            else
+            {
+                Object.DestroyImmediate(obj);
+            }
         }
         instanceIDProp.intValue = 0;
     }
@@ -197,47 +213,28 @@ public abstract class ItemInfoBaseDrawer : PropertyDrawer
             }
         }
     }
+
     protected abstract GameObject GetPrefabItem();
 
     protected virtual void InstantiatePrefab(GameObject gopfb)
     {
-
         if (gopfb != null)
         {
             GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
-
-            var obj = serializedObject.targetObject;
-
-            if (obj is UIGroup)
+            var uigroup = Object.FindObjectOfType<UIGroup>();
+            if (uigroup != null)
             {
-                if (go.GetComponent<Transform>() is RectTransform)
-                {
-                    go.transform.SetParent((obj as UIGroup).transform, false);
-                }
-                else
-                {
-                    go.transform.SetParent((obj as UIGroup).transform, true);
-                }
+                UIBundleLoadCtrl.SetTranform(go, (ItemInfoBase.Layer)parentLayerProp.intValue, uigroup.transform);
             }
-            else if (obj is GroupObj)
+            else
             {
-                if (go.GetComponent<Transform>() is RectTransform)
-                {
-                    var canvas = GameObject.FindObjectOfType<Canvas>();
-                    go.transform.SetParent(canvas.transform, false);
-                }
-                else
-                {
-                    go.transform.SetParent(null);
-                }
+                go.transform.SetParent(null);
             }
-
-            //if (rematrixProp.boolValue) {
-            //    UISystemUtility.LoadmatrixInfo(matrixProp, go.transform);
-            //}
             instanceIDProp.intValue = go.GetInstanceID();
         }
     }
+
+
     protected virtual void Worning(Rect rect, string info)
     {
         GUI.color = Color.red;

@@ -27,12 +27,12 @@ namespace BundleUISystem
             Enable = 3,
         }
 
-        public enum Layer:int
+        public enum Layer : int
         {
-            Background,
-            PopWithMask,
-            PopNoMask,
-            Tip,
+            Heap = 1<<0,//堆叠面版
+            Mask = 1<<1,//遮罩面板
+            Pop = 1<<2,//弹窗提示
+            Tip = 1<<3,//最高显示,没有射线识别不会影响其他ui
         }
     }
 }
