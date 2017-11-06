@@ -221,7 +221,15 @@ public abstract class ItemInfoBaseDrawer : PropertyDrawer
         if (gopfb != null)
         {
             GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
-            var uigroup = Object.FindObjectOfType<UIGroup>();
+            UIGroup uigroup = null;
+            if(serializedObject.targetObject is UIGroup)
+            {
+                uigroup = serializedObject.targetObject as UIGroup;
+            }
+            else
+            {
+                uigroup = Object.FindObjectOfType<UIGroup>();
+            }
             if (uigroup != null)
             {
                 UIBundleLoadCtrl.SetTranform(go, (ItemInfoBase.Layer)parentLayerProp.intValue, uigroup.transform);

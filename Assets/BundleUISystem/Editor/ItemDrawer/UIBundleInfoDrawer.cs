@@ -77,7 +77,7 @@ public class UIBundleInfoDrawer : ItemInfoBaseDrawer
         }
 
         rect.y += singleHeight;
-        EditorGUI.PropertyField(rect, parentLayerProp, new GUIContent("[layer]"));
+        parentLayerProp.intValue = EditorGUI.MaskField(rect, new GUIContent("[layer]"), parentLayerProp.intValue, parentLayerProp.enumNames);
 
         //rect.y += singleHeight;
         //EditorGUI.PropertyField(rect, rematrixProp, new GUIContent("[rematrix]"));
