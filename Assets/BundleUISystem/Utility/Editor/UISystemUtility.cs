@@ -33,5 +33,19 @@ namespace BundleUISystem
             }
             usePrefab = false;
         }
+
+        public static void ApplyPrefab(GameObject gitem)
+        {
+            var instanceRoot = PrefabUtility.FindValidUploadPrefabInstanceRoot(gitem);
+            var prefab = PrefabUtility.GetPrefabParent(instanceRoot);
+            if (prefab != null)
+            {
+                if (prefab.name == gitem.name)
+                {
+                    PrefabUtility.ReplacePrefab(gitem, prefab, ReplacePrefabOptions.ConnectToPrefab);
+                }
+            }
+        }
+
     }
 }

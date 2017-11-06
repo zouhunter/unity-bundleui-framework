@@ -2,7 +2,6 @@
 using System.Collections;
 using UnityEditor;
 using BundleUISystem;
-using System;
 //bundle: //var bundleName = property.FindPropertyRelative("bundleName");
 
 /// <summary>
@@ -13,7 +12,8 @@ public abstract class ItemInfoBaseDrawer : PropertyDrawer
     protected SerializedProperty assetNameProp;
     protected SerializedProperty typeProp;
     protected SerializedProperty parentLayerProp;
-    protected SerializedProperty resetProp;
+    //protected SerializedProperty rematrixProp;
+    //protected SerializedProperty matrixProp;
     protected SerializedProperty buttonProp;
     protected SerializedProperty toggleProp;
     protected SerializedProperty instanceIDProp;
@@ -40,7 +40,8 @@ public abstract class ItemInfoBaseDrawer : PropertyDrawer
         assetNameProp = property.FindPropertyRelative("assetName");
         typeProp = property.FindPropertyRelative("type"); ;
         parentLayerProp = property.FindPropertyRelative("parentLayer");
-        resetProp = property.FindPropertyRelative("reset");
+        //rematrixProp = property.FindPropertyRelative("rematrix");
+        //matrixProp = property.FindPropertyRelative("matrix");
         buttonProp = property.FindPropertyRelative("button");
         toggleProp = property.FindPropertyRelative("toggle");
         instanceIDProp = property.FindPropertyRelative("instanceID");
@@ -51,8 +52,8 @@ public abstract class ItemInfoBaseDrawer : PropertyDrawer
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         Rect btnRect = new Rect(position.xMin, position.yMin, position.width * 0.9f, singleHeight);
-
-        if (GUI.Button(btnRect, assetNameProp.stringValue, EditorStyles.toolbar))
+        GUI.contentColor = Color.green;
+        if (GUI.Button(btnRect, assetNameProp.stringValue, EditorStyles.toolbarDropDown))
         {
             ResetBuildInfoOnOpen();
 
@@ -82,8 +83,11 @@ public abstract class ItemInfoBaseDrawer : PropertyDrawer
                 instanceIDProp.intValue = 0;
             }
         }
+        GUI.contentColor = Color.white;
 
         WorningIfNotRight(btnRect);
+
+        InformationShow(btnRect);
 
         Rect acceptRect = new Rect(position.max.x - position.width * 0.1f, position.yMin, position.width * 0.1f, singleHeight);
 
@@ -98,6 +102,21 @@ public abstract class ItemInfoBaseDrawer : PropertyDrawer
         }
     }
 
+    protected virtual void InformationShow(Rect rect)
+    {
+        var infoRect = rect;
+        infoRect.x = infoRect.width - 150;
+        infoRect.width = 25;
+        GUI.color = new Color(0.3f, 0.5f, 0.8f);
+        EditorGUI.SelectableLabel(infoRect, string.Format("[{0}]", ((ItemInfoBase.Type)typeProp.enumValueIndex).ToString().Substring(0, 1)));
+
+        infoRect.x += infoRect.width *3;
+        infoRect.width = 100;
+        GUI.color = new Color(0.8f, 0.8f, 0.4f);
+        EditorGUI.SelectableLabel(infoRect, string.Format("[{0}]",((ItemInfoBase.Layer)parentLayerProp.enumValueIndex)));
+
+        GUI.color = Color.white;
+    }
     protected abstract void DrawExpanded(Rect opendRect);
 
     protected abstract void DrawObjectField(Rect acceptRect);
@@ -157,7 +176,15 @@ public abstract class ItemInfoBaseDrawer : PropertyDrawer
         }
     }
 
-    protected abstract void HideItemIfInstenced();
+    protected virtual void HideItemIfInstenced()
+    {
+        var obj = EditorUtility.InstanceIDToObject(instanceIDProp.intValue);
+        if (obj != null){
+            UISystemUtility.ApplyPrefab(obj as GameObject);
+            Object.DestroyImmediate(obj);
+        }
+        instanceIDProp.intValue = 0;
+    }
 
     protected virtual void ResetBuildInfoOnOpen()
     {
@@ -174,6 +201,7 @@ public abstract class ItemInfoBaseDrawer : PropertyDrawer
 
     protected virtual void InstantiatePrefab(GameObject gopfb)
     {
+
         if (gopfb != null)
         {
             GameObject go = PrefabUtility.InstantiatePrefab(gopfb) as GameObject;
@@ -204,11 +232,9 @@ public abstract class ItemInfoBaseDrawer : PropertyDrawer
                 }
             }
 
-            if (resetProp.boolValue)
-            {
-                go.transform.position = Vector3.zero;
-                go.transform.localRotation = Quaternion.identity;
-            }
+            //if (rematrixProp.boolValue) {
+            //    UISystemUtility.LoadmatrixInfo(matrixProp, go.transform);
+            //}
             instanceIDProp.intValue = go.GetInstanceID();
         }
     }

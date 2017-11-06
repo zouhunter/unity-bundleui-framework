@@ -10,7 +10,7 @@ GameObject:
   - 224: {fileID: 22400792}
   - 222: {fileID: 22222686}
   - 114: {fileID: 11498108}
-  - 114: {fileID: 11450846}
+  - 114: {fileID: 11413170}
   m_Layer: 5
   m_Name: Panel1
   m_TagString: Untagged
@@ -18,7 +18,7 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &11450846
+--- !u!114 &11413170
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
@@ -29,16 +29,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0e09b3ca13b47c842b642f3e6b3274b0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_OnOpen:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  m_OpenClose:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.UI.Toggle+ToggleEvent, UnityEngine.UI, Version=1.0.0.0,
-      Culture=neutral, PublicKeyToken=null
 --- !u!114 &11498108
 MonoBehaviour:
   m_ObjectHideFlags: 1

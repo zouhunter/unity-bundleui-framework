@@ -13,7 +13,7 @@ public class UIBundleInfoDrawer : ItemInfoBaseDrawer
     protected SerializedProperty guidProp;//uibundle = property.FindPropertyRelative("guid");
     protected SerializedProperty bundleNameProp;//bundle
 
-    protected const int ht = 6;
+    protected const int ht = 5;
 
     protected override void InitPropertys(SerializedProperty property)
     {
@@ -51,24 +51,24 @@ public class UIBundleInfoDrawer : ItemInfoBaseDrawer
         var rect = new Rect(opendRect.x, opendRect.y, opendRect.width, singleHeight);
 
         EditorGUI.BeginDisabledGroup(true);
-        EditorGUI.PropertyField(rect, assetNameProp, new GUIContent("name"));
+        EditorGUI.PropertyField(rect, assetNameProp, new GUIContent("[name]"));
         rect.y += singleHeight;
-        EditorGUI.PropertyField(rect, bundleNameProp, new GUIContent("bundle"));
+        EditorGUI.PropertyField(rect, bundleNameProp, new GUIContent("[bundle]"));
         EditorGUI.EndDisabledGroup();
 
         rect.y += singleHeight;
-        EditorGUI.PropertyField(rect, typeProp, new GUIContent("type"));
+        EditorGUI.PropertyField(rect, typeProp, new GUIContent("[type]"));
         switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
         {
             case ItemInfoBase.Type.Name:
                 break;
             case ItemInfoBase.Type.Button:
                 rect.y += singleHeight;
-                EditorGUI.PropertyField(rect, buttonProp, new GUIContent("Button"));
+                EditorGUI.PropertyField(rect, buttonProp, new GUIContent("[Btn]"));
                 break;
             case ItemInfoBase.Type.Toggle:
                 rect.y += singleHeight;
-                EditorGUI.PropertyField(rect, toggleProp, new GUIContent("Toggle"));
+                EditorGUI.PropertyField(rect, toggleProp, new GUIContent("[Tog]"));
                 break;
             case ItemInfoBase.Type.Enable:
                 break;
@@ -77,10 +77,10 @@ public class UIBundleInfoDrawer : ItemInfoBaseDrawer
         }
 
         rect.y += singleHeight;
-        EditorGUI.PropertyField(rect, parentLayerProp, new GUIContent("parentLayer"));
+        EditorGUI.PropertyField(rect, parentLayerProp, new GUIContent("[layer]"));
 
-        rect.y += singleHeight;
-        EditorGUI.PropertyField(rect, resetProp, new GUIContent("reset"));
+        //rect.y += singleHeight;
+        //EditorGUI.PropertyField(rect, rematrixProp, new GUIContent("[rematrix]"));
     }
 
     protected override void DrawObjectField(Rect acceptRect)
@@ -131,15 +131,6 @@ public class UIBundleInfoDrawer : ItemInfoBaseDrawer
         base.InstantiatePrefab(gopfb);
         var path = AssetDatabase.GetAssetPath(gopfb);
         guidProp.stringValue = AssetDatabase.AssetPathToGUID(path);
-    }
-    protected override void HideItemIfInstenced()
-    {
-        var obj = EditorUtility.InstanceIDToObject(instanceIDProp.intValue);
-        if (obj != null)
-        {
-            Object.DestroyImmediate(obj);
-        }
-        instanceIDProp.intValue = 0;
     }
 
     protected override GameObject GetPrefabItem()

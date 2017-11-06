@@ -10,6 +10,10 @@ namespace BundleUISystem
     public class BundleInfo: ItemInfoBase
     {
         public string bundleName;
-        public override string IDName { get { return bundleName + assetName; } }
+        public override string IDName {
+            get {
+                return bundleName + assetName;
+            }
+        }
     }
 }

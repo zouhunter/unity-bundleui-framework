@@ -9,7 +9,7 @@ using BundleUISystem;
 [CustomPropertyDrawer(typeof(BundleInfo))]
 public class BundleInfoDrawer : ItemInfoBaseDrawer
 {
-    const int ht = 6;
+    const int ht = 5;
     protected SerializedProperty bundleNameProp;//bundle
 
     protected override void InitPropertys(SerializedProperty property)
@@ -32,13 +32,13 @@ public class BundleInfoDrawer : ItemInfoBaseDrawer
     protected override void DrawExpanded(Rect opendRect)
     {
         var rect = new Rect(opendRect.xMin, opendRect.yMin, opendRect.width, singleHeight);
-        EditorGUI.PropertyField(rect, assetNameProp, new GUIContent("name"));
+        EditorGUI.PropertyField(rect, assetNameProp, new GUIContent("[name]"));
 
         rect.y += singleHeight;
-        EditorGUI.PropertyField(rect, bundleNameProp, new GUIContent("bundle"));
+        EditorGUI.PropertyField(rect, bundleNameProp, new GUIContent("[bundle]"));
 
         rect.y += singleHeight;
-        EditorGUI.PropertyField(rect, typeProp, new GUIContent("type"));
+        EditorGUI.PropertyField(rect, typeProp, new GUIContent("[type]"));
 
         switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
         {
@@ -46,11 +46,11 @@ public class BundleInfoDrawer : ItemInfoBaseDrawer
                 break;
             case ItemInfoBase.Type.Button:
                 rect.y += singleHeight;
-                EditorGUI.PropertyField(rect, buttonProp, new GUIContent("Button"));
+                EditorGUI.PropertyField(rect, buttonProp, new GUIContent("[Btn]"));
                 break;
             case ItemInfoBase.Type.Toggle:
                 rect.y += singleHeight;
-                EditorGUI.PropertyField(rect, toggleProp, new GUIContent("Toggle"));
+                EditorGUI.PropertyField(rect, toggleProp, new GUIContent("[Tog]"));
                 break;
             case ItemInfoBase.Type.Enable:
                 break;
@@ -59,10 +59,10 @@ public class BundleInfoDrawer : ItemInfoBaseDrawer
         }
 
         rect.y += singleHeight;
-        EditorGUI.PropertyField(rect, parentLayerProp, new GUIContent("parentLayer"));
+        EditorGUI.PropertyField(rect, parentLayerProp, new GUIContent("[layer]"));
 
-        rect.y += singleHeight;
-        EditorGUI.PropertyField(rect, resetProp, new GUIContent("reset"));
+        //rect.y += singleHeight;
+        //EditorGUI.PropertyField(rect, rematrixProp, new GUIContent("[rematrix]"));
     }
 
     protected override void DrawObjectField(Rect acceptRect)
@@ -88,7 +88,7 @@ public class BundleInfoDrawer : ItemInfoBaseDrawer
                 var bdinfo = new BundleInfo();
                 bdinfo.assetName = assetNameProp.stringValue;
                 bdinfo.bundleName = bundleNameProp.stringValue;
-                bdinfo.reset = resetProp.boolValue;
+                //bdinfo.rematrix = rematrixProp.boolValue;
                 data.rbundles.Add(bdinfo);
                 var path = AssetDatabase.GUIDToAssetPath("018159907ea26db409399b839477ad27");
                 UnityEditor.SceneManagement.EditorSceneManager.OpenScene(path);
@@ -133,13 +133,5 @@ public class BundleInfoDrawer : ItemInfoBaseDrawer
             return gopfb;
         }
         return null;
-    }
-    protected override void HideItemIfInstenced()
-    {
-        var obj = EditorUtility.InstanceIDToObject(instanceIDProp.intValue);
-        if (obj != null){
-            Object.DestroyImmediate(obj);
-        }
-        instanceIDProp.intValue = 0;
     }
 }

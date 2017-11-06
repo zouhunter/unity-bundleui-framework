@@ -121,7 +121,6 @@ MonoBehaviour:
     button: {fileID: 0}
     toggle: {fileID: 0}
     instence: {fileID: 0}
-    reset: 0
     parentLayer: 0
     type: 3
     prefab: {fileID: 127972, guid: b50576f64a976e0449ddaf82f89fd028, type: 2}
@@ -235,25 +234,31 @@ MonoBehaviour:
     button: {fileID: 0}
     toggle: {fileID: 0}
     instence: {fileID: 0}
-    reset: 0
-    parentLayer: 0
-    type: 0
+    parentLayer: 3
+    type: 3
     bundleName: prefabs/image
     guid: f71e2a5440629ad4ab59c38ab3b972bf
     good: 1
-  - instanceID: 0
+  - instanceID: -83466
     assetName: Panel1
     button: {fileID: 0}
     toggle: {fileID: 0}
     instence: {fileID: 0}
-    reset: 0
     parentLayer: 0
     type: 0
     bundleName: prefabs/panel1
     guid: cf79948b0fcb33b4980d5f826d96e366
     good: 1
   rbundles: []
-  prefabs: []
+  prefabs:
+  - instanceID: 0
+    assetName: Cube
+    button: {fileID: 0}
+    toggle: {fileID: 0}
+    instence: {fileID: 0}
+    parentLayer: 0
+    type: 0
+    prefab: {fileID: 127972, guid: b50576f64a976e0449ddaf82f89fd028, type: 2}
   groupObjs:
   - {fileID: 11400000, guid: 42276e422a2d6544db0b34403d9feb46, type: 2}
   assetUrl: ./StreamingAssets/AssetBundle

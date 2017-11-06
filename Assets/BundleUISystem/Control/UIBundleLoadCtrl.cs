@@ -14,15 +14,16 @@ namespace BundleUISystem
 #endif
         private List<string> _loadingKeys = new List<string>();
         private List<string> _cansaleKeys = new List<string>();
-        private static Dictionary<Transform, Dictionary<int, Transform>> _parentsDic = new Dictionary<Transform, Dictionary<int, Transform>>();
+        private static Dictionary<Transform, Dictionary<ItemInfoBase.Layer, Transform>> _parentsDic = new Dictionary<Transform, Dictionary<ItemInfoBase.Layer, Transform>>();
         private Transform _root;
+
         public UIBundleLoadCtrl(Transform root)
         {
             _root = root;
             if (!_parentsDic.ContainsKey(_root))
             {
                 //Debug.Log(_root);
-                _parentsDic[_root] = new Dictionary<int, Transform>();
+                _parentsDic[_root] = new Dictionary<ItemInfoBase.Layer, Transform>();
             }
 #if AssetBundleTools
             assetLoader = AssetBundleLoader.Instence;
@@ -33,7 +34,7 @@ namespace BundleUISystem
             _root = root;
             if (!_parentsDic.ContainsKey(_root))
             {
-                _parentsDic[_root] = new Dictionary<int, Transform>();
+                _parentsDic[_root] = new Dictionary<ItemInfoBase.Layer, Transform>();
             }
 #if AssetBundleTools
             assetLoader = AssetBundleLoader.GetInstance(url, menu);
@@ -139,12 +140,12 @@ namespace BundleUISystem
             GameObject go = GameObject.Instantiate(prefab);
 
             go.SetActive(true);
-            SetParent(trigger.parentLayer, go.transform, trigger.reset);
-            if (trigger.reset)
-            {
-                go.transform.position = Vector3.zero;
-                go.transform.localRotation = Quaternion.identity;
-            }
+            SetParent(trigger.parentLayer, go.transform/*, trigger.rematrix*/);
+            //if (trigger.rematrix)
+            //{
+            //    go.transform.position = Vector3.zero;
+            //    go.transform.localRotation = Quaternion.identity;
+            //}
             if (trigger.OnCreate != null) trigger.OnCreate(go);
         }
         /// <summary>
@@ -153,7 +154,7 @@ namespace BundleUISystem
         /// <param name="layer"></param>
         /// <param name="child"></param>
         /// <param name="reset"></param>
-        private void SetParent(int layer, Transform child, bool reset)
+        private void SetParent(ItemInfoBase.Layer layer, Transform child/*, bool reset*/)
         {
             Transform parent = null;
             var _parents = _parentsDic[_root];
@@ -180,24 +181,17 @@ namespace BundleUISystem
             }
 
             child.SetParent(parent, !(_root is RectTransform));
-
-            if (reset)
-            {
-                child.transform.position = Vector3.zero;
-                child.transform.localRotation = Quaternion.identity;
-            }
         }
         /// <summary>
         /// 重新排序
         /// </summary>
         /// <param name="parentDic"></param>
-        private void ResortParents(Dictionary<int, Transform> parentDic)
+        private void ResortParents(Dictionary<ItemInfoBase.Layer, Transform> parentDic)
         {
-            int[] keys = new int[parentDic.Count];
+            ItemInfoBase.Layer[] keys = new ItemInfoBase.Layer[parentDic.Count];
             parentDic.Keys.CopyTo(keys, 0);
             Array.Sort(keys);
-            for (int i = 0; i < keys.Length; i++)
-            {
+            for (int i = 0; i < keys.Length; i++){
                 parentDic[keys[i]].SetAsLastSibling();
             }
         }

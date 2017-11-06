@@ -32,6 +32,7 @@ namespace BundleUISystem
         public virtual void HandleData(UIData data)
         {
             gameObject.SetActive(true);
+            transform.SetAsLastSibling();
         }
 
         protected void CallBack(UIData callBackData)

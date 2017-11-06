@@ -53,6 +53,12 @@ public abstract class UIDrawerTemp : Editor
 #else
     protected string[] option = new string[] { "预制"};
 #endif
+    public enum SortType
+    {
+        ByName = 0,
+        ByLayer = 1
+    }
+    private SortType currSortType = SortType.ByName;
     private void OnEnable()
     {
         script = serializedObject.FindProperty("m_Script");
@@ -351,12 +357,12 @@ public abstract class UIDrawerTemp : Editor
             var itemProp = rbundlesProp.GetArrayElementAtIndex(i);
             var assetProp = itemProp.FindPropertyRelative("assetName");
             var bundleProp = itemProp.FindPropertyRelative("bundleName");
-            var resetProp = itemProp.FindPropertyRelative("reset");
+            //var rematrixProp = itemProp.FindPropertyRelative("rematrix");
 
             var bdinfo = new BundleInfo();
             bdinfo.assetName = assetProp.stringValue;
             bdinfo.bundleName = bundleProp.stringValue;
-            bdinfo.reset = resetProp.boolValue;
+            //bdinfo.rematrix = rematrixProp.boolValue;
             data.rbundles.Add(bdinfo);
         }
         var path = AssetDatabase.GUIDToAssetPath("018159907ea26db409399b839477ad27");
@@ -401,7 +407,7 @@ public abstract class UIDrawerTemp : Editor
             }
             else
             {
-                var resetProp = itemProp.FindPropertyRelative("reset");
+                //var rematrixProp = itemProp.FindPropertyRelative("reset");
                 GameObject go = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
                 if (target is UIGroup)
                 {
@@ -427,11 +433,11 @@ public abstract class UIDrawerTemp : Editor
                     }
                 }
 
-                if (resetProp.boolValue)
-                {
-                    go.transform.position = Vector3.zero;
-                    go.transform.localRotation = Quaternion.identity;
-                }
+                //if (rematrixProp.boolValue)
+                //{
+                //    go.transform.position = Vector3.zero;
+                //    go.transform.localRotation = Quaternion.identity;
+                //}
 
                 instanceIDProp.intValue = go.GetInstanceID();
             }
@@ -479,7 +485,7 @@ public abstract class UIDrawerTemp : Editor
     }
     private void RemoveBundlesDouble(SerializedProperty property)
     {
-    compair: List<string> temp = new List<string>();
+        compair: List<string> temp = new List<string>();
 
         for (int i = 0; i < property.arraySize; i++)
         {
@@ -507,6 +513,7 @@ public abstract class UIDrawerTemp : Editor
             var obj = EditorUtility.InstanceIDToObject(instanceIDPorp.intValue);
             if (obj != null)
             {
+                UISystemUtility.ApplyPrefab(obj as GameObject);
                 DestroyImmediate(obj);
             }
             instanceIDPorp.intValue = 0;
@@ -514,18 +521,40 @@ public abstract class UIDrawerTemp : Editor
     }
     private void SortAllBundles(SerializedProperty property)
     {
-        for (int i = 0; i < property.arraySize; i++)
+        if (currSortType == SortType.ByName)
         {
-            for (int j = i; j < property.arraySize - i - 1; j++)
+            for (int i = 0; i < property.arraySize; i++)
             {
-                var itemj = property.GetArrayElementAtIndex(j).FindPropertyRelative("assetName");
-                var itemj1 = property.GetArrayElementAtIndex(j + 1).FindPropertyRelative("assetName");
-                if (string.Compare(itemj.stringValue, itemj1.stringValue) > 0)
+                for (int j = i; j < property.arraySize - i - 1; j++)
                 {
-                    property.MoveArrayElement(j, j + 1);
+                    var itemj = property.GetArrayElementAtIndex(j).FindPropertyRelative("assetName");
+                    var itemj1 = property.GetArrayElementAtIndex(j + 1).FindPropertyRelative("assetName");
+                    if (string.Compare(itemj.stringValue, itemj1.stringValue) > 0)
+                    {
+                        property.MoveArrayElement(j, j + 1);
+                    }
                 }
             }
+            currSortType = SortType.ByLayer;
         }
+
+        else if (currSortType == SortType.ByLayer)
+        {
+            for (int i = 0; i < property.arraySize; i++)
+            {
+                for (int j = i; j < property.arraySize - i - 1; j++)
+                {
+                    var itemj = property.GetArrayElementAtIndex(j).FindPropertyRelative("parentLayer");
+                    var itemj1 = property.GetArrayElementAtIndex(j + 1).FindPropertyRelative("parentLayer");
+                    if (itemj.intValue > itemj1.intValue)
+                    {
+                        property.MoveArrayElement(j, j + 1);
+                    }
+                }
+            }
+            currSortType = SortType.ByName;
+        }
+
     }
 
     private void TrySaveAllPrefabs(SerializedProperty arrayProp)

@@ -12,7 +12,7 @@ using Object = UnityEngine.Object;
 public class PrefabInfoDrawer :ItemInfoBaseDrawer
 {
     SerializedProperty prefabProp;//prefab
-    protected const int ht = 4;
+    protected const int ht = 3;
 
     protected override void InitPropertys(SerializedProperty property)
     {
@@ -37,7 +37,7 @@ public class PrefabInfoDrawer :ItemInfoBaseDrawer
     {
         var rect = new Rect(opendRect.x, opendRect.y, opendRect.width, singleHeight);
 
-        EditorGUI.PropertyField(rect, typeProp, new GUIContent("type"));
+        EditorGUI.PropertyField(rect, typeProp, new GUIContent("[type]"));
 
         switch ((ItemInfoBase.Type)typeProp.enumValueIndex)
         {
@@ -45,11 +45,11 @@ public class PrefabInfoDrawer :ItemInfoBaseDrawer
                 break;
             case ItemInfoBase.Type.Button:
                 rect.y += singleHeight;
-                EditorGUI.PropertyField(rect, buttonProp, new GUIContent("Button"));
+                EditorGUI.PropertyField(rect, buttonProp, new GUIContent("[Btn]"));
                 break;
             case ItemInfoBase.Type.Toggle:
                 rect.y += singleHeight;
-                EditorGUI.PropertyField(rect, toggleProp, new GUIContent("Toggle"));
+                EditorGUI.PropertyField(rect, toggleProp, new GUIContent("[Tog]"));
                 break;
             case ItemInfoBase.Type.Enable:
                 break;
@@ -58,10 +58,9 @@ public class PrefabInfoDrawer :ItemInfoBaseDrawer
         }
 
         rect.y += singleHeight;
-        EditorGUI.PropertyField(rect, parentLayerProp, new GUIContent("parentLayer"));
-
-        rect.y += singleHeight;
-        EditorGUI.PropertyField(rect, resetProp, new GUIContent("reset"));
+        EditorGUI.PropertyField(rect, parentLayerProp, new GUIContent("[layer]"));
+        //rect.y += singleHeight;
+        //EditorGUI.PropertyField(rect, rematrixProp, new GUIContent("[rematrix]"));
     }
 
     protected override void DrawObjectField(Rect rect)
@@ -100,16 +99,5 @@ public class PrefabInfoDrawer :ItemInfoBaseDrawer
     {
         GameObject gopfb = prefabProp.objectReferenceValue as GameObject;
         return gopfb;
-    }
-
-    protected override void HideItemIfInstenced()
-    {
-        var obj = EditorUtility.InstanceIDToObject(instanceIDProp.intValue);
-
-        if (obj != null){
-            Object.DestroyImmediate(obj);
-        }
-
-        instanceIDProp.intValue = 0;
     }
 }
