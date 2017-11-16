@@ -116,7 +116,7 @@ MonoBehaviour:
   bundles: []
   rbundles: []
   prefabs:
-  - instanceID: -23970
+  - instanceID: 0
     assetName: Cube
     button: {fileID: 0}
     toggle: {fileID: 0}
@@ -235,11 +235,11 @@ MonoBehaviour:
     toggle: {fileID: 0}
     instence: {fileID: 0}
     parentLayer: 3
-    type: 3
+    type: 0
     bundleName: prefabs/image
     guid: f71e2a5440629ad4ab59c38ab3b972bf
     good: 1
-  - instanceID: -83466
+  - instanceID: 0
     assetName: Panel1
     button: {fileID: 0}
     toggle: {fileID: 0}
@@ -256,7 +256,7 @@ MonoBehaviour:
     button: {fileID: 0}
     toggle: {fileID: 0}
     instence: {fileID: 0}
-    parentLayer: 0
+    parentLayer: 7
     type: 0
     prefab: {fileID: 127972, guid: b50576f64a976e0449ddaf82f89fd028, type: 2}
   groupObjs:

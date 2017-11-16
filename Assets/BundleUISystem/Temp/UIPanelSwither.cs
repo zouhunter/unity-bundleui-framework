@@ -29,6 +29,10 @@ public class UIPanelSwither : MonoBehaviour {
         UIGroup.Close(panelName);
     }
 
+    public void Hide()
+    {
+        UIGroup.Hide(panelName);
+    }
     private void OnDestroy()
     {
         if (!destroyOnOpen)

@@ -91,6 +91,7 @@ namespace BundleUISystem
             {
                 UnityEngine.Debug.Log("mPool.Length:" + mPool.Length + "Reseted");
                 Reset();
+                System.GC.Collect();
             }
             // Creates extra items if needed
             if (mNextIndex >= mPool.Length)
