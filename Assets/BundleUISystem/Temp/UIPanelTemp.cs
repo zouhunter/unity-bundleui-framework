@@ -13,7 +13,7 @@ namespace BundleUISystem
         protected Button m_Btn;
         protected Toggle m_Tog;
         public event UnityAction onDelete;
-        public event UnityAction<UIData> onCallBack;
+        public event UnityAction<object> onCallBack;
         public virtual Button Btn
         {
             set
@@ -29,27 +29,19 @@ namespace BundleUISystem
                 m_Tog.onValueChanged.AddListener((x) => { gameObject.SetActive(x); });
             }
         }
-        public virtual void HandleData(UIData data)
+        public virtual void HandleData(object data)
         {
             gameObject.SetActive(true);
             transform.SetAsLastSibling();
         }
 
-        protected void CallBack(UIData callBackData)
+        protected void CallBack(object callBackData)
         {
             if(onCallBack != null){
                 onCallBack.Invoke(callBackData);
             }
         }
 
-        protected void CallBack<T>(T data)
-        {
-            if (onCallBack != null)
-            {
-                var callBackData = UIData.Allocate<T>(data);
-                onCallBack.Invoke(callBackData);
-            }
-        }
         protected virtual void OnDestroy()
         {
             if (onDelete != null) onDelete();

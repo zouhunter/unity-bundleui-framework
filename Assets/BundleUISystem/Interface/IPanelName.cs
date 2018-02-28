@@ -10,8 +10,8 @@ namespace BundleUISystem.Internal
     public interface IPanelName
     {
         event UnityAction onDelete;
-        event UnityAction<UIData> onCallBack;
-        void HandleData(UIData data);
+        event UnityAction<object> onCallBack;
+        void HandleData(object data);
     }
 
 }

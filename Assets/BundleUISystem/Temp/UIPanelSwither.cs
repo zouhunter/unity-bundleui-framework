@@ -8,7 +8,7 @@ using BundleUISystem;
 public class UIPanelSwither : MonoBehaviour {
     public string panelName;
     public bool destroyOnOpen;
-    public void OpenSend(UIData data)
+    public void OpenSend(object data)
     {
         UIGroup.Open(panelName,null,data);
         if(destroyOnOpen)

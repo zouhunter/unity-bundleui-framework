@@ -8,7 +8,7 @@ public class NewEditorTest {
     [Test]
     public void EditorTest()
     {
-        //var data = new UIData(1);
+        //var data = new object(1);
     }
 
 }

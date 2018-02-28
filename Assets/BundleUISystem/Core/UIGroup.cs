@@ -158,13 +158,13 @@ namespace BundleUISystem
         }
         private void RegisterMessageEvents(IUILoadCtrl loadCtrl, ItemInfoBase trigger)
         {
-            UnityAction<UIData> createAction = (x) =>
+            UnityAction<object> createAction = (x) =>
             {
                 trigger.dataQueue.Enqueue(x);//
                 loadCtrl.GetGameObjectInfo(trigger);
             };
 
-            UnityAction<UIData> handInfoAction = (data) =>
+            UnityAction<object> handInfoAction = (data) =>
             {
                 IPanelName irm = trigger.instence.GetComponent<IPanelName>();
                 irm.HandleData(data);
@@ -309,19 +309,19 @@ namespace BundleUISystem
         {
             string key = _close + assetName;
             eventHold.Remove(key);
-            eventHold.Record(key, new UnityAction<UIData>((y) =>
+            eventHold.Record(key, new UnityAction<object>((y) =>
             {
                 if (x != null) Destroy(x);
             }));
 
             key = _hide + assetName;
             eventHold.Remove(key);
-            eventHold.Record(key, new UnityAction<UIData>((y) =>
+            eventHold.Record(key, new UnityAction<object>((y) =>
             {
                 if (x != null) x.gameObject.SetActive(false);
             }));
         }
-        private void InvokeCallBack(string assetName, UIData node)
+        private void InvokeCallBack(string assetName, object node)
         {
             var key = _onCallBack + assetName;
             eventHold.NotifyObserver(key, node);
@@ -330,7 +330,7 @@ namespace BundleUISystem
 
         #region 触发事件
      
-        public static void Open(string assetName, UnityAction<UIData> onCallBack = null, UIData data = null)
+        public static void Open(string assetName, UnityAction<object> onCallBack = null, object data = null)
         {
             List<EventHold> haveEventHolds = new List<EventHold>();
             TraverseHold((eventHold) =>
@@ -364,20 +364,12 @@ namespace BundleUISystem
                 }
             }
         }
-        public static void Open<T>(string assetName, UnityAction<UIData> onCallBack = null, T data = default(T))
-        {
-            UIData uidata = UIData.Allocate<T>(data);
-            Open(assetName, onCallBack, uidata);
-        }
-        public static void Open<T>(string assetName, T data)
-        {
-            UIData uidata = UIData.Allocate<T>(data);
-            Open(assetName, null, (UIData)uidata);
-        }
-        public static void Open(string assetName, UIData data)
+    
+        public static void Open(string assetName, object data)
         {
             Open(assetName, null, data);
         }
+
         public static void Close(string assetName)
         {
             foreach (var item in controllers)

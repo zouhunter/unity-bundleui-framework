@@ -16,7 +16,7 @@ namespace BundleUISystem
         public GameObject instence;
         public Layer parentLayer;
         public Type type = Type.Name;
-        public Queue<UIData> dataQueue = new Queue<UIData>();//多次打开使用
+        public Queue<object> dataQueue = new Queue<object>();//多次打开使用
         public UnityAction<GameObject> OnCreate;
 
         public enum Type

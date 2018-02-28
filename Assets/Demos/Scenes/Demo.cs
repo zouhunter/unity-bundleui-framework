@@ -18,17 +18,17 @@ public class Demo : MonoBehaviour
     {
         if (GUILayout.Button("打开panel1"))
         {
-            UIData table = UIData.Allocate();
+            var table = new Hashtable();
             table["tableItem1"] = "你好";
-            UIGroup.Open(panel1, (x) => { Debug.Log("callBack panel1" + x); table.Release(); }, table);
+            UIGroup.Open(panel1, (x) => { Debug.Log("callBack panel1" + x);  }, table);
         }
         if (GUILayout.Button("打开panel1 1000 次"))
         {
             for (int i = 0; i < 1000; i++)
             {
-                UIData table = UIData.Allocate();
+                var table = new Hashtable();
                 table["tableItem1"] = "你好";
-                BundleUISystem.UIGroup.Open(panel1, (x) => { Debug.Log("onClose panel1" + x); table.Release();}, table);
+                BundleUISystem.UIGroup.Open(panel1, (x) => { Debug.Log("onClose panel1" + x); }, table);
             }
         }
         if (GUILayout.Button("隐藏panel1"))
